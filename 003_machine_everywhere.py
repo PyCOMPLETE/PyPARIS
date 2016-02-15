@@ -48,7 +48,8 @@ if I_am_a_worker:
 	mypart = machine.one_turn_map[N_elements_per_worker*myid:N_elements_per_worker*(myid+1)]
 	print 'I am id=%d and my part is %d long'%(myid, len(mypart))
 else: 	
-	part_for_master = machine.one_turn_map[N_elements_per_worker*(N_wkrs):]
+	part_for_master = machine.one_turn_map[N_elements_per_worker*(N_wkrs):i_end_parallel]
+	non_parallel_part = machine.one_turn_map[i_end_parallel:]
 	print 'I am id=%d (master) and my part is %d long'%(myid, len(part_for_master))
 	
 # initialization bunch
@@ -57,20 +58,71 @@ if I_am_the_master:
 		macroparticlenumber_track, intensity, epsn_x, epsn_y, sigma_z=sigma_z)
 	print 'Bunch initialized.'
 	
-# first slicing
+# initial slicing
 if I_am_the_master:
 	from PyHEADTAIL.particles.slicing import UniformBinSlicer
 	slicer = UniformBinSlicer(n_slices = n_slices, z_cuts=(-z_cut, z_cut))
+	slice_obj_list = bunch.extract_slices(slicer)
+	print 'Bunch sliced.'
 
-
-	
-
-	
-	
-	
-	
-
-	
+#~ 
+#~ # simulation
+#~ if I_am_the_master:
+	#~ 
+	#~ pieces_to_be_treated = slice_obj_list
+	#~ 
+	#~ N_pieces = len(pieces_to_be_treated)
+	#~ pieces_treated = []
+	#~ i_turn = 0
+	#~ piece_to_send = None	
+	#~ 
+	#~ while True:	
+		#~ orders_from_master = []
+				#~ 
+		#~ try:
+			#~ piece_to_send = pieces_to_be_treated.pop() 	#pop starts for the last slices 
+														#~ #(it is what we want, for the HEADTAIL 
+														#~ #slice order convention, z = -beta*c*t)
+		#~ except IndexError:
+			#~ piece_to_send = None
+		#~ 
+		#~ piece_received = comm.sendrecv(sendobj=piece_to_send, dest=0, sendtag=0, 
+				#~ source=master_id-1, recvtag=myid)
+		#~ 
+		#~ if piece_received is not None:
+			#~ pieces_treated.append(piece_received)
+		#~ 
+		#~ 
+		#~ if len(pieces_treated)==N_pieces: # the full list has gone through the ring
+			#~ pieces_treated = pieces_treated[::-1] #restore the HEADTAIL order
+			#~ 
+			#~ # finalize present turn
+			#~ print pieces_treated
+			#~ 
+			#~ 
+			#~ # prepare next turn
+			#~ pieces_to_be_treated = pieces_treated
+			#~ pieces_treated = []			
+								#~ 
+			#~ i_turn+=1
+			#~ # check if stop is needed
+			#~ if i_turn == N_turns: orders_from_master.append('stop')
+			#~ 
+		#~ 
+		#~ orders_from_master = comm.bcast(orders_from_master, root=master_id)
+		#~ 
+		#~ if 'stop' in orders_from_master:
+			#~ break
+#~ 
+#~ 
+	#~ 
+#~ 
+	#~ 
+	#~ 
+	#~ 
+	#~ 
+#~ 
+	#~ 
 	
 	
 	

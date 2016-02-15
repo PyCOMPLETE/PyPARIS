@@ -1,0 +1,2 @@
+
+mpiexec -n 4 python 004_first_loop.py
