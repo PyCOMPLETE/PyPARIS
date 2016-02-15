@@ -4,6 +4,7 @@ BIN=os.path.expanduser('../')
 sys.path.append(BIN)
 
 import numpy as np
+from scipy.constants import c
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
 
@@ -16,6 +17,9 @@ epsn_y  = 3.5e-6
 sigma_z = 0.05
 
 intensity = 1e11
+
+n_slices = 100
+z_cut = 2.5e-9*c
 
 
 # get info on the grid
@@ -53,6 +57,10 @@ if I_am_the_master:
 		macroparticlenumber_track, intensity, epsn_x, epsn_y, sigma_z=sigma_z)
 	print 'Bunch initialized.'
 	
+# first slicing
+if I_am_the_master:
+	from PyHEADTAIL.particles.slicing import UniformBinSlicer
+	slicer = UniformBinSlicer(n_slices = n_slices, z_cuts=(-z_cut, z_cut))
 
 
 	
