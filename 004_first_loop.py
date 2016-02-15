@@ -10,7 +10,7 @@ comm = MPI.COMM_WORLD
 
 
 macroparticlenumber_track = 50000
-N_turns = 512*4
+N_turns = 128
 
 epsn_x  = 2.5e-6
 epsn_y  = 3.5e-6
@@ -97,12 +97,14 @@ if I_am_the_master:
 		
 		if len(pieces_treated)==N_pieces: # the full list has gone through the ring
 			pieces_treated = pieces_treated[::-1] #restore the HEADTAIL order
+			bunch = sum(pieces_treated)
 			
 			# finalize present turn
-			#print pieces_treated
+			for ele in non_parallel_part:
+				ele.track(bunch)
 			
 			# prepare next turn
-			pieces_to_be_treated = pieces_treated
+			pieces_to_be_treated = bunch.extract_slices(slicer)
 			pieces_treated = []			
 								
 			print i_turn
