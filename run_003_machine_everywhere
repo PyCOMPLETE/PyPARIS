@@ -1,0 +1,2 @@
+
+mpiexec -n 4 python 003_machine_everywhere.py 

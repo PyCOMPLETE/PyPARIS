@@ -1,0 +1,2 @@
+
+mpiexec -n 4 python 000_lets_start.py
