@@ -1,5 +1,7 @@
 # specific of PyParaSlice
 test_pickle.pkl
+.project
+.pydevproject
 
 
 # Byte-compiled / optimized / DLL files

@@ -4,7 +4,7 @@ from scipy.constants import c, e, m_p
 
 class LHC(BasicSynchrotron):
 
-	def __init__(self, machine_configuration=None, optics_mode='smooth', **kwargs):
+	def __init__(self, machine_configuration=None, optics_mode='smooth', use_cython=False, **kwargs):
 		
 		
 		longitudinal_mode = 'non-linear' 

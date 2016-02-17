@@ -10,7 +10,7 @@ comm = MPI.COMM_WORLD
 
 
 macroparticlenumber_track = 50000
-N_turns = 1024
+N_turns = 128
 
 epsn_x  = 2.5e-6
 epsn_y  = 3.5e-6
@@ -33,7 +33,7 @@ I_am_the_master = not(I_am_a_worker)
 		
 from LHC import LHC
 machine = LHC(machine_configuration='Injection', n_segments=43, D_x=10, 
-				RF_at='end_of_transverse', use_cython=False)
+				RF_at='end_of_transverse')
 
 # We suppose that all the object that cannot be slice parallelized are at the end of the ring
 i_end_parallel = len(machine.one_turn_map)-1 #only RF is not parallelizable
