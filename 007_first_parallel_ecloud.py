@@ -4,6 +4,7 @@ BIN=os.path.expanduser('../')
 sys.path.append(BIN)
 
 import numpy as np
+import time
 from scipy.constants import c,e
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
@@ -123,7 +124,9 @@ if I_am_the_master:
 	i_turn = 0
 	piece_to_send = None
 	
-	print 'Sim. start' 	
+	print 'Sim. start'
+	
+	t_last_turn = time.mktime(time.localtime()) 	
 	
 	while True:	
 		orders_from_master = []
@@ -156,10 +159,12 @@ if I_am_the_master:
 			
 			# prepare next turn
 			pieces_to_be_treated = bunch.extract_slices(slicer)
-			pieces_treated = []			
-								
-			print i_turn
-								
+			pieces_treated = []		
+			
+			t_now = time.mktime(time.localtime())
+			print 'Turn %d, %d s'%(i_turn,t_now-t_last_turn) 
+			t_last_turn = t_now
+												
 			i_turn+=1
 			# check if stop is needed
 			orders_from_master.append('reset_clouds')
