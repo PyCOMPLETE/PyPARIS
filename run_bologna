@@ -1,0 +1,43 @@
+#!/bin/bash
+
+
+NUMBER_OF_REQUESTED_CORES=8
+MAX_NUMBER_OF_CORE_PER_NODE=32
+
+PATH_TO_EXECUTABLE="python /home/HPC/giadarol/test_PyECPyHT/PyParaSlice/007_first_parallel_ecloud.py"
+SIMULATION_NAME='first'
+QUEUE=hpc_inf
+#QUEUE=hpc_short
+
+stderr_file=epic.txt
+stdout_file=opic.txt
+
+
+
+############################################
+## DO NOT TOUCH FROM HERE
+############################################
+
+job=job_${NUMBER_OF_REQUESTED_CORES}.cmd
+
+rm -f $job 
+touch $job
+chmod 755 $job
+touch ${stderr_file}
+touch ${stdout_file}
+echo "#BSUB -J ${SIMULATION_NAME}" > $job # Job name
+echo "#BSUB -o %J.out" >> $job # Job standard output
+echo "#BSUB -e %J.err" >> $job # Job standard error
+echo "#BSUB -N" >> $job # Job report
+echo "#BSUB -B" >> $job # Send mail
+echo "#BSUB -q $QUEUE" >> $job
+echo "#BSUB -a openmpi" >> $job
+echo "#BSUB -n ${NUMBER_OF_REQUESTED_CORES}" >> $job
+echo "#BSUB -R span[ptile=${MAX_NUMBER_OF_CORE_PER_NODE}]" >> $job
+echo "/usr/share/lsf/9.1/linux2.6-glibc2.3-x86_64/bin/mpirun.lsf env PSM_SHAREDCONTEXTS_MAX=8 ${PATH_TO_EXECUTABLE} >> ${stdout_file} 2>> ${stderr_file}" >> $job
+
+
+echo "Submit your job to the queue system with this command: "
+echo "bsub < $job"
+
+

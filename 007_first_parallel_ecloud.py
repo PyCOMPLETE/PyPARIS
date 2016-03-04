@@ -1,3 +1,5 @@
+#!/home/HPC/giadarol/anaconda/bin/python
+
 import sys, os
 BIN=os.path.expanduser('../')
 
@@ -53,7 +55,8 @@ myid = comm.Get_rank()
 I_am_a_worker = myid!=master_id
 I_am_the_master = not(I_am_a_worker)
 
-		
+print 'I am %d of %d'%(myid, N_nodes)	
+	
 from LHC import LHC
 machine = LHC(machine_configuration='Injection', n_segments=n_segments, 
 				RF_at='end_of_transverse')
