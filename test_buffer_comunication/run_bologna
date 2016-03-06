@@ -1,10 +1,10 @@
 #!/bin/bash
 
 
-NUMBER_OF_REQUESTED_CORES=4
+NUMBER_OF_REQUESTED_CORES=2
 MAX_NUMBER_OF_CORE_PER_NODE=32
 
-PATH_TO_EXECUTABLE="python /home/HPC/giadarol/test_PyECPyHT/PyParaSlice/test_mpi4pi/007_first_pipeline_initialization_scattered.py"
+PATH_TO_EXECUTABLE="python /home/HPC/giadarol/test_PyECPyHT/PyParaSlice/test_mpi4pi/001_first_send_buffer.py"
 SIMULATION_NAME='first'
 QUEUE=hpc_inf
 #QUEUE=hpc_short
