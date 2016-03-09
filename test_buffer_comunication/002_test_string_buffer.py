@@ -7,6 +7,7 @@ import numpy as np
 
 myid = comm.Get_rank()
 
+# test send
 if myid == 0:
     list_of_orders = ['order1', 'order2']
     buf_to_send = ch.list_of_strings_2_buffer(list_of_orders)
@@ -16,5 +17,7 @@ elif myid == 1:
 	comm.Recv(buf, source=0, tag=11)
 	list_of_orders_received = ch.buffer_2_list_of_strings(buf)
 	print 'I am 1 and I received:', repr(list_of_orders_received)
+	
+
 	
 
