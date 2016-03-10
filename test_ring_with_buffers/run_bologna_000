@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-NUMBER_OF_REQUESTED_CORES=2
+NUMBER_OF_REQUESTED_CORES=4
 MAX_NUMBER_OF_CORE_PER_NODE=32
 
 PATH_TO_EXECUTABLE="python /home/HPC/giadarol/test_PyECPyHT/PyParaSlice/test_buffer_comunication/000_ring_without_cloud.py"
