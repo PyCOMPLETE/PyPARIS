@@ -1,6 +1,7 @@
 import sys, os
+BIN=os.path.expanduser('../../')
+sys.path.append(BIN)
 BIN=os.path.expanduser('../')
-
 sys.path.append(BIN)
 
 import numpy as np
@@ -35,8 +36,8 @@ I_am_the_master = not(I_am_a_worker)
 # allocate buffers for communation
 N_buffer_float_size = 1000000
 buf_float = np.array(N_buffer_float_size*[0.])
-N_buffer_int_size = 100000
-buf_int = np.array(N_buffer_float_size*[0])
+N_buffer_int_size = 10
+buf_int = np.array(N_buffer_int_size*[0])
 
 		
 from LHC import LHC
@@ -91,7 +92,7 @@ if I_am_the_master:
 	piece_to_send = None	
 	
 	while True:	
-		orders_from_master = []
+		orders_from_master = ['ciao']
 				
 		try:
 			piece_to_send = pieces_to_be_treated.pop() 	#pop starts for the last slices 
@@ -100,12 +101,12 @@ if I_am_the_master:
 		except IndexError:
 			piece_to_send = None
 		
-		piece_received = comm.sendrecv(sendobj=piece_to_send, dest=0, sendtag=0, 
-				source=master_id-1, recvtag=myid)
-		
+		#~ piece_received = comm.sendrecv(sendobj=piece_to_send, dest=0, sendtag=0, 
+				#~ source=master_id-1, recvtag=myid)
 		sendbuf = ch.beam_2_buffer(piece_to_send)	
 		comm.Sendrecv(sendbuf, dest=0, sendtag=0, 
-		 recvbuf=buf_float, source=master_id-1, int recvtag=myid)
+		 recvbuf=buf_float, source=master_id-1, recvtag=myid)
+		piece_received = ch.buffer_2_beam(buf_float)
 
 		
 		if piece_received is not None:
@@ -117,8 +118,13 @@ if I_am_the_master:
 		if len(pieces_treated)==N_pieces: # the full list has gone through the ring
 			pieces_treated = pieces_treated[::-1] #restore the HEADTAIL order
 			
+			#for pp in pieces_treated:
+			#	print pp.macroparticlenumber, pp.id, pp.id.shape
+			
 			# re-merge bunch
 			bunch = sum(pieces_treated)
+			
+			#print dir(bunch)
 			
 			# finalize present turn (with non parallel part)
 			for ele in non_parallel_part:
@@ -143,13 +149,16 @@ if I_am_the_master:
 								
 			i_turn+=1
 			# check if stop is needed
-			if i_turn == N_turns: orders_from_master.append('stop')
+			if i_turn == N_turns: buf_int[0]=1#orders_from_master.append('stop')
 			
-		
-		orders_from_master = comm.bcast(orders_from_master, root=master_id)
-		
-		if 'stop' in orders_from_master:
+		buforders = ch.list_of_strings_2_buffer(orders_from_master)
+		#print 'buforders', buforders
+		comm.Bcast(buf_int[:-3], master_id)
+		if buf_int[0]==1:
 			break
+		
+		#if 'stop' in orders_from_master:
+		#	break
 
 else: # workers
 	
@@ -164,9 +173,14 @@ else: # workers
 			left = myid-1
 		
 		right = myid+1
-		piece_received = comm.sendrecv(sendobj=piece_to_send, dest=right, sendtag=right, 
-				source=left, recvtag=myid)
-				
+		#piece_received = comm.sendrecv(sendobj=piece_to_send, dest=right, sendtag=right, 
+		#		source=left, recvtag=myid)
+		#print 'Here 1'
+		sendbuf = ch.beam_2_buffer(piece_to_send)	
+		comm.Sendrecv(sendbuf, dest=right, sendtag=right, 
+		 recvbuf=buf_float, source=left, recvtag=myid)
+		piece_received = ch.buffer_2_beam(buf_float)
+		#print 'Here 2'				
 		# if you get something do your job
 		if piece_received is not None:
 			for ele in mypart: 
@@ -175,14 +189,20 @@ else: # workers
 		# prepare for next iteration
 		piece_to_send = piece_received
 		
+		#print 'Here 3'	
+		#orders_from_master = comm.bcast(None, root=master_id)
+		#print buf_int
+		comm.Bcast(buf_int, master_id)
+		#print 'Here 3.5'
+		orders_from_master = ch.buffer_2_list_of_strings(buf_int)
 		
-		orders_from_master = comm.bcast(None, root=master_id)
-		
-		if 'stop' in orders_from_master:
-			break	
+		#if 'stop' in orders_from_master:
+		if buf_int[0]==1:
+			break
+		#print 'Here 4'		
 	
 # output plots
-if False:
+if I_am_the_master:
 	import pylab as plt
 	
 	plt.figure(2, figsize=(16, 8), tight_layout=True)

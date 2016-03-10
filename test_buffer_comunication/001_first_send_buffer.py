@@ -5,6 +5,9 @@ import numpy as np
 
 myid = comm.Get_rank()
 
+if myid>1: raise ValueError('To be tested with 2 processors')
+
+
 if myid == 0:
     list_of_orders = ['order1', 'order2']
     data = ''.join(map(lambda s:s+';', list_of_orders))+'\n'

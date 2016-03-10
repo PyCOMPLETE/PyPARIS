@@ -15,12 +15,14 @@ def buffer_2_list_of_strings(buf):
 
 def beam_2_buffer(beam):
 	
+	#print beam
+	
 	if beam is None:
 		buf = np.array([-1.])
 	else:	
 		if np.array(beam.particlenumber_per_mp).shape != ():
 			raise ValueError('particlenumber_per_mp is a vector! Not implemented!')
-		
+
 		buf = np.concatenate((
 			np.array([float(beam.macroparticlenumber)]),
 			np.array([float(beam.particlenumber_per_mp)]), 
@@ -28,8 +30,9 @@ def beam_2_buffer(beam):
 			np.array([beam.mass]),
 			np.array([beam.circumference]),
 			np.array([beam.gamma]),
-			np.float_(beam.id),
+			np.atleast_1d(np.float_(beam.id)),
 			beam.x, beam.xp, beam.y, beam.yp, beam.z, beam.dp))
+			
 	return buf
 	
 def buffer_2_beam(buf):
@@ -80,14 +83,15 @@ def buffer_2_beam(buf):
 		
 		beam = Particles(macroparticlenumber=macroparticlenumber,
 						particlenumber_per_mp=particlenumber_per_mp, charge=charge,
-						mass=mass, circumference=circumference, gamma=gamma, coords_n_momenta_dict={})
-
-		beam.id = id_
-		beam.x = x
-		beam.xp = xp
-		beam.y = y
-		beam.yp = yp		
-		beam.z = z
-		beam.dp = dp
+						mass=mass, circumference=circumference, gamma=gamma, 
+						coords_n_momenta_dict={\
+								'x': np.atleast_1d(x),
+								'xp':np.atleast_1d(xp),
+								'y':np.atleast_1d(y),
+								'yp':np.atleast_1d(yp),	
+								'z':np.atleast_1d(z),
+								'dp':np.atleast_1d(dp)})
+		
+		beam.id = np.atleast_1d(id_)
 	
 	return beam

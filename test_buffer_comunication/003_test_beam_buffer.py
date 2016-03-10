@@ -15,6 +15,8 @@ import numpy as np
 
 myid = comm.Get_rank()
 
+if myid>1: raise ValueError('To be tested with 2 processors')
+
 N_buffer_float_size = 1000000
 buf_float = np.array(N_buffer_float_size*[0.])
 
@@ -57,51 +59,46 @@ elif myid == 1:
 	bunch = ch.buffer_2_beam(buf_float)
 	print 'I am 1 and I received the bunch'
 
+if myid<2:
+	import time		
+	time.sleep(1); comm.Barrier()
 
-import time		
-time.sleep(1); comm.Barrier()
+	print 'macroparticlenumber', bunch.macroparticlenumber
+	time.sleep(1); comm.Barrier()
 
-print 'macroparticlenumber', bunch.macroparticlenumber
-time.sleep(1); comm.Barrier()
+	print 'particlenumber_per_mp',  bunch.particlenumber_per_mp
+	time.sleep(1); comm.Barrier()
 
-print 'particlenumber_per_mp',  bunch.particlenumber_per_mp
-time.sleep(1); comm.Barrier()
+	print 'mass', bunch.mass
+	time.sleep(1); comm.Barrier()
 
-print 'mass', bunch.mass
-time.sleep(1); comm.Barrier()
+	print 'charge', bunch.mass
+	time.sleep(1); comm.Barrier()
 
-print 'charge', bunch.mass
-time.sleep(1); comm.Barrier()
+	print 'circumference', bunch.circumference
+	time.sleep(1); comm.Barrier()
 
-print 'circumference', bunch.circumference
-time.sleep(1); comm.Barrier()
+	print 'gamma', bunch.gamma
+	time.sleep(1); comm.Barrier()
 
-print 'gamma', bunch.gamma
-time.sleep(1); comm.Barrier()
+	print 'id', bunch.id
+	time.sleep(1); comm.Barrier()
 
-print 'id', bunch.id
-time.sleep(1); comm.Barrier()
+	print 'x',  bunch.x
+	time.sleep(1); comm.Barrier()
 
-print 'x',  bunch.x
-time.sleep(1); comm.Barrier()
+	print 'xp', bunch.xp
+	time.sleep(1); comm.Barrier()
 
-print 'xp', bunch.xp
-time.sleep(1); comm.Barrier()
+	print 'y', bunch.y
+	time.sleep(1); comm.Barrier()
 
-print 'y', bunch.y
-time.sleep(1); comm.Barrier()
+	print 'yp', bunch.yp
+	time.sleep(1); comm.Barrier()
 
-print 'yp', bunch.yp
-time.sleep(1); comm.Barrier()
+	print 'z', bunch.z
+	time.sleep(1); comm.Barrier()	
 
-print 'z', bunch.z
-time.sleep(1); comm.Barrier()	
-
-print 'dp', bunch.dp
-time.sleep(1); comm.Barrier()
-	
-
-	
-
-	
+	print 'dp', bunch.dp
+	time.sleep(1); comm.Barrier()
 
