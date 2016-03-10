@@ -50,47 +50,49 @@ elif myid == 1:
 	#~ 
 	#~ list_of_orders_received = ch.buffer_2_list_of_strings(buf)
 	print 'I am 1 and I received'
-	
-comm.Barrier()
-	
-print bunch.macroparticlenumber
-comm.Barrier()
 
-print bunch.particlenumber_per_mp
-comm.Barrier()
 
-print bunch.charge
-comm.Barrier()
+import time		
+time.sleep(1); comm.Barrier()
 
-print bunch.mass
-comm.Barrier()
+print 'macroparticlenumber', bunch.macroparticlenumber
+time.sleep(1); comm.Barrier()
 
-print bunch.circumference
-comm.Barrier()
+print 'particlenumber_per_mp',  bunch.particlenumber_per_mp
+time.sleep(1); comm.Barrier()
 
-print bunch.gamma
-comm.Barrier()
+print 'bunch.particlenumber_per_mp',  bunch.particlenumber_per_mp
+time.sleep(1); comm.Barrier()
 
-print bunch.id
-comm.Barrier()
+print 'mass', bunch.mass
+time.sleep(1); comm.Barrier()
 
-print bunch.x
-comm.Barrier()
+print 'circumference', bunch.circumference
+time.sleep(1); comm.Barrier()
 
-print bunch.xp
-comm.Barrier()
+print 'gamma', bunch.gamma
+time.sleep(1); comm.Barrier()
 
-print bunch.y
-comm.Barrier()
+print 'id', bunch.id
+time.sleep(1); comm.Barrier()
 
-print bunch.yp
-comm.Barrier()
+print 'x',  bunch.x
+time.sleep(1); comm.Barrier()
 
-print bunch.z 
-comm.Barrier()	
+print 'xp', bunch.xp
+time.sleep(1); comm.Barrier()
 
-print bunch.dp 
-comm.Barrier()
+print 'y', bunch.y
+time.sleep(1); comm.Barrier()
+
+print 'yp', bunch.yp
+time.sleep(1); comm.Barrier()
+
+print 'z', bunch.z
+time.sleep(1); comm.Barrier()	
+
+print 'dp', bunch.dp
+time.sleep(1); comm.Barrier()
 	
 
 	
