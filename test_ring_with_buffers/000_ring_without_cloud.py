@@ -41,7 +41,7 @@ buf_int = np.array(N_buffer_int_size*[0])
 
 		
 from LHC import LHC
-machine = LHC(machine_configuration='Injection', n_segments=43, D_x=10, 
+machine = LHC(machine_configuration='Injection', n_segments=43, D_x=0., 
 				RF_at='end_of_transverse')
 
 # We suppose that all the object that cannot be slice parallelized are at the end of the ring
@@ -92,7 +92,7 @@ if I_am_the_master:
 	piece_to_send = None	
 	
 	while True:	
-		orders_from_master = ['ciao']
+		orders_from_master = []
 				
 		try:
 			piece_to_send = pieces_to_be_treated.pop() 	#pop starts for the last slices 
@@ -149,16 +149,14 @@ if I_am_the_master:
 								
 			i_turn+=1
 			# check if stop is needed
-			if i_turn == N_turns: buf_int[0]=1#orders_from_master.append('stop')
+			if i_turn == N_turns: orders_from_master.append('stop')
 			
 		buforders = ch.list_of_strings_2_buffer(orders_from_master)
 		#print 'buforders', buforders
-		comm.Bcast(buf_int[:-3], master_id)
-		if buf_int[0]==1:
-			break
+		comm.Bcast(buforders, master_id)
 		
-		#if 'stop' in orders_from_master:
-		#	break
+		if 'stop' in orders_from_master:
+			break
 
 else: # workers
 	
@@ -173,14 +171,13 @@ else: # workers
 			left = myid-1
 		
 		right = myid+1
-		#piece_received = comm.sendrecv(sendobj=piece_to_send, dest=right, sendtag=right, 
-		#		source=left, recvtag=myid)
-		#print 'Here 1'
+
 		sendbuf = ch.beam_2_buffer(piece_to_send)	
 		comm.Sendrecv(sendbuf, dest=right, sendtag=right, 
 		 recvbuf=buf_float, source=left, recvtag=myid)
 		piece_received = ch.buffer_2_beam(buf_float)
-		#print 'Here 2'				
+
+		
 		# if you get something do your job
 		if piece_received is not None:
 			for ele in mypart: 
@@ -189,17 +186,13 @@ else: # workers
 		# prepare for next iteration
 		piece_to_send = piece_received
 		
-		#print 'Here 3'	
-		#orders_from_master = comm.bcast(None, root=master_id)
-		#print buf_int
+
 		comm.Bcast(buf_int, master_id)
-		#print 'Here 3.5'
 		orders_from_master = ch.buffer_2_list_of_strings(buf_int)
 		
-		#if 'stop' in orders_from_master:
-		if buf_int[0]==1:
+		if 'stop' in orders_from_master:
 			break
-		#print 'Here 4'		
+	
 	
 # output plots
 if False and I_am_the_master:
