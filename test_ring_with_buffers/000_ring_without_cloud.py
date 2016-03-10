@@ -202,7 +202,7 @@ else: # workers
 		#print 'Here 4'		
 	
 # output plots
-if I_am_the_master:
+if False and I_am_the_master:
 	import pylab as plt
 	
 	plt.figure(2, figsize=(16, 8), tight_layout=True)
