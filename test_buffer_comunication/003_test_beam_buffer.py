@@ -1,6 +1,4 @@
-import sys, os
-BIN = os.path.expanduser("../../../")
-sys.path.append(BIN)
+
 
 import sys, os
 BIN = os.path.expanduser("../")
@@ -23,6 +21,11 @@ buf_float = np.array(N_buffer_float_size*[0.])
 
 # test send
 if myid == 0:
+	
+	#test None
+	bufbun = ch.beam_2_buffer(None)
+	comm.Send(bufbun, dest=1, tag=1)
+	
 	epsn_x  = 2.5e-6
 	epsn_y  = 3.5e-6
 	sigma_z = 0.05
@@ -44,12 +47,15 @@ if myid == 0:
 	comm.Send(bufbun, dest=1, tag=11)
 	
 elif myid == 1:
+	
+	#test None
+	comm.Recv(buf_float, source=0, tag=1)
+	bnone = ch.buffer_2_beam(buf_float)
+	print 'I am 1 and I received', repr(bnone)
+	
 	comm.Recv(buf_float, source=0, tag=11)
 	bunch = ch.buffer_2_beam(buf_float)
-	#~ buf = np.array(100*[0])
-	#~ 
-	#~ list_of_orders_received = ch.buffer_2_list_of_strings(buf)
-	print 'I am 1 and I received'
+	print 'I am 1 and I received the bunch'
 
 
 import time		
@@ -61,10 +67,10 @@ time.sleep(1); comm.Barrier()
 print 'particlenumber_per_mp',  bunch.particlenumber_per_mp
 time.sleep(1); comm.Barrier()
 
-print 'bunch.particlenumber_per_mp',  bunch.particlenumber_per_mp
+print 'mass', bunch.mass
 time.sleep(1); comm.Barrier()
 
-print 'mass', bunch.mass
+print 'charge', bunch.mass
 time.sleep(1); comm.Barrier()
 
 print 'circumference', bunch.circumference
