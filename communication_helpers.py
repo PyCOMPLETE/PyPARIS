@@ -4,7 +4,7 @@ from PyHEADTAIL.particles.particles import Particles
 
 def list_of_strings_2_buffer(strlist):
 	data = ''.join(map(lambda s:s+';', strlist))+'\n'
-	buf_to_send = np.int_(np.array(map(ord, list(data))))
+	buf_to_send = np.atleast_1d(np.int_(np.array(map(ord, list(data)))))
 	return buf_to_send
 	
 def buffer_2_list_of_strings(buf):
@@ -23,6 +23,19 @@ def beam_2_buffer(beam):
 		if np.array(beam.particlenumber_per_mp).shape != ():
 			raise ValueError('particlenumber_per_mp is a vector! Not implemented!')
 
+		
+		if not hasattr(beam, 'slice_info'):
+			sl_info_buf = np.array([-1., 0., 0., 0.])
+		elif beam.slice_info is None:
+			sl_info_buf = np.array([-1., 0., 0., 0.])
+		elif beam.slice_info == 'unsliced':
+			sl_info_buf = np.array([0., 0., 0., 0.])
+		else:
+			sl_info_buf = np.array([1.,
+							beam.slice_info['z_bin_center'],
+							beam.slice_info['z_bin_right'],
+							beam.slice_info['z_bin_left']])
+		
 		buf = np.concatenate((
 			np.array([float(beam.macroparticlenumber)]),
 			np.array([float(beam.particlenumber_per_mp)]), 
@@ -31,7 +44,8 @@ def beam_2_buffer(beam):
 			np.array([beam.circumference]),
 			np.array([beam.gamma]),
 			np.atleast_1d(np.float_(beam.id)),
-			beam.x, beam.xp, beam.y, beam.yp, beam.z, beam.dp))
+			beam.x, beam.xp, beam.y, beam.yp, beam.z, beam.dp,
+			sl_info_buf))
 			
 	return buf
 	
@@ -81,6 +95,9 @@ def buffer_2_beam(buf):
 		dp = buf[i_buf:i_buf+macroparticlenumber]
 		i_buf += macroparticlenumber
 		
+		slice_info_buf = buf[i_buf:i_buf+4]
+		i_buf += 4
+		
 		beam = Particles(macroparticlenumber=macroparticlenumber,
 						particlenumber_per_mp=particlenumber_per_mp, charge=charge,
 						mass=mass, circumference=circumference, gamma=gamma, 
@@ -93,5 +110,15 @@ def buffer_2_beam(buf):
 								'dp':np.atleast_1d(dp)})
 		
 		beam.id = np.atleast_1d(id_)
+		
+		if slice_info_buf[0] < 0.:
+			beam.slice_info = None
+		elif slice_info_buf[0] == 0.:
+			beam.slice_info = 'unsliced'
+		else:
+			beam.slice_info = {\
+                    'z_bin_center':slice_info_buf[1] ,
+                    'z_bin_right':slice_info_buf[2],
+                    'z_bin_left':slice_info_buf[3]}
 	
 	return beam

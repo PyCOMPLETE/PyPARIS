@@ -42,6 +42,13 @@ if myid == 0:
 					
 	bunch   = machine.generate_6D_Gaussian_bunch(
 			macroparticlenumber, intensity, epsn_x, epsn_y, sigma_z=sigma_z)
+	
+	bunch.slice_info = 'unsliced'
+	bunch.slice_info = {\
+                    'z_bin_center': 25.,\
+                    'z_bin_right': 30.,\
+                    'z_bin_left':20.}
+	
 
 	bufbun = ch.beam_2_buffer(bunch)
 	if len(bufbun)>N_buffer_float_size:
@@ -101,4 +108,9 @@ if myid<2:
 
 	print 'dp', bunch.dp
 	time.sleep(1); comm.Barrier()
+	
+	if not hasattr(bunch, 'slice_info'):
+		print "No slice info"
+	else:
+		print bunch.slice_info
 
