@@ -46,7 +46,7 @@ N_mp_max = N_MP_ele_init*4.
 Dh_sc = .2e-3
 nel_mp_ref_0 = init_unif_edens*4*x_aper*y_aper/N_MP_ele_init
 
-n_segments = 4
+n_segments = 5
 
 
 # get info on the grid
@@ -60,7 +60,7 @@ I_am_the_master = not(I_am_a_worker)
 # allocate buffers for communation
 N_buffer_float_size = 1000000
 buf_float = np.array(N_buffer_float_size*[0.])
-N_buffer_int_size = 10
+N_buffer_int_size = 100
 buf_int = np.array(N_buffer_int_size*[0])
 
 print 'I am %d of %d'%(myid, N_nodes)	
@@ -188,6 +188,7 @@ if I_am_the_master:
 		buforders = ch.list_of_strings_2_buffer(orders_from_master)
 		comm.Bcast(buforders, master_id)
 		
+		
 		if 'reset_clouds' in orders_from_master:
 			for ec in my_list_eclouds: ec.finalize_and_reinitialize()
 		
@@ -224,8 +225,6 @@ else: # workers
 		
 		comm.Bcast(buf_int, master_id)
 		orders_from_master = ch.buffer_2_list_of_strings(buf_int)
-		
-		orders_from_master = comm.bcast(None, root=master_id)
 		
 		if 'reset_clouds' in orders_from_master:
 			for ec in my_list_eclouds: ec.finalize_and_reinitialize()

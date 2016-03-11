@@ -36,7 +36,7 @@ I_am_the_master = not(I_am_a_worker)
 # allocate buffers for communation
 N_buffer_float_size = 1000000
 buf_float = np.array(N_buffer_float_size*[0.])
-N_buffer_int_size = 10
+N_buffer_int_size = 100
 buf_int = np.array(N_buffer_int_size*[0])
 
 		
