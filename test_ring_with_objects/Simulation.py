@@ -1,34 +1,37 @@
-
 import communication_helpers as ch
+import numpy as np
+from scipy.constants import c
 
 
 class Simulation(object):
-	def __init__(self, ring_of_CPUs):
-		self.N_turns = 3
-		self.ring_of_CPUs = ring_of_CPUs
+	def __init__(self):
+		self.N_turns = 128
 
 	def init_all(self):
 		n_slices = 100
 		z_cut = 2.5e-9*c
+		
+		self.n_slices = n_slices
+		self.z_cut = z_cut
 
 		from LHC import LHC
 		self.machine = LHC(machine_configuration='Injection', n_segments=43, D_x=0., 
 						RF_at='end_of_transverse')
 		
 		# We suppose that all the object that cannot be slice parallelized are at the end of the ring
-		i_end_parallel = len(machine.one_turn_map)-1 #only RF is not parallelizable
+		i_end_parallel = len(self.machine.one_turn_map)-1 #only RF is not parallelizable
 
 		# split the machine
+		N_wkrs = self.ring_of_CPUs.N_wkrs 	
 		N_elements_per_worker = int(np.floor(float(i_end_parallel)/N_wkrs))
 		myid = self.ring_of_CPUs.myid
 		print 'N_elements_per_worker', N_elements_per_worker
 		if self.ring_of_CPUs.I_am_a_worker:
-			self.mypart = machine.one_turn_map[N_elements_per_worker*myid:N_elements_per_worker*(myid+1)]
+			self.mypart = self.machine.one_turn_map[N_elements_per_worker*myid:N_elements_per_worker*(myid+1)]
 			print 'I am id=%d and my part is %d long'%(myid, len(self.mypart))
-		elif self.ring_of_CPUs.I_am_the master:
-			N_wkrs = self.ring_of_CPUs.N_wkrs 	
-			self.mypart = machine.one_turn_map[N_elements_per_worker*(N_wkrs):i_end_parallel]
-			non_parallel_part = machine.one_turn_map[i_end_parallel:]
+		elif self.ring_of_CPUs.I_am_the_master:
+			self.mypart = self.machine.one_turn_map[N_elements_per_worker*(N_wkrs):i_end_parallel]
+			self.non_parallel_part = self.machine.one_turn_map[i_end_parallel:]
 			print 'I am id=%d (master) and my part is %d long'%(myid, len(self.mypart))
 
 	def init_master(self):
@@ -41,16 +44,16 @@ class Simulation(object):
 		macroparticlenumber_track = 50000
 
 		# initialization bunch
-		bunch   = machine.generate_6D_Gaussian_bunch_matched(
+		bunch = self.machine.generate_6D_Gaussian_bunch_matched(
 			macroparticlenumber_track, intensity, epsn_x, epsn_y, sigma_z=sigma_z)
 		print 'Bunch initialized.'
 
 		# initial slicing
 		from PyHEADTAIL.particles.slicing import UniformBinSlicer
-		self.slicer = UniformBinSlicer(n_slices = n_slices, z_cuts=(-z_cut, z_cut))
+		self.slicer = UniformBinSlicer(n_slices = self.n_slices, z_cuts=(-self.z_cut, self.z_cut))
 		
 		#slice for the first turn
-		slice_obj_list = bunch.extract_slices(slicer)
+		slice_obj_list = bunch.extract_slices(self.slicer)
 
 		#prepare to save results
 		self.beam_x, self.beam_y, self.beam_z = [], [], []
@@ -74,7 +77,7 @@ class Simulation(object):
 		bunch = sum(pieces_treated)
 
 		#finalize present turn (with non parallel part, e.g. synchrotron motion)
-		for ele in non_parallel_part:
+		for ele in self.non_parallel_part:
 			ele.track(bunch)
 
 		#csave results
@@ -102,15 +105,75 @@ class Simulation(object):
 
 		
 	def finalize_simulation(self):
-
-		pass
+		# output plots
+		if True:
+			
+			beam_x = self.beam_x
+			beam_y = self.beam_y
+			beam_z = self.beam_z
+			sx = self.sx
+			sy = self.sy 
+			sz = self.sz
+			epsx = self.epsx
+			epsy =	self.epsy
+			epsz =	self.epsz
+			
+			import pylab as plt
+			
+			plt.figure(2, figsize=(16, 8), tight_layout=True)
+			plt.subplot(2,3,1)
+			plt.plot(beam_x)
+			plt.ylabel('x [m]');plt.xlabel('Turn')
+			plt.gca().ticklabel_format(style='sci', scilimits=(0,0),axis='y')
+			plt.subplot(2,3,2)
+			plt.plot(beam_y)
+			plt.ylabel('y [m]');plt.xlabel('Turn')
+			plt.gca().ticklabel_format(style='sci', scilimits=(0,0),axis='y')
+			plt.subplot(2,3,3)
+			plt.plot(beam_z)
+			plt.ylabel('z [m]');plt.xlabel('Turn')
+			plt.gca().ticklabel_format(style='sci', scilimits=(0,0),axis='y')
+			plt.subplot(2,3,4)
+			plt.plot(np.fft.rfftfreq(len(beam_x), d=1.), np.abs(np.fft.rfft(beam_x)))
+			plt.ylabel('Amplitude');plt.xlabel('Qx')
+			plt.subplot(2,3,5)
+			plt.plot(np.fft.rfftfreq(len(beam_y), d=1.), np.abs(np.fft.rfft(beam_y)))
+			plt.ylabel('Amplitude');plt.xlabel('Qy')
+			plt.subplot(2,3,6)
+			plt.plot(np.fft.rfftfreq(len(beam_z), d=1.), np.abs(np.fft.rfft(beam_z)))
+			plt.xlim(0, 0.1)
+			plt.ylabel('Amplitude');plt.xlabel('Qz')
+			
+			fig, axes = plt.subplots(3, figsize=(16, 8), tight_layout=True)
+			twax = [plt.twinx(ax) for ax in axes]
+			axes[0].plot(sx)
+			twax[0].plot(epsx, '-g')
+			axes[0].set_xlabel('Turns')
+			axes[0].set_ylabel(r'$\sigma_x$')
+			twax[0].set_ylabel(r'$\varepsilon_y$')
+			axes[1].plot(sy)
+			twax[1].plot(epsy, '-g')
+			axes[1].set_xlabel('Turns')
+			axes[1].set_ylabel(r'$\sigma_x$')
+			twax[1].set_ylabel(r'$\varepsilon_y$')
+			axes[2].plot(sz)
+			twax[2].plot(epsz, '-g')
+			axes[2].set_xlabel('Turns')
+			axes[2].set_ylabel(r'$\sigma_x$')
+			twax[2].set_ylabel(r'$\varepsilon_y$')
+			axes[0].grid()
+			axes[1].grid()
+			axes[2].grid()
+			for ax in list(axes)+list(twax): 
+				ax.ticklabel_format(useOffset=False, style='sci', scilimits=(0,0),axis='y')
+			plt.show()	
 
 	def piece_to_buffer(self, piece):
-		buf = ch.beam_2_buffer(piece_to_send)
+		buf = ch.beam_2_buffer(piece)
 		return buf
 
 	def buffer_to_piece(self, buf):
-		piece = ch.buffer_2_beam(buf_float)
+		piece = ch.buffer_2_beam(buf)
 		return piece
 
 
