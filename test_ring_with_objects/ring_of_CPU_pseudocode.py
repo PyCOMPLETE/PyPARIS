@@ -1,5 +1,7 @@
 from mpi4py import MPI
 
+import communication_helpers as ch
+
 
 class RingOfCPUs(object):
 	def __init__(self, sim_content):
@@ -14,8 +16,6 @@ class RingOfCPUs(object):
 		self.I_am_a_worker = self.myid!=self.master_id
 		self.I_am_the_master = not(self.I_am_a_worker)
 
-		
-
 		# allocate buffers for communation
 		self.N_buffer_float_size = 1000000
 		self.buf_float = np.array(N_buffer_float_size*[0.])
@@ -23,7 +23,7 @@ class RingOfCPUs(object):
 		self.buf_int = np.array(N_buffer_int_size*[0])
 
 		self.sim_content.init_all()
-		
+
 		comm.Barrier() # only for stdoutp
 
 		if self.I_am_the_master:
@@ -80,6 +80,7 @@ class RingOfCPUs(object):
 
 					# prepare next turn
 					self.pieces_to_be_treated = new_pieces_to_be_treated
+					self.N_pieces = len(self.pieces_to_be_treated)
 					self.pieces_treated = []			
 					self.i_turn+=1
 
