@@ -14,7 +14,7 @@ class Simulation(object):
 		self.n_slices = n_slices
 		self.z_cut = z_cut
 
-		n_segments=3
+		n_segments=70
 
 		from LHC import LHC
 		self.machine = LHC(machine_configuration='Injection', n_segments=n_segments, D_x=0., 
@@ -52,7 +52,7 @@ class Simulation(object):
 		init_unif_edens = 9.000000e+11
 		N_MP_ele_init = 100000
 		N_mp_max = N_MP_ele_init*4.
-		Dh_sc = 1e-3
+		Dh_sc = .2e-3
 		nel_mp_ref_0 = init_unif_edens*4*x_aper*y_aper/N_MP_ele_init
 
 		import PyECLOUD.PyEC4PyHT as PyEC4PyHT
