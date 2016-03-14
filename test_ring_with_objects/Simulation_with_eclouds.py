@@ -1,6 +1,7 @@
 import communication_helpers as ch
 import numpy as np
 from scipy.constants import c, e
+import share_segments as shs
 
 
 class Simulation(object):
@@ -24,15 +25,13 @@ class Simulation(object):
 		i_end_parallel = len(self.machine.one_turn_map)-1 #only RF is not parallelizable
 
 		# split the machine
-		N_wkrs = self.ring_of_CPUs.N_wkrs 	
-		N_elements_per_worker = int(np.floor(float(i_end_parallel)/N_wkrs))
+		sharing = shs.ShareSegments(i_end_parallel, self.ring_of_CPUs.N_nodes)
 		myid = self.ring_of_CPUs.myid
-		print 'N_elements_per_worker', N_elements_per_worker
+		i_start_part, i_end_part = sharing.my_part(myid)
+		self.mypart = self.machine.one_turn_map[i_start_part:i_end_part]
 		if self.ring_of_CPUs.I_am_a_worker:
-			self.mypart = self.machine.one_turn_map[N_elements_per_worker*myid:N_elements_per_worker*(myid+1)]
-			print 'I am id=%d and my part is %d long'%(myid, len(self.mypart))
+			print 'I am id=%d (worker) and my part is %d long'%(myid, len(self.mypart))
 		elif self.ring_of_CPUs.I_am_the_master:
-			self.mypart = self.machine.one_turn_map[N_elements_per_worker*(N_wkrs):i_end_parallel]
 			self.non_parallel_part = self.machine.one_turn_map[i_end_parallel:]
 			print 'I am id=%d (master) and my part is %d long'%(myid, len(self.mypart))
 
