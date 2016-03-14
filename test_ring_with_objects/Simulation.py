@@ -5,7 +5,7 @@ from scipy.constants import c
 
 class Simulation(object):
 	def __init__(self):
-		self.N_turns = 128
+		self.N_turns = 12
 
 	def init_all(self):
 		n_slices = 100
@@ -105,8 +105,22 @@ class Simulation(object):
 
 		
 	def finalize_simulation(self):
+		
+		# save results
+		import myfilemanager as mfm
+		mfm.save_dict_to_h5('beam_coord.h5',{\
+			'beam_x':self.beam_x,
+			'beam_y':self.beam_y,
+			'beam_z':self.beam_z,
+			'sx':self.sx,
+			'sy':self.sy,
+			'sz':self.sz,
+			'epsx':self.epsx,
+			'epsy':self.epsy,
+			'epsz':self.epsz})
+		
 		# output plots
-		if True:
+		if False:
 			
 			beam_x = self.beam_x
 			beam_y = self.beam_y
