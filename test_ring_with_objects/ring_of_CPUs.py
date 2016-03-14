@@ -52,14 +52,15 @@ class RingOfCPUs(object):
 
 	def run(self):
 		if self.I_am_the_master:
-			
+			import time
+			t_last_turn = time.mktime(time.localtime())
 			while True: #(it will be stopped with a break)
 				orders_from_master = []
 				# pop a piece
 				try:
-					piece_to_send = self.pieces_to_be_treated.pop() 	#pop starts for the last slices 
-																#(it is what we want, for the HEADTAIL 
-																#slice order convention, z = -beta*c*t)
+					piece_to_send = self.pieces_to_be_treated.pop() 	# pop starts for the last slices 
+																# (it is what we want, for the HEADTAIL 
+																# slice order convention, z = -beta*c*t)
 				except IndexError:
 					piece_to_send = None
 
@@ -78,7 +79,6 @@ class RingOfCPUs(object):
 
 				# end of turn
 				if len(self.pieces_treated)==self.N_pieces:	
-					print 'Turn', self.i_turn
 
 					self.pieces_treated = self.pieces_treated[::-1] #restore the original order
 
@@ -86,6 +86,10 @@ class RingOfCPUs(object):
 					orders_to_pass, new_pieces_to_be_treated = \
 						self.sim_content.finalize_turn_on_master(self.pieces_treated)
 					orders_from_master += orders_to_pass
+					
+					t_now = time.mktime(time.localtime())
+					print 'Turn %d, %d s'%(self.i_turn,t_now-t_last_turn) 
+					t_last_turn = t_now
 
 					# prepare next turn
 					self.pieces_to_be_treated = new_pieces_to_be_treated

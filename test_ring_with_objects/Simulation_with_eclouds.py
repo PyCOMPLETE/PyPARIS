@@ -1,11 +1,11 @@
 import communication_helpers as ch
 import numpy as np
-from scipy.constants import c
+from scipy.constants import c, e
 
 
 class Simulation(object):
 	def __init__(self):
-		self.N_turns = 128
+		self.N_turns = 2
 
 	def init_all(self):
 		n_slices = 100
@@ -14,7 +14,7 @@ class Simulation(object):
 		self.n_slices = n_slices
 		self.z_cut = z_cut
 
-		n_segments=70
+		n_segments=3
 
 		from LHC import LHC
 		self.machine = LHC(machine_configuration='Injection', n_segments=n_segments, D_x=0., 
@@ -52,16 +52,16 @@ class Simulation(object):
 		init_unif_edens = 9.000000e+11
 		N_MP_ele_init = 100000
 		N_mp_max = N_MP_ele_init*4.
-		Dh_sc = .2e-3
+		Dh_sc = 1e-3
 		nel_mp_ref_0 = init_unif_edens*4*x_aper*y_aper/N_MP_ele_init
 
 		import PyECLOUD.PyEC4PyHT as PyEC4PyHT
 		my_new_part = []
 		self.my_list_eclouds = []
-		for ele in mypart:
+		for ele in self.mypart:
 			my_new_part.append(ele)
-			if ele in machine.transverse_map:
-				ecloud_new = PyEC4PyHT.Ecloud(L_ecloud=machine.circumference/n_segments, slicer=None , 
+			if ele in self.machine.transverse_map:
+				ecloud_new = PyEC4PyHT.Ecloud(L_ecloud=self.machine.circumference/n_segments, slicer=None, 
 					Dt_ref=10e-12, pyecl_input_folder='../pyecloud_config',
 					chamb_type = chamb_type,
 					x_aper=x_aper, y_aper=y_aper,
@@ -70,11 +70,11 @@ class Simulation(object):
 					init_unif_edens=init_unif_edens, 
 					N_mp_max=N_mp_max,
 					nel_mp_ref_0=nel_mp_ref_0,
-					B_multip=B_multip_per_eV*machine.p0/e*c,
+					B_multip=B_multip_per_eV*self.machine.p0/e*c,
 					slice_by_slice_mode=True)
 				my_new_part.append(ecloud_new)
 				self.my_list_eclouds.append(ecloud_new)
-		mypart = my_new_part
+		self.mypart = my_new_part
 
 	def init_master(self):
 		
