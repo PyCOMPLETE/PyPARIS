@@ -106,7 +106,7 @@ class Simulation(object):
 		
 	def finalize_simulation(self):
 		# output plots
-		if True:
+		if False:#True:
 			
 			beam_x = self.beam_x
 			beam_y = self.beam_y

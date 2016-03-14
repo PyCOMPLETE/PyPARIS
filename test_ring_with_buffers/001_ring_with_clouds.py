@@ -46,7 +46,7 @@ N_mp_max = N_MP_ele_init*4.
 Dh_sc = .2e-3
 nel_mp_ref_0 = init_unif_edens*4*x_aper*y_aper/N_MP_ele_init
 
-n_segments = 5
+n_segments = 70
 
 
 # get info on the grid
