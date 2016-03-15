@@ -7,6 +7,9 @@ import share_segments as shs
 epsn_x = 2.5e-6
 epsn_y = 2.5e-6
 
+filename = '../../PyECLOUD/testing/tests_PyEC4PyHT/headtail_for_test/test_protons/SPS_Q20_proton_check_dipole_3kicks_20150212_prb.dat'
+B_multip = [0.5]
+
 
 class Simulation(object):
 	def __init__(self):
@@ -15,15 +18,15 @@ class Simulation(object):
 	def init_all(self):
 
 		n_slices = 64
-		
 		self.n_slices = n_slices
 
-		n_segments=3
+		n_segments = 3
+		self.n_segments = n_segments
 
 		from machines_for_testing import SPS
-		machine = SPS(n_segments = n_segments, 
+		self.machine = SPS(n_segments = n_segments, 
 			machine_configuration = 'Q20-injection', accQ_x=20., accQ_y=20., 
-					RF_at=RF_at='end_of_transverse')
+					RF_at='end_of_transverse')
 
 		
 		# We suppose that all the object that cannot be slice parallelized are at the end of the ring
@@ -46,14 +49,17 @@ class Simulation(object):
 		init_unif_edens=2e11
 		N_MP_ele_init = 100000
 		N_mp_max = N_MP_ele_init*4.
-
+		
 		# define apertures and Dh_sc to simulate headtail 
-		inj_optics = machine.transverse_map.get_injection_optics()
-		sigma_x = np.sqrt(inj_optics['beta_x']*epsn_x/machine.betagamma)
-		sigma_y = np.sqrt(inj_optics['beta_y']*epsn_y/machine.betagamma)
+		inj_optics = self.machine.transverse_map.get_injection_optics()
+		sigma_x = np.sqrt(inj_optics['beta_x']*epsn_x/self.machine.betagamma)
+		sigma_y = np.sqrt(inj_optics['beta_y']*epsn_y/self.machine.betagamma)
 		x_aper  = 20*sigma_x
 		y_aper  = 20*sigma_y
 		Dh_sc = 2*x_aper/128/2
+		
+		# initial MP size
+		nel_mp_ref_0 = init_unif_edens*4*x_aper*y_aper/N_MP_ele_init
 
 		import PyECLOUD.PyEC4PyHT as PyEC4PyHT
 		my_new_part = []
@@ -61,9 +67,11 @@ class Simulation(object):
 		for ele in self.mypart:
 			my_new_part.append(ele)
 			if ele in self.machine.transverse_map:
-				ecloud_new = PyEC4PyHT.Ecloud(L_ecloud=machine.circumference/N_kicks, 
+				ecloud_new = PyEC4PyHT.Ecloud(slice_by_slice_mode=True,
+						L_ecloud=self.machine.circumference/n_segments, 
 						slicer=None, 
-						Dt_ref=25e-12, pyecl_input_folder='./drift_sim',
+						Dt_ref=25e-12, 
+						pyecl_input_folder='../../PyECLOUD/testing/tests_PyEC4PyHT/drift_sim/',
 						x_aper=x_aper, y_aper=y_aper, Dh_sc=Dh_sc,
 						init_unif_edens_flag=init_unif_edens_flag,
 						init_unif_edens=init_unif_edens, 
@@ -71,7 +79,6 @@ class Simulation(object):
 						N_mp_max=N_mp_max,
 						nel_mp_ref_0=nel_mp_ref_0,
 						B_multip=B_multip)
-					slice_by_slice_mode=True)
 				my_new_part.append(ecloud_new)
 				self.my_list_eclouds.append(ecloud_new)
 		self.mypart = my_new_part
@@ -89,17 +96,16 @@ class Simulation(object):
 		print 'Bunch initialized.'
 
 		#replace particles with HDTL ones
-		filename = 'headtail_for_test/test_protons/SPS_Q20_proton_check_dipole_3kicks_20150212_prb.dat'
 		n_part_per_turn = 5000
 		appo = np.loadtxt(filename)
-
-		parid = np.reshape(appo[:,0], (-1, n_part_per_turn))[::N_kicks,:]
-		x = np.reshape(appo[:,1], (-1, n_part_per_turn))[::N_kicks,:]
-		xp = np.reshape(appo[:,2], (-1, n_part_per_turn))[::N_kicks,:]
-		y = np.reshape(appo[:,3], (-1, n_part_per_turn))[::N_kicks,:]
-		yp =np.reshape(appo[:,4], (-1, n_part_per_turn))[::N_kicks,:]
-		z = np.reshape(appo[:,5], (-1, n_part_per_turn))[::N_kicks,:]
-		zp = np.reshape(appo[:,6], (-1, n_part_per_turn))[::N_kicks,:]
+		
+		parid = np.reshape(appo[:,0], (-1, n_part_per_turn))[::self.n_segments,:]
+		x = np.reshape(appo[:,1], (-1, n_part_per_turn))[::self.n_segments,:]
+		xp = np.reshape(appo[:,2], (-1, n_part_per_turn))[::self.n_segments,:]
+		y = np.reshape(appo[:,3], (-1, n_part_per_turn))[::self.n_segments,:]
+		yp =np.reshape(appo[:,4], (-1, n_part_per_turn))[::self.n_segments,:]
+		z = np.reshape(appo[:,5], (-1, n_part_per_turn))[::self.n_segments,:]
+		zp = np.reshape(appo[:,6], (-1, n_part_per_turn))[::self.n_segments,:]
 		self.N_turns = len(x[:,0])
 
 		# replace first particles with HEADTAIL ones
