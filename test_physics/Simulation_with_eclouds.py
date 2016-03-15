@@ -6,6 +6,7 @@ import share_segments as shs
 # compute sigma x and y
 epsn_x = 2.5e-6
 epsn_y = 2.5e-6
+B_multip = [0.5]
 
 filename = '../../PyECLOUD/testing/tests_PyEC4PyHT/headtail_for_test/test_protons/SPS_Q20_proton_check_dipole_3kicks_20150212_prb.dat'
 B_multip = [0.5]
@@ -96,30 +97,30 @@ class Simulation(object):
 		print 'Bunch initialized.'
 
 		#replace particles with HDTL ones
-		n_part_per_turn = 5000
+		self.n_part_per_turn = 5000
 		appo = np.loadtxt(filename)
 		
-		parid = np.reshape(appo[:,0], (-1, n_part_per_turn))[::self.n_segments,:]
-		x = np.reshape(appo[:,1], (-1, n_part_per_turn))[::self.n_segments,:]
-		xp = np.reshape(appo[:,2], (-1, n_part_per_turn))[::self.n_segments,:]
-		y = np.reshape(appo[:,3], (-1, n_part_per_turn))[::self.n_segments,:]
-		yp =np.reshape(appo[:,4], (-1, n_part_per_turn))[::self.n_segments,:]
-		z = np.reshape(appo[:,5], (-1, n_part_per_turn))[::self.n_segments,:]
-		zp = np.reshape(appo[:,6], (-1, n_part_per_turn))[::self.n_segments,:]
+		parid = np.reshape(appo[:,0], (-1, self.n_part_per_turn))[::self.n_segments,:]
+		x = np.reshape(appo[:,1], (-1, self.n_part_per_turn))[::self.n_segments,:]
+		xp = np.reshape(appo[:,2], (-1, self.n_part_per_turn))[::self.n_segments,:]
+		y = np.reshape(appo[:,3], (-1, self.n_part_per_turn))[::self.n_segments,:]
+		yp =np.reshape(appo[:,4], (-1, self.n_part_per_turn))[::self.n_segments,:]
+		z = np.reshape(appo[:,5], (-1, self.n_part_per_turn))[::self.n_segments,:]
+		zp = np.reshape(appo[:,6], (-1, self.n_part_per_turn))[::self.n_segments,:]
 		self.N_turns = len(x[:,0])
 
 		# replace first particles with HEADTAIL ones
-		bunch.x[:n_part_per_turn] = x[0,:]
-		bunch.xp[:n_part_per_turn] = xp[0,:]
-		bunch.y[:n_part_per_turn] = y[0,:]
-		bunch.yp[:n_part_per_turn] = yp[0,:]
-		bunch.z[:n_part_per_turn] = z[0,:]
-		bunch.dp[:n_part_per_turn] =zp[0,:]
+		bunch.x[:self.n_part_per_turn] = x[0,:]
+		bunch.xp[:self.n_part_per_turn] = xp[0,:]
+		bunch.y[:self.n_part_per_turn] = y[0,:]
+		bunch.yp[:self.n_part_per_turn] = yp[0,:]
+		bunch.z[:self.n_part_per_turn] = z[0,:]
+		bunch.dp[:self.n_part_per_turn] =zp[0,:]
 
 		# save id and momenta before track
-		self.id_before = bunch.id[bunch.id<=n_part_per_turn]
-		self.xp_before = bunch.xp[bunch.id<=n_part_per_turn]
-		self.yp_before = bunch.yp[bunch.id<=n_part_per_turn]
+		self.id_before = bunch.id[bunch.id<=self.n_part_per_turn]
+		self.xp_before = bunch.xp[bunch.id<=self.n_part_per_turn]
+		self.yp_before = bunch.yp[bunch.id<=self.n_part_per_turn]
 
 		# initial slicing
 		from PyHEADTAIL.particles.slicing import UniformBinSlicer
@@ -150,6 +151,24 @@ class Simulation(object):
 		#finalize present turn (with non parallel part, e.g. synchrotron motion)
 		for ele in self.non_parallel_part:
 			ele.track(bunch)
+
+		# id and momenta after track
+		id_after = bunch.id[bunch.id<=self.n_part_per_turn]
+		xp_after = bunch.xp[bunch.id<=self.n_part_per_turn]
+		z_after = bunch.z[bunch.id<=self.n_part_per_turn]
+		yp_after = bunch.yp[bunch.id<=self.n_part_per_turn]
+
+		# sort id and momenta after track
+		indsort = np.argsort(id_after)
+		id_after = np.take(id_after, indsort)
+		xp_after = np.take(xp_after, indsort)
+		yp_after = np.take(yp_after, indsort)
+		z_after = np.take(z_after, indsort)
+
+		# save results
+		import myfilemanager as mfm
+		mfm.save_dict_to_h5('particles_at_turn_%d.h5'%self.ring_of_CPUs.i_turn,{\
+
 
 		# prepare next turn (re-slice)
 		new_pieces_to_be_treated = bunch.extract_slices(self.slicer)
