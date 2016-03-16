@@ -7,21 +7,22 @@ import share_segments as shs
 epsn_x = 2.5e-6
 epsn_y = 2.5e-6
 B_multip = [0.5]
+n_slices = 64
+n_segments = 3
 
 filename = '../../PyECLOUD/testing/tests_PyEC4PyHT/headtail_for_test/test_protons/SPS_Q20_proton_check_dipole_3kicks_20150212_prb.dat'
 B_multip = [0.5]
+N_turns_to_simulate = 8
 
 
 class Simulation(object):
 	def __init__(self):
-		self.N_turns = None
+		self.N_turns = N_turns_to_simulate
 
 	def init_all(self):
 
-		n_slices = 64
+		
 		self.n_slices = n_slices
-
-		n_segments = 3
 		self.n_segments = n_segments
 
 		from machines_for_testing import SPS
@@ -107,7 +108,6 @@ class Simulation(object):
 		yp =np.reshape(appo[:,4], (-1, self.n_part_per_turn))[::self.n_segments,:]
 		z = np.reshape(appo[:,5], (-1, self.n_part_per_turn))[::self.n_segments,:]
 		zp = np.reshape(appo[:,6], (-1, self.n_part_per_turn))[::self.n_segments,:]
-		self.N_turns = len(x[:,0])
 
 		# replace first particles with HEADTAIL ones
 		bunch.x[:self.n_part_per_turn] = x[0,:]
@@ -133,6 +133,8 @@ class Simulation(object):
 		slice_obj_list = bunch.extract_slices(self.slicer)
 
 		pieces_to_be_treated = slice_obj_list
+		
+		print 'N_turns', self.N_turns
 
 		return pieces_to_be_treated
 
@@ -168,6 +170,13 @@ class Simulation(object):
 		# save results
 		import myfilemanager as mfm
 		mfm.save_dict_to_h5('particles_at_turn_%d.h5'%self.ring_of_CPUs.i_turn,{\
+		'id_after': id_after,
+		'xp_after': xp_after,
+		'yp_after': yp_after,
+		'z_after': z_after,
+		'id_before':self.id_before,
+		'xp_before':self.xp_before,
+		'yp_before':self.yp_before})
 
 
 		# prepare next turn (re-slice)
