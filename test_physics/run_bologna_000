@@ -1,10 +1,10 @@
 #!/bin/bash
 
 
-NUMBER_OF_REQUESTED_CORES=5
+NUMBER_OF_REQUESTED_CORES=3
 MAX_NUMBER_OF_CORE_PER_NODE=32
 
-PATH_TO_EXECUTABLE="python /home/HPC/giadarol/test_PyECPyHT/PyParaSlice/test_ring_with_objects/002_test_with_ecloud.py"
+PATH_TO_EXECUTABLE="python /home/HPC/giadarol/test_PyECPyHT/PyParaSlice/test_physics/000_test_with_ecloud.py"
 SIMULATION_NAME='first'
 QUEUE=hpc_inf
 #QUEUE=hpc_short
