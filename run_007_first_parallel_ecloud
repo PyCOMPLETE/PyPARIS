@@ -1,1 +1,0 @@
-mpiexec -n 4 python 007_first_parallel_ecloud.py

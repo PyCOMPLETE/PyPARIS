@@ -1,1 +1,0 @@
-mpiexec -n 4 python 005_and_output.py
