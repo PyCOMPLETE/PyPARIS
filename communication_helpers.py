@@ -2,6 +2,32 @@ import numpy as np
 from PyHEADTAIL.particles.particles import Particles
 
 
+def combine_float_buffers(list_of_buffers):
+	N_buffers = len(list_of_buffers)
+	len_buffers = np.array(map(lambda seq: float(len(seq)), list_of_buffers))
+	return np.concatenate([np.array([float(N_buffers)]), len_buffers]+list_of_buffers)
+
+def split_float_buffers(megabuffer):
+	i_mbuf = 0
+	
+	N_buffers = int(megabuffer[0])
+	i_mbuf += 1
+	
+	len_buffers = megabuffer[i_mbuf:i_mbuf+N_buffers]
+	i_mbuf += N_buffers
+	
+	list_of_buffers = []
+	for i_buf in xrange(N_buffers):
+		lenbuf = int(len_buffers[i_buf])
+		list_of_buffers.append(megabuffer[i_mbuf:i_mbuf+lenbuf])
+		i_mbuf += lenbuf
+		
+	return list_of_buffers
+	
+	
+	
+
+
 def list_of_strings_2_buffer(strlist):
 	data = ''.join(map(lambda s:s+';', strlist))+'\n'
 	buf_to_send = np.atleast_1d(np.int_(np.array(map(ord, list(data)))))
