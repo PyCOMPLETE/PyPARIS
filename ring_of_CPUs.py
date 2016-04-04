@@ -4,17 +4,27 @@ import numpy as np
 
 import communication_helpers as ch
 
-
 class RingOfCPUs(object):
-	def __init__(self, sim_content):
+	def __init__(self, sim_content, single_CPU_mode = False):
 		
 		self.sim_content = sim_content
 		self.N_turns = sim_content.N_turns
 		
 		self.sim_content.ring_of_CPUs = self
 		
-		self.comm = MPI.COMM_WORLD
-		
+		# check if user is forcing simulation mode
+		if single_CPU_mode:
+			print '\nSingle_CPU_forced_by_user!\n'
+			self.comm = SingleCoreComminicator()
+		else:
+			from mpi4py import MPI
+			self.comm = MPI.COMM_WORLD
+			
+		#check if there is only one node
+		if self.comm.Get_size()==1:
+			#in case it is forced by user it will be rebound but there is no harm in that
+			self.comm = SingleCoreComminicator()
+			
 		# get info on the grid
 		self.N_nodes = self.comm.Get_size()
 		self.N_wkrs = self.N_nodes-1
@@ -23,7 +33,7 @@ class RingOfCPUs(object):
 		self.I_am_a_worker = self.myid!=self.master_id
 		self.I_am_the_master = not(self.I_am_a_worker)
 
-		# allocate buffers for communation
+		# allocate buffers for communication
 		self.N_buffer_float_size = 1000000
 		self.buf_float = np.array(self.N_buffer_float_size*[0.])
 		self.N_buffer_int_size = 100
@@ -147,6 +157,40 @@ class RingOfCPUs(object):
 				if 'stop' in orders_from_master:
 					break
 
+# # usage
+# from Simulation import Simulation
+# sim_content = Simulation()
+
+# myring = RingOfCPUs(sim_content, N_turns)
+
+# myring.run()
+
+class SingleCoreComminicator(object):
+	def __init__(self):
+		print '\n\n\n'
+		print '****************************************'	
+		print '*** Using single core MPI simulator! ***'	
+		print '****************************************'
+		print '\n\n\n'
+		
+	def Get_size(self):
+		return 1
+	
+	def Get_rank(self):
+		return 0
+	
+	def Barrier(self):
+		pass
+
+	def Sendrecv(self, sendbuf, dest, sendtag, recvbuf, source, recvtag):
+		if dest!=0 or sendtag!=0 or source!=-1 or recvtag!=0:
+			raise ValueError('Input of Sendrecv not compatible with single core operation!!!')
+		recvbuf[:len(sendbuf)]=sendbuf
+		
+	def Bcast(self, buf, root=0):
+		if root!=0:
+			raise ValueError('Input of Bcast not compatible with single core operation!!!')
+		#Does not really have to do anything
 
 # # usage
 # from Simulation import Simulation
