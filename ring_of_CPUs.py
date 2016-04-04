@@ -5,10 +5,11 @@ import numpy as np
 import communication_helpers as ch
 
 class RingOfCPUs(object):
-	def __init__(self, sim_content, single_CPU_mode = False):
+	def __init__(self, sim_content, N_pieces_per_transfer=1, single_CPU_mode = False):
 		
 		self.sim_content = sim_content
 		self.N_turns = sim_content.N_turns
+		self.N_pieces_per_transfer = N_pieces_per_transfer
 		
 		self.sim_content.ring_of_CPUs = self
 		
@@ -66,26 +67,32 @@ class RingOfCPUs(object):
 			t_last_turn = time.mktime(time.localtime())
 			while True: #(it will be stopped with a break)
 				orders_from_master = []
-				# pop a piece
-				try:
-					piece_to_send = self.pieces_to_be_treated.pop() 	# pop starts for the last slices 
-																# (it is what we want, for the HEADTAIL 
-																# slice order convention, z = -beta*c*t)
-				except IndexError:
-					piece_to_send = None
+				list_of_buffers_to_send = []
+				
+				for _ in xrange(self.N_pieces_per_transfer):
+					# pop a piece
+					try:
+						piece_to_send = self.pieces_to_be_treated.pop() 	# pop starts for the last slices 
+																	# (it is what we want, for the HEADTAIL 
+																	# slice order convention, z = -beta*c*t)
+					except IndexError:
+						piece_to_send = None
+						
+					list_of_buffers_to_send.append(self.sim_content.piece_to_buffer(piece_to_send))
 
 				# send it to the first element of the ring and receive from the last
-				sendbuf = self.sim_content.piece_to_buffer(piece_to_send)
+				sendbuf = ch.combine_float_buffers(list_of_buffers_to_send)
 				if len(sendbuf)	> self.N_buffer_float_size:
 					raise ValueError('Float buffer is too small!')
 				self.comm.Sendrecv(sendbuf, dest=0, sendtag=0, 
 							recvbuf=self.buf_float, source=self.master_id-1, recvtag=self.myid)
-				piece_received = self.sim_content.buffer_to_piece(self.buf_float)
-
-				# treat received piece
-				if piece_received is not None:
-					self.sim_content.treat_piece(piece_received)
-					self.pieces_treated.append(piece_received)	
+				list_received_pieces = map(self.sim_content.buffer_to_piece, ch.split_float_buffers(self.buf_float))
+				
+				# treat received pieces				
+				for piece_received in list_received_pieces:
+					if piece_received is not None:
+						self.sim_content.treat_piece(piece_received)
+						self.pieces_treated.append(piece_received)	
 
 				# end of turn
 				if len(self.pieces_treated)==self.N_pieces:	
@@ -128,23 +135,24 @@ class RingOfCPUs(object):
 
 		elif self.I_am_a_worker:
 			# initialization 
-			piece_to_send = None
+			list_of_buffers_to_send = [self.sim_content.piece_to_buffer(None)]
 			
 			while True:
 
-				sendbuf = self.sim_content.piece_to_buffer(piece_to_send)
+				sendbuf = ch.combine_float_buffers(list_of_buffers_to_send)
 				if len(sendbuf)	> self.N_buffer_float_size:
 					raise ValueError('Float buffer is too small!')
 				self.comm.Sendrecv(sendbuf, dest=self.right, sendtag=self.right, 
 							recvbuf=self.buf_float, source=self.left, recvtag=self.myid)
-				piece_received = self.sim_content.buffer_to_piece(self.buf_float)
+				list_received_pieces = map(self.sim_content.buffer_to_piece, ch.split_float_buffers(self.buf_float))
 
 				# treat received piece
-				if piece_received is not None:
-					self.sim_content.treat_piece(piece_received)
+				for piece_received in list_received_pieces:
+					if piece_received is not None:
+						self.sim_content.treat_piece(piece_received) #the elements of the list are being mutated
 
 				# prepare for next iteration
-				piece_to_send = piece_received	
+				list_of_buffers_to_send = map(self.sim_content.piece_to_buffer, list_received_pieces)
 
 				# receive orders from the master
 				self.comm.Bcast(self.buf_int, self.master_id)
