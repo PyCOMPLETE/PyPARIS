@@ -53,14 +53,9 @@ class Simulation(object):
 		N_mp_max = N_MP_ele_init*4.
 		Dh_sc = .2e-3
 		nel_mp_ref_0 = init_unif_edens*4*x_aper*y_aper/N_MP_ele_init
-
+		
 		import PyECLOUD.PyEC4PyHT as PyEC4PyHT
-		my_new_part = []
-		self.my_list_eclouds = []
-		for ele in self.mypart:
-			my_new_part.append(ele)
-			if ele in self.machine.transverse_map:
-				ecloud_new = PyEC4PyHT.Ecloud(L_ecloud=self.machine.circumference/n_segments, slicer=None, 
+		ecloud = PyEC4PyHT.Ecloud(L_ecloud=self.machine.circumference/n_segments, slicer=None, 
 					Dt_ref=10e-12, pyecl_input_folder='../pyecloud_config',
 					chamb_type = chamb_type,
 					x_aper=x_aper, y_aper=y_aper,
@@ -71,6 +66,13 @@ class Simulation(object):
 					nel_mp_ref_0=nel_mp_ref_0,
 					B_multip=B_multip_per_eV*self.machine.p0/e*c,
 					slice_by_slice_mode=True)
+
+		my_new_part = []
+		self.my_list_eclouds = []
+		for ele in self.mypart:
+			my_new_part.append(ele)
+			if ele in self.machine.transverse_map:
+				ecloud_new = ecloud.generate_twin_ecloud_with_shared_space_charge()
 				my_new_part.append(ecloud_new)
 				self.my_list_eclouds.append(ecloud_new)
 		self.mypart = my_new_part
