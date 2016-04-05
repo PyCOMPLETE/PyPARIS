@@ -1,0 +1,2 @@
+bsub -L /bin/bash -J LH0136 -o /afs/cern.ch/work/e/ecldcode/sim_workspace_PyHEADTAIL_3/LHC_dip_instab_simulations/simulations/HLLHC-injection_ArcDip_edens10.00e11_inten1.3e11_rep02/STDOUT -e /afs/cern.ch/work/e/ecldcode/sim_workspace_PyHEADTAIL_3/LHC_dip_instab_simulations/simulations/HLLHC-injection_ArcDip_edens10.00e11_inten1.3e11_rep02/STDERR -q 1nw < /afs/cern.ch/work/e/ecldcode/sim_workspace_PyHEADTAIL_3/LHC_dip_instab_simulations/simulations/HLLHC-injection_ArcDip_edens10.00e11_inten1.3e11_rep02/job.job
+bjobs

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+source /afs/cern.ch/work/k/kli/public/venv_py27_slc6/bin/activate
+which python
+
+#execute simulation
+python h000_reset_last_part.py
+
+./launch_single
+
+

@@ -1,0 +1,5 @@
+present_simulation_part = 1
+first_turn_part = 256
+last_turn_part = 511
+present_part_done = True
+present_part_running = False
