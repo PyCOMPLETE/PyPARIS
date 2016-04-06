@@ -5,7 +5,7 @@ import share_segments as shs
 import time
 
 n_segments = 79
-N_turns = 512
+N_turns = 2#512
 
 Dh_sc = .2e-3
 
