@@ -8,6 +8,6 @@ from ring_of_CPUs import RingOfCPUs
 from Simulation_with_eclouds import Simulation
 simulation_content = Simulation()
 
-myCPUring = RingOfCPUs(simulation_content, N_pieces_per_transfer=4)
+myCPUring = RingOfCPUs(simulation_content, N_pieces_per_transfer=10)
 
 myCPUring.run()

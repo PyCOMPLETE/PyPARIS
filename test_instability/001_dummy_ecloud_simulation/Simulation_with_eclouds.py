@@ -4,7 +4,7 @@ from scipy.constants import c, e
 import share_segments as shs
 import time
 
-n_segments = 79
+n_segments = 15#79
 N_turns = 512
 
 Dh_sc = .2e-3
@@ -100,7 +100,8 @@ class Simulation(object):
 		for ele in self.mypart:
 			my_new_part.append(ele)
 			if ele in self.machine.transverse_map:
-				ecloud_new = ecloud.generate_twin_ecloud_with_shared_space_charge()
+				#ecloud_new = ecloud.generate_twin_ecloud_with_shared_space_charge()
+				ecloud_new = DummyEcloud()
 				my_new_part.append(ecloud_new)
 				self.my_list_eclouds.append(ecloud_new)
 		self.mypart = my_new_part
@@ -130,7 +131,7 @@ class Simulation(object):
 		
 		# define a bunch monitor 
 		from PyHEADTAIL.monitors.monitors import BunchMonitor
-		self.bunch_monitor = BunchMonitor('bunch_evolution', N_turns, {'Comment':'PyHDTL simulation'}, 
+		self.bunch_monitor = BunchMonitor('bunch_evolution.h5', N_turns, {'Comment':'PyHDTL simulation'}, 
 							write_buffer_every = 8)
 
 		
@@ -187,6 +188,12 @@ class Simulation(object):
 		piece = ch.buffer_2_beam(buf)
 		return piece
 
-
+class DummyEcloud(object):
+	def __init__(self):
+		pass
+	def track(self, bunch):
+		pass
+	def finalize_and_reinitialize(self):
+		pass
 
 
