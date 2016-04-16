@@ -5,7 +5,7 @@ import numpy as np
 import communication_helpers as ch
 
 class RingOfCPUs(object):
-	def __init__(self, sim_content, N_pieces_per_transfer=1, single_CPU_mode = False):
+	def __init__(self, sim_content, N_pieces_per_transfer=1, single_CPU_mode = False, comm=None):
 		
 		self.sim_content = sim_content
 		self.N_turns = sim_content.N_turns
@@ -17,6 +17,8 @@ class RingOfCPUs(object):
 		if single_CPU_mode:
 			print '\nSingle_CPU_forced_by_user!\n'
 			self.comm = SingleCoreComminicator()
+		elif comm is not None:
+			self.comm = comm
 		else:
 			from mpi4py import MPI
 			self.comm = MPI.COMM_WORLD
