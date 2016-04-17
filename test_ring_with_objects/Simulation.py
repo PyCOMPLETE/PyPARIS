@@ -1,3 +1,10 @@
+import sys, os
+BIN = os.path.expanduser("../../../")
+sys.path.append(BIN)
+BIN = os.path.expanduser("../../")
+sys.path.append(BIN)
+
+
 import communication_helpers as ch
 import numpy as np
 from scipy.constants import c
@@ -187,7 +194,6 @@ class Simulation(object):
 	def buffer_to_piece(self, buf):
 		piece = ch.buffer_2_beam(buf)
 		return piece
-
 
 
 

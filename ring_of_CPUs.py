@@ -11,15 +11,22 @@ class RingOfCPUs(object):
 		self.N_turns = sim_content.N_turns
 		self.N_pieces_per_transfer = N_pieces_per_transfer
 		
+		if hasattr(sim_content, 'N_pieces_per_transfer'):
+			self.N_pieces_per_transfer = N_pieces_per_transfer
+		
+		print 'N_pieces_per_transfer = ', N_pieces_per_transfer
+		
 		self.sim_content.ring_of_CPUs = self
 		
-		# check if user is forcing simulation mode
+		# choice of the communicator
 		if single_CPU_mode:
-			print '\nSingle_CPU_forced_by_user!\n'
+			print '\nSingle CPU forced by user!\n'
 			self.comm = SingleCoreComminicator()
 		elif comm is not None:
+			print '\nMultiprocessing using communicator provided as argument.\n'
 			self.comm = comm
 		else:
+			print '\nMultiprocessing via MPI.'
 			from mpi4py import MPI
 			self.comm = MPI.COMM_WORLD
 			
