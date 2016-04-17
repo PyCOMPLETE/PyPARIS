@@ -68,8 +68,8 @@ def todo(pid, N_proc, queue_list,
 					mutex, barriex, turnstile, turnstile2, cnt)
 
 	from ring_of_CPUs import RingOfCPUs
-	#~ from Simulation import Simulation
-	from Simulation_with_eclouds import Simulation
+	from Simulation import Simulation
+	#~ from Simulation_with_eclouds import Simulation
 	simulation_content = Simulation()
 
 	myCPUring = RingOfCPUs(simulation_content, N_pieces_per_transfer=5, comm=comm)
