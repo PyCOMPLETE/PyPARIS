@@ -8,15 +8,16 @@ import multiprocessing as mp
 import numpy as np
 
 class mpComm(object):
-	def __init__(self, N_nodes, pid, N_proc, queue_list,
-					at_sync_list, done_sync, cnt):
+	def __init__(self, pid, N_proc, queue_list,
+					mutex, barriex, turnstile, turnstile2, cnt):
 		self._pid = pid
 		self._N_proc = N_proc
 		self._queue_list = queue_list
-		self._at_sync_list = at_sync_list
-		self._done_sync = done_sync
-		self._cnt = cnt
-
+		self.mutex = mutex
+		self.turnstile = turnstile
+		self.turnstile2 = turnstile2
+		self.cnt = cnt
+		
 	def Get_size(self):
 		return self._N_proc
 
@@ -24,31 +25,25 @@ class mpComm(object):
 		return self._pid
 		
 	def Barrier(self):
-		with self._cnt.get_lock():
-			self._cnt.value+=1
-			print self._cnt.value
-		while self._cnt.value<self._N_proc:
-			pass
+		self.mutex.acquire()
+		self.cnt.value += 1
+		if self.cnt.value == self._N_proc:
+			self.turnstile2.acquire()
+			self.turnstile.release()
+		self.mutex.release()
+		self.turnstile.acquire()
+		self.turnstile.release()
+		#criticalpoint
+		self.mutex.acquire()
+		self.cnt.value -= 1
+		if self.cnt.value == 0:
+		   self.turnstile.acquire()
+		   self.turnstile2.release()
+		self.mutex.release()
+		self.turnstile2.acquire()
+		self.turnstile2.release()
 		
 
-
-	#~ def Barrier(self):
-		#~ myid = self._pid
-		#~ self._at_sync_list[myid].set()
-		#~ if myid == 0:
-			#~ print 'Start sync'
-			#~ for ii, e in enumerate(self._at_sync_list):
-				#~ print 'Waiting for:', ii
-				#~ with self._cnt:
-					#~ e.wait()
-					#~ e.clear()
-				#~ print 'Done with:', ii
-			#~ self._done_sync.set()
-			#~ print 'Done sync'
-		#~ else:
-			#~ with self._cnt:
-				#~ self._done_sync.wait()
-				#~ self._done_sync.clear()
 
 	def Sendrecv(self, sendbuf, dest, sendtag, recvbuf, source, recvtag):
 		self._queue_list[dest].put(sendbuf)
@@ -66,14 +61,15 @@ class mpComm(object):
 			buf[:len(temp)]=temp
 		self.Barrier()
 
-def todo(pid, N_nodes, queue_list,
-					at_sync_list, done_sync, cnt):	
+def todo(pid, N_proc, queue_list,
+					mutex, barriex, turnstile, turnstile2, cnt):	
 
-	comm = mpComm(N_nodes, pid, N_proc, queue_list,
-					at_sync_list, done_sync, cnt)
+	comm = mpComm(pid, N_proc, queue_list,
+					mutex, barriex, turnstile, turnstile2, cnt)
 
 	from ring_of_CPUs import RingOfCPUs
-	from Simulation import Simulation
+	#~ from Simulation import Simulation
+	from Simulation_with_eclouds import Simulation
 	simulation_content = Simulation()
 
 	myCPUring = RingOfCPUs(simulation_content, N_pieces_per_transfer=5, comm=comm)
@@ -82,17 +78,21 @@ def todo(pid, N_nodes, queue_list,
 
 
 if __name__=='__main__':
-	N_proc = 4
+	N_proc = 2
+
 	queue_list = [mp.Queue() for _ in xrange(N_proc)]
-	at_sync_list = [mp.Event() for _ in xrange(N_proc)]
-	done_sync = mp.Event()
+	
+	mutex = mp.Semaphore(1)
+	barrier = mp.Semaphore(0)
+	turnstile = mp.Semaphore(0)
+	turnstile2 = mp.Semaphore(1)
 	cnt = mp.Value('i', 0)
 
 	proc_list = []
 	for pid in xrange(N_proc):
 		proc_list.append(mp.Process(target=todo, 
 			args=(pid, N_proc, queue_list,
-					at_sync_list, done_sync, cnt)))
+					mutex, barrier, turnstile, turnstile2, cnt)))
 	for p in proc_list:
 		p.start()
 	for p in proc_list:
