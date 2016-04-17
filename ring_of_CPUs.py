@@ -1,5 +1,3 @@
-from mpi4py import MPI
-
 import numpy as np
 
 import communication_helpers as ch
@@ -72,6 +70,9 @@ class RingOfCPUs(object):
 
 	def run(self):
 		if self.I_am_the_master:
+			with open('logfile.txt', 'a+') as fid:
+                        	import socket
+				fid.writelines(['Running on %s\n'%socket.gethostname()])
 			import time
 			t_last_turn = time.mktime(time.localtime())
 			while True: #(it will be stopped with a break)
@@ -115,6 +116,8 @@ class RingOfCPUs(object):
 					
 					t_now = time.mktime(time.localtime())
 					print 'Turn %d, %d s'%(self.i_turn,t_now-t_last_turn) 
+					with open('logfile.txt', 'a+') as fid:
+						fid.writelines(['Turn %d, %d s\n'%(self.i_turn,t_now-t_last_turn)])
 					t_last_turn = t_now
 
 					# prepare next turn
