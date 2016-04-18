@@ -70,8 +70,8 @@ class RingOfCPUs(object):
 
 	def run(self):
 		if self.I_am_the_master:
-			with open('logfile.txt', 'a+') as fid:
-                        	import socket
+			with open('pyparislog.txt', 'a+') as fid:
+				import socket
 				fid.writelines(['Running on %s\n'%socket.gethostname()])
 			import time
 			t_last_turn = time.mktime(time.localtime())
@@ -116,7 +116,7 @@ class RingOfCPUs(object):
 					
 					t_now = time.mktime(time.localtime())
 					print 'Turn %d, %d s'%(self.i_turn,t_now-t_last_turn) 
-					with open('logfile.txt', 'a+') as fid:
+					with open('pyparislog.txt', 'a+') as fid:
 						fid.writelines(['Turn %d, %d s\n'%(self.i_turn,t_now-t_last_turn)])
 					t_last_turn = t_now
 

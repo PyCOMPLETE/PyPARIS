@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import multiprocessing as mp
 import numpy as np
 import os, sys
