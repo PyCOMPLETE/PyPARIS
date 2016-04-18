@@ -1,23 +1,30 @@
-from mpi4py import MPI
-
 import numpy as np
 
 import communication_helpers as ch
 
 class RingOfCPUs(object):
-	def __init__(self, sim_content, N_pieces_per_transfer=1, single_CPU_mode = False):
+	def __init__(self, sim_content, N_pieces_per_transfer=1, single_CPU_mode = False, comm=None):
 		
 		self.sim_content = sim_content
 		self.N_turns = sim_content.N_turns
 		self.N_pieces_per_transfer = N_pieces_per_transfer
 		
+		if hasattr(sim_content, 'N_pieces_per_transfer'):
+			self.N_pieces_per_transfer = N_pieces_per_transfer
+		
+		print 'N_pieces_per_transfer = ', N_pieces_per_transfer
+		
 		self.sim_content.ring_of_CPUs = self
 		
-		# check if user is forcing simulation mode
+		# choice of the communicator
 		if single_CPU_mode:
-			print '\nSingle_CPU_forced_by_user!\n'
+			print '\nSingle CPU forced by user!\n'
 			self.comm = SingleCoreComminicator()
+		elif comm is not None:
+			print '\nMultiprocessing using communicator provided as argument.\n'
+			self.comm = comm
 		else:
+			print '\nMultiprocessing via MPI.'
 			from mpi4py import MPI
 			self.comm = MPI.COMM_WORLD
 			
@@ -63,6 +70,9 @@ class RingOfCPUs(object):
 
 	def run(self):
 		if self.I_am_the_master:
+			with open('logfile.txt', 'a+') as fid:
+                        	import socket
+				fid.writelines(['Running on %s\n'%socket.gethostname()])
 			import time
 			t_last_turn = time.mktime(time.localtime())
 			while True: #(it will be stopped with a break)
@@ -106,6 +116,8 @@ class RingOfCPUs(object):
 					
 					t_now = time.mktime(time.localtime())
 					print 'Turn %d, %d s'%(self.i_turn,t_now-t_last_turn) 
+					with open('logfile.txt', 'a+') as fid:
+						fid.writelines(['Turn %d, %d s\n'%(self.i_turn,t_now-t_last_turn)])
 					t_last_turn = t_now
 
 					# prepare next turn
