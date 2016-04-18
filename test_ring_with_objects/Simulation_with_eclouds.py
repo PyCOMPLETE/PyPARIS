@@ -1,3 +1,9 @@
+import sys, os
+BIN = os.path.expanduser("../../../")
+sys.path.append(BIN)
+BIN = os.path.expanduser("../../")
+sys.path.append(BIN)
+
 import communication_helpers as ch
 import numpy as np
 from scipy.constants import c, e
