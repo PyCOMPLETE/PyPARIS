@@ -137,7 +137,7 @@ class Simulation(object):
 		
 		# define a bunch monitor 
 		from PyHEADTAIL.monitors.monitors import BunchMonitor
-		self.bunch_monitor = BunchMonitor('bunch_evolution.h5', N_turns, {'Comment':'PyHDTL simulation'}, 
+		self.bunch_monitor = BunchMonitor('bunch_evolution', N_turns, {'Comment':'PyHDTL simulation'}, 
 							write_buffer_every = 8)
 
 		
