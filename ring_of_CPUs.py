@@ -2,6 +2,13 @@ import numpy as np
 
 import communication_helpers as ch
 
+logfilename = 'pyparislog.txt'
+def print2logandstdo(message, mode='a+'):
+	print message
+	with open(logfilename, mode) as fid:
+		fid.writelines([message+'\n'])
+	
+
 class RingOfCPUs(object):
 	def __init__(self, sim_content, N_pieces_per_transfer=1, force_serial = False, comm=None):
 		
@@ -12,19 +19,18 @@ class RingOfCPUs(object):
 		if hasattr(sim_content, 'N_pieces_per_transfer'):
 			self.N_pieces_per_transfer = sim_content.N_pieces_per_transfer
 		
-		print 'N_pieces_per_transfer = ', self.N_pieces_per_transfer
 		
 		self.sim_content.ring_of_CPUs = self
 		
 		# choice of the communicator
 		if force_serial:
-			print '\nSingle CPU forced by user!\n'
+			comm_info = 'Single CPU forced by user.'
 			self.comm = SingleCoreComminicator()
 		elif comm is not None:
-			print '\nMultiprocessing using communicator provided as argument.\n'
+			comm_info = 'Multiprocessing using communicator provided as argument.'
 			self.comm = comm
 		else:
-			print '\nMultiprocessing via MPI.'
+			comm_info = 'Multiprocessing via MPI.'
 			from mpi4py import MPI
 			self.comm = MPI.COMM_WORLD
 			
@@ -48,7 +54,16 @@ class RingOfCPUs(object):
 		self.buf_int = np.array(self.N_buffer_int_size*[0])
 
 		self.sim_content.init_all()
-
+		
+		if self.I_am_the_master:
+			print2logandstdo('PyPARIS simulation', mode='w+')
+			print2logandstdo(comm_info)
+			print2logandstdo('N_pieces_per_transfer = %d'%self.N_pieces_per_transfer)
+			import socket
+			import sys
+			print2logandstdo('Running on %s'%socket.gethostname())
+			print2logandstdo('Interpreter at %s'%sys.executable)			
+		
 		self.comm.Barrier() # only for stdoutp
 
 		if self.I_am_the_master:
@@ -70,9 +85,6 @@ class RingOfCPUs(object):
 
 	def run(self):
 		if self.I_am_the_master:
-			with open('pyparislog.txt', 'a+') as fid:
-				import socket
-				fid.writelines(['Running on %s\n'%socket.gethostname()])
 			import time
 			t_last_turn = time.mktime(time.localtime())
 			while True: #(it will be stopped with a break)
@@ -115,9 +127,7 @@ class RingOfCPUs(object):
 					orders_from_master += orders_to_pass
 					
 					t_now = time.mktime(time.localtime())
-					print 'Turn %d, %d s'%(self.i_turn,t_now-t_last_turn) 
-					with open('pyparislog.txt', 'a+') as fid:
-						fid.writelines(['Turn %d, %d s\n'%(self.i_turn,t_now-t_last_turn)])
+					print2logandstdo('Turn %d, %d s'%(self.i_turn,t_now-t_last_turn) )
 					t_last_turn = t_now
 
 					# prepare next turn
