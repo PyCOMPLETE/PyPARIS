@@ -1,1 +1,1 @@
-# PyParaSlice
+# PyPARIS
