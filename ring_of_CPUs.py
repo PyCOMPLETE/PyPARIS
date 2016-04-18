@@ -10,9 +10,9 @@ class RingOfCPUs(object):
 		self.N_pieces_per_transfer = N_pieces_per_transfer
 		
 		if hasattr(sim_content, 'N_pieces_per_transfer'):
-			self.N_pieces_per_transfer = N_pieces_per_transfer
+			self.N_pieces_per_transfer = sim_content.N_pieces_per_transfer
 		
-		print 'N_pieces_per_transfer = ', N_pieces_per_transfer
+		print 'N_pieces_per_transfer = ', self.N_pieces_per_transfer
 		
 		self.sim_content.ring_of_CPUs = self
 		
