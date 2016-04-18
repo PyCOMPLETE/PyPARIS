@@ -3,7 +3,7 @@ import numpy as np
 import communication_helpers as ch
 
 class RingOfCPUs(object):
-	def __init__(self, sim_content, N_pieces_per_transfer=1, single_CPU_mode = False, comm=None):
+	def __init__(self, sim_content, N_pieces_per_transfer=1, force_serial = False, comm=None):
 		
 		self.sim_content = sim_content
 		self.N_turns = sim_content.N_turns
@@ -17,7 +17,7 @@ class RingOfCPUs(object):
 		self.sim_content.ring_of_CPUs = self
 		
 		# choice of the communicator
-		if single_CPU_mode:
+		if force_serial:
 			print '\nSingle CPU forced by user!\n'
 			self.comm = SingleCoreComminicator()
 		elif comm is not None:

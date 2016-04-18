@@ -90,12 +90,10 @@ def todo(sim_module_string, pid, N_proc, queue_list,
 if __name__=='__main__':
 	import sys
 	
-	print repr(sys.argv)
-	
 	if len(sys.argv)!=4:
-		raise ValueError('\n\nSyntax must be:\n\t python multiprocexec -n N_proc sim_class=module.class\n\n')
+		raise ValueError('\n\nSyntax must be:\n\t multiprocexec.py -n N_proc sim_class=module.class\n\n')
 	if '-n' not in sys.argv[1] or 'sim_class' not in sys.argv[3]:
-		raise ValueError('\n\nSyntax must be:\n python multiprocexec -n N_proc sim_class=module.class\n\n')
+		raise ValueError('\n\nSyntax must be:\n\t multiprocexec.py -n N_proc sim_class=module.class\n\n')
 	
 	N_proc = int(sys.argv[2])
 
