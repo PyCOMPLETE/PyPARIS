@@ -1,3 +1,9 @@
+import sys, os
+BIN = os.path.expanduser("../../../")
+sys.path.append(BIN)
+BIN = os.path.expanduser("../../")
+sys.path.append(BIN)
+
 import communication_helpers as ch
 import numpy as np
 from scipy.constants import c, e
@@ -18,6 +24,7 @@ N_turns_to_simulate = 8
 class Simulation(object):
 	def __init__(self):
 		self.N_turns = N_turns_to_simulate
+		self.N_pieces_per_transfer=10
 
 	def init_all(self):
 
