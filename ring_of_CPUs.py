@@ -10,14 +10,23 @@ def print2logandstdo(message, mode='a+'):
 
 
 class RingOfCPUs(object):
-    def __init__(self, sim_content, N_pieces_per_transfer=1, force_serial = False, comm=None):
+    def __init__(self, sim_content, N_pieces_per_transfer=1, force_serial = False, comm=None,
+                    N_buffer_float_size = 1000000, N_buffer_int_size = 100):
         
         self.sim_content = sim_content
         self.N_turns = sim_content.N_turns
         self.N_pieces_per_transfer = N_pieces_per_transfer
+        self.N_buffer_float_size = N_buffer_float_size
+        self.N_buffer_int_size = N_buffer_int_size
         
         if hasattr(sim_content, 'N_pieces_per_transfer'):
             self.N_pieces_per_transfer = sim_content.N_pieces_per_transfer
+            
+        if hasattr(sim_content, 'N_buffer_float_size'):
+            self.N_buffer_float_size = sim_content.N_buffer_float_size
+            
+        if hasattr(sim_content, 'N_buffer_int_size'):
+            self.N_buffer_int_size = sim_content.N_buffer_int_size
         
         
         self.sim_content.ring_of_CPUs = self
@@ -48,9 +57,9 @@ class RingOfCPUs(object):
         self.I_am_the_master = not(self.I_am_a_worker)
 
         # allocate buffers for communication
-        self.N_buffer_float_size = 1000000
+
         self.buf_float = np.array(self.N_buffer_float_size*[0.])
-        self.N_buffer_int_size = 100
+
         self.buf_int = np.array(self.N_buffer_int_size*[0])
 
         self.sim_content.init_all()
@@ -60,6 +69,8 @@ class RingOfCPUs(object):
             print2logandstdo(comm_info)
             print2logandstdo('N_cores = %d'%self.N_nodes)
             print2logandstdo('N_pieces_per_transfer = %d'%self.N_pieces_per_transfer)
+            print2logandstdo('N_buffer_float_size = %d'%self.N_buffer_float_size)
+            print2logandstdo('N_buffer_int_size = %d'%self.N_buffer_int_size)
             import socket
             import sys
             print2logandstdo('Running on %s'%socket.gethostname())

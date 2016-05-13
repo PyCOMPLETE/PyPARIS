@@ -14,6 +14,8 @@ import share_segments as shs
 class Simulation(object):
 	def __init__(self):
 		self.N_turns = 128
+		self.N_buffer_float_size = 500000
+		self.N_buffer_int_size = 450
 
 	def init_all(self):
 		n_slices = 100
