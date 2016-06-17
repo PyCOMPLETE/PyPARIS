@@ -100,7 +100,7 @@ def buffer_2_beam(buf):
 		gamma = buf[i_buf]
 		i_buf += 1
 		
-		id_ = np.int_(buf[i_buf:i_buf+macroparticlenumber])
+		id_ = buf[i_buf:i_buf+macroparticlenumber].astype(np.int32)
 		i_buf += macroparticlenumber
 
 		x =  buf[i_buf:i_buf+macroparticlenumber]
