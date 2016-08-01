@@ -65,7 +65,7 @@ class RingOfCPUs(object):
         self.sim_content.init_all()
         
         if self.I_am_the_master:
-            print2logandstdo('PyPARIS simulation', mode='w+')
+            print2logandstdo('PyPARIS simulation')#, mode='w+')
             print2logandstdo(comm_info)
             print2logandstdo('N_cores = %d'%self.N_nodes)
             print2logandstdo('N_pieces_per_transfer = %d'%self.N_pieces_per_transfer)
