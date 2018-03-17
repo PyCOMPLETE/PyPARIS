@@ -1,5 +1,6 @@
 import numpy as np
 from PyHEADTAIL.particles.particles import Particles
+import json
 
 
 def combine_float_buffers(list_of_buffers):
@@ -50,17 +51,30 @@ def beam_2_buffer(beam):
 			raise ValueError('particlenumber_per_mp is a vector! Not implemented!')
 
 		
+		# if not hasattr(beam, 'slice_info'):
+		# 	sl_info_buf = np.array([-1., 0., 0., 0.])
+		# elif beam.slice_info is None:
+		# 	sl_info_buf = np.array([-1., 0., 0., 0.])
+		# elif beam.slice_info == 'unsliced':
+		# 	sl_info_buf = np.array([0., 0., 0., 0.])
+		# else:
+		# 	sl_info_buf = np.array([1.,
+		# 					beam.slice_info['z_bin_center'],
+		# 					beam.slice_info['z_bin_right'],
+		# 					beam.slice_info['z_bin_left']])
+
+		# Prepare slice info buffer
 		if not hasattr(beam, 'slice_info'):
-			sl_info_buf = np.array([-1., 0., 0., 0.])
-		elif beam.slice_info is None:
-			sl_info_buf = np.array([-1., 0., 0., 0.])
-		elif beam.slice_info == 'unsliced':
-			sl_info_buf = np.array([0., 0., 0., 0.])
+			sinfo = None
 		else:
-			sl_info_buf = np.array([1.,
-							beam.slice_info['z_bin_center'],
-							beam.slice_info['z_bin_right'],
-							beam.slice_info['z_bin_left']])
+			sinfo = beam.slice_info
+
+		# Beam data buffer
+		sinfo_str = json.dumps(sinfo)
+		sinfo_int = np.array(map(ord, sinfo_str), dtype=np.int)
+		sinfo_float_buf = sinfo_int.astype(np.float, casting='safe')
+
+
 		
 		buf = np.concatenate((
 			np.array([float(beam.macroparticlenumber)]),
@@ -71,7 +85,7 @@ def beam_2_buffer(beam):
 			np.array([beam.gamma]),
 			np.atleast_1d(np.float_(beam.id)),
 			beam.x, beam.xp, beam.y, beam.yp, beam.z, beam.dp,
-			sl_info_buf))
+			np.array([float(len(sinfo_float_buf))]),sinfo_float_buf))
 			
 	return buf
 	
@@ -121,8 +135,11 @@ def buffer_2_beam(buf):
 		dp = buf[i_buf:i_buf+macroparticlenumber]
 		i_buf += macroparticlenumber
 		
-		slice_info_buf = buf[i_buf:i_buf+4]
-		i_buf += 4
+		slice_info_buf_size = int(buf[i_buf])
+		i_buf += 1
+		
+		slice_info_buf = buf[i_buf:i_buf+slice_info_buf_size]
+		i_buf += slice_info_buf_size
 		
 		beam = Particles(macroparticlenumber=macroparticlenumber,
 						particlenumber_per_mp=particlenumber_per_mp, charge=charge,
@@ -136,15 +153,23 @@ def buffer_2_beam(buf):
 								'dp':np.atleast_1d(dp)})
 		
 		beam.id = np.atleast_1d(id_)
+
+		si_int = slice_info_buf.astype(np.int)
+		si_str = ''.join(map(unichr, list(si_int)))
+		beam.slice_info = json.loads(si_str)
+
 		
-		if slice_info_buf[0] < 0.:
-			beam.slice_info = None
-		elif slice_info_buf[0] == 0.:
-			beam.slice_info = 'unsliced'
-		else:
-			beam.slice_info = {\
-                    'z_bin_center':slice_info_buf[1] ,
-                    'z_bin_right':slice_info_buf[2],
-                    'z_bin_left':slice_info_buf[3]}
-	
+		# if slice_info_buf[0] < 0.:
+		# 	beam.slice_info = None
+		# elif slice_info_buf[0] == 0.:
+		# 	beam.slice_info = 'unsliced'
+		# else:
+		# 	beam.slice_info = {\
+  #                   'z_bin_center':slice_info_buf[1] ,
+  #                   'z_bin_right':slice_info_buf[2],
+  #                   'z_bin_left':slice_info_buf[3]}
+
+
+
+
 	return beam

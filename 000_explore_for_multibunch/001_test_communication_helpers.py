@@ -1,5 +1,6 @@
 import sys
 sys.path.append('../../')
+import numpy as np
 
 from machines_for_testing import SPS
 
@@ -27,31 +28,31 @@ from PyHEADTAIL.particles.slicing import UniformBinSlicer
 slicer = UniformBinSlicer(n_slices = n_slices, z_cuts=(-z_cut, z_cut))
 slices = bunch.extract_slices(slicer, include_non_sliced='always')
 
-
 # I get a slice
 aslice = slices[0]
-aslice = slices[-1]
 
+# What I want to buffer
+tobebuffered = bunch
+tobebuffered = aslice
 
-# I get its slice_info
-sinfo = aslice.slice_info
+import PyPARIS.communication_helpers as ch
 
-# I print slice_info
-print("\nSlice info:")
-print(sinfo)
+# buffer
+buf = ch.beam_2_buffer(tobebuffered)
 
-import json, numpy as np
-# I make it into a json string
-sinfo_str = json.dumps(sinfo)
-# I convert it into an array of int
-sinfo_int = np.array(map(ord, sinfo_str), dtype=np.int)
-# I convert it to an array of floats
-sinfo_float = sinfo_int.astype(np.float, casting='safe')
+# unbuffer
+beamfrombuf = ch.buffer_2_beam(buf)
 
-# I reconstruct the original dictionary
-si_int = sinfo_float.astype(np.int)
-si_str = ''.join(map(unichr, list(si_int)))
-sinfo_rec = json.loads(si_str)
+# check
+attr_list = dir(tobebuffered)
+for att in attr_list:
 
-print("\nSlice info reconstructed:")
-print(sinfo_rec)
+	v1 = getattr(tobebuffered, att)
+	v2 = getattr(beamfrombuf, att)
+
+	if type(v1) is np.ndarray:
+		print att, '1', v1[0:3], '...', v1[-3:]
+		print att, '2', v2[0:3], '...', v2[-3:]
+	else:
+		print att, '1', v1
+		print att, '2', v2
