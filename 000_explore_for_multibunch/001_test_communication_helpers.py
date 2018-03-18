@@ -33,15 +33,18 @@ aslice = slices[10]
 
 # What I want to buffer
 tobebuffered = bunch
-tobebuffered = aslice
+# tobebuffered = aslice
 
 import PyPARIS.communication_helpers as ch
 
+mode = 'pickle'
+
 # buffer
-buf = ch.beam_2_buffer(tobebuffered, mode='bla')
+buf = ch.beam_2_buffer(tobebuffered, mode=mode, verbose=True)
 
 # unbuffer
-beamfrombuf = ch.buffer_2_beam(buf, mode='pickle')
+beamfrombuf = ch.buffer_2_beam(buf, mode=mode)
+
 
 # # check
 # attr_list = dir(tobebuffered)

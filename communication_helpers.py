@@ -7,7 +7,7 @@ import pickle
 def combine_float_buffers(list_of_buffers):
 	N_buffers = len(list_of_buffers)
 	len_buffers = np.array(map(lambda seq: float(len(seq)), list_of_buffers))
-	return np.concatenate([np.array([float(N_buffers)]), len_buffers]+list_of_buffers)
+	return np.array(np.concatenate([np.array([float(N_buffers)]), len_buffers]+list_of_buffers),dtype=np.float64)
 
 def split_float_buffers(megabuffer):
 	i_mbuf = 0
@@ -41,7 +41,7 @@ def buffer_2_list_of_strings(buf):
 	return strlist
 
 
-def beam_2_buffer(beam, mode='pickle'):
+def beam_2_buffer(beam, mode='pickle', verbose=False):
 	
 	#print beam
 	
@@ -82,8 +82,8 @@ def beam_2_buffer(beam, mode='pickle'):
 			ll = len(s1arr)
 			s1arr_padded = np.concatenate((s1arr, np.zeros(8-ll%8, dtype='S1')))
 			# Cast to array of floats
-			f8arr = np.frombuffer(s1arr_padded, dtype=float)
-			sinfo_float_buf = np.concatenate((np.array([ll], dtype=float),f8arr))
+			f8arr = np.frombuffer(s1arr_padded, dtype=np.float64)
+			sinfo_float_buf = np.concatenate((np.array([ll], dtype=np.float64),f8arr))
 		else:
 			raise ValueError('Unknown mode!')
 
@@ -99,9 +99,11 @@ def beam_2_buffer(beam, mode='pickle'):
 			beam.x, beam.xp, beam.y, beam.yp, beam.z, beam.dp,
 			np.array([float(len(sinfo_float_buf))]),sinfo_float_buf)), dtype=np.float64)
 
-		print('beam.macroparticlenumber:%d'%beam.macroparticlenumber)
-		print('len(buf):%d'%len(buf))
-		print('len(sinfo_float_buf):%d'%len(sinfo_float_buf))
+		if verbose:
+			print('mode=%s'%mode)
+			print('beam.macroparticlenumber:%d'%beam.macroparticlenumber)
+			print('len(buf):%d'%len(buf))
+			print('len(sinfo_float_buf):%d'%len(sinfo_float_buf))
 			
 	return buf
 	
