@@ -1,6 +1,7 @@
 import numpy as np
 from PyHEADTAIL.particles.particles import Particles
 import json
+import pickle
 
 
 def combine_float_buffers(list_of_buffers):
@@ -40,7 +41,7 @@ def buffer_2_list_of_strings(buf):
 	return strlist
 
 
-def beam_2_buffer(beam):
+def beam_2_buffer(beam, mode='pickle'):
 	
 	#print beam
 	
@@ -70,26 +71,41 @@ def beam_2_buffer(beam):
 			sinfo = beam.slice_info
 
 		# Beam data buffer
-		sinfo_str = json.dumps(sinfo)
-		sinfo_int = np.array(map(ord, sinfo_str), dtype=np.int)
-		sinfo_float_buf = sinfo_int.astype(np.float, casting='safe')
-
+		if mode=='json':
+			sinfo_str = json.dumps(sinfo)
+			sinfo_int = np.array(map(ord, sinfo_str), dtype=np.int)
+			sinfo_float_buf = sinfo_int.astype(np.float, casting='safe')
+		elif mode=='pickle':
+			pss = pickle.dumps(sinfo, protocol=2)
+			# Pad to have a multiple of 8 bytes
+			s1arr = np.frombuffer(pss, dtype='S1')
+			ll = len(s1arr)
+			s1arr_padded = np.concatenate((s1arr, np.zeros(8-ll%8, dtype='S1')))
+			# Cast to array of floats
+			f8arr = np.frombuffer(s1arr_padded, dtype=float)
+			sinfo_float_buf = np.concatenate((np.array([ll], dtype=float),f8arr))
+		else:
+			raise ValueError('Unknown mode!')
 
 		
-		buf = np.concatenate((
-			np.array([float(beam.macroparticlenumber)]),
-			np.array([float(beam.particlenumber_per_mp)]), 
+		buf = np.array(np.concatenate((
+			np.array([np.float64(beam.macroparticlenumber)]),
+			np.array([np.float64(beam.particlenumber_per_mp)]), 
 			np.array([beam.charge]),
 			np.array([beam.mass]),
 			np.array([beam.circumference]),
 			np.array([beam.gamma]),
 			np.atleast_1d(np.float_(beam.id)),
 			beam.x, beam.xp, beam.y, beam.yp, beam.z, beam.dp,
-			np.array([float(len(sinfo_float_buf))]),sinfo_float_buf))
+			np.array([float(len(sinfo_float_buf))]),sinfo_float_buf)), dtype=np.float64)
+
+		print('beam.macroparticlenumber:%d'%beam.macroparticlenumber)
+		print('len(buf):%d'%len(buf))
+		print('len(sinfo_float_buf):%d'%len(sinfo_float_buf))
 			
 	return buf
 	
-def buffer_2_beam(buf):
+def buffer_2_beam(buf, mode='pickle'):
 	
 	if buf[0]<0:
 		beam=None
@@ -154,9 +170,21 @@ def buffer_2_beam(buf):
 		
 		beam.id = np.atleast_1d(id_)
 
-		si_int = slice_info_buf.astype(np.int)
-		si_str = ''.join(map(unichr, list(si_int)))
-		beam.slice_info = json.loads(si_str)
+		
+		if mode=='json':
+			si_int = slice_info_buf.astype(np.int)
+			si_str = ''.join(map(unichr, list(si_int)))
+			beam.slice_info = json.loads(si_str)
+		elif mode=='pickle':
+			# Get length in bytes
+			llrec = int(slice_info_buf[0])
+			s1back_padded = np.frombuffer(slice_info_buf[1:].tobytes(), dtype='S1') 
+			s1back = s1back_padded[:llrec]
+			pss_rec = s1back.tobytes()
+			beam.slice_info = pickle.loads(pss_rec)
+		else:
+			raise ValueError('Unknown mode!')
+
 
 		
 		# if slice_info_buf[0] < 0.:

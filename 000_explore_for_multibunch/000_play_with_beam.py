@@ -29,8 +29,8 @@ slices = bunch.extract_slices(slicer, include_non_sliced='always')
 
 
 # I get a slice
-aslice = slices[0]
-aslice = slices[-1]
+aslice = slices[10]
+# aslice = slices[-1]
 
 
 # I get its slice_info

@@ -29,7 +29,7 @@ slicer = UniformBinSlicer(n_slices = n_slices, z_cuts=(-z_cut, z_cut))
 slices = bunch.extract_slices(slicer, include_non_sliced='always')
 
 # I get a slice
-aslice = slices[0]
+aslice = slices[10]
 
 # What I want to buffer
 tobebuffered = bunch
@@ -38,21 +38,21 @@ tobebuffered = aslice
 import PyPARIS.communication_helpers as ch
 
 # buffer
-buf = ch.beam_2_buffer(tobebuffered)
+buf = ch.beam_2_buffer(tobebuffered, mode='bla')
 
 # unbuffer
-beamfrombuf = ch.buffer_2_beam(buf)
+beamfrombuf = ch.buffer_2_beam(buf, mode='pickle')
 
-# check
-attr_list = dir(tobebuffered)
-for att in attr_list:
+# # check
+# attr_list = dir(tobebuffered)
+# for att in attr_list:
 
-	v1 = getattr(tobebuffered, att)
-	v2 = getattr(beamfrombuf, att)
+# 	v1 = getattr(tobebuffered, att)
+# 	v2 = getattr(beamfrombuf, att)
 
-	if type(v1) is np.ndarray:
-		print att, '1', v1[0:3], '...', v1[-3:]
-		print att, '2', v2[0:3], '...', v2[-3:]
-	else:
-		print att, '1', v1
-		print att, '2', v2
+# 	if type(v1) is np.ndarray:
+# 		print att, '1', v1[0:3], '...', v1[-3:]
+# 		print att, '2', v2[0:3], '...', v2[-3:]
+# 	else:
+# 		print att, '1', v1
+# 		print att, '2', v2
