@@ -73,13 +73,18 @@ list_bunches = list_bunches[::-1] # I want the head at the beginning of the list
 for bb in list_bunches:
 	slice4EC = bb.intensity>min_inten_slice4EC
 	bb.slice_info['slice4EC'] = slice4EC
+	bb.slice_info['kickEC'] = slice4EC
 
-
-# Slice a populated bunch
+# Slice bunch if populated
 this_bunch = list_bunches[3]
-bunch_center = this_bunch.slice_info['z_bin_center']
-this_slicer = UniformBinSlicer(z_cuts=(bunch_center-z_cut, bunch_center+z_cut), n_slices=n_slices)
-
+if this_bunch.slice_info['slice4EC']:
+	bunch_center = this_bunch.slice_info['z_bin_center']
+	this_slicer = UniformBinSlicer(z_cuts=(bunch_center-z_cut, bunch_center+z_cut), n_slices=n_slices)
+	this_slices = this_bunch.extract_slices(this_slicer, include_non_sliced='always')[::-1]
+	#split_unsliced...
+else:
+	pass
+	#simple list with one long slice
 
 thin_slicer = UniformBinSlicer(n_slices=1000, z_cuts=(-len(filling_pattern)*bucket_length_m*b_spac_buckets, bucket_length_m))
 thin_slice_set = beam.get_slices(thin_slicer, statistics=True)
