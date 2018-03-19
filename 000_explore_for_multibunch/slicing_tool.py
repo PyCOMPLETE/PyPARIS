@@ -1,13 +1,13 @@
 from PyHEADTAIL.particles.particles import Particles
 from PyHEADTAIL.particles.slicing import UniformBinSlicer
 
+import numpy as np
 
-def slice_a_bunch(this_bunch, z_cut):
+
+def slice_a_bunch(this_bunch, z_cut, n_slices):
 
     # Slice bunch if populated
-    this_bunch = list_bunches[3]
     if this_bunch.slice_info['slice_4_EC']:
-        print("To be sliced")
         bunch_center = this_bunch.slice_info['z_bin_center']
         this_slicer = UniformBinSlicer(z_cuts=(bunch_center-z_cut, bunch_center+z_cut), n_slices=n_slices)
         this_slices = this_bunch.extract_slices(this_slicer, include_non_sliced='always')
