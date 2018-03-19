@@ -67,4 +67,7 @@ def slice_a_bunch(this_bunch, z_cut, n_slices):
     else:
         list_slices_this_bunch = [this_bunch]
         
+    for ss in list_slices_this_bunch:
+        ss.slice_info['info_parent_bunch'] = {kk: this_bunch.slice_info[kk] for kk in this_bunch.slice_info.keys()}
+        
     return list_slices_this_bunch

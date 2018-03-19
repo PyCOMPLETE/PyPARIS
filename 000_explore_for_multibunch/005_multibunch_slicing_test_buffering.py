@@ -76,11 +76,17 @@ for bb in list_bunches:
     bb.slice_info['interact_with_EC'] = slice4EC
 
 import slicing_tool as st
+import PyPARIS.communication_helpers as ch
 
-list_sliced_bunches = []
+# Turn slices into buffer
+list_buffers = []
 for bb in list_bunches:
-    list_sliced_bunches.append(st.slice_a_bunch(bb, z_cut=z_cut, n_slices=n_slices))
+    these_slices = st.slice_a_bunch(bb, z_cut=z_cut, n_slices=n_slices)
+    for ss in these_slices:
+        list_buffers.append(ch.beam_2_buffer(ss,verbose=True, mode='pickle'))
+big_buffer = ch.combine_float_buffers(list_buffers)
 
+# Build profile of the full beam
 thin_slicer = UniformBinSlicer(n_slices=10000, z_cuts=(-len(filling_pattern)*bucket_length_m*b_spac_buckets, bucket_length_m))
 thin_slice_set = beam.get_slices(thin_slicer, statistics=True)
 
@@ -97,16 +103,19 @@ for ibb, bb in enumerate(list_bunches):
         color={0:'r', 1:'b'}[ibb%2], alpha = 0.3)
 sp1.grid('on')
 
+# re-split buffer
+list_buffers_rec = ch.split_float_buffers(big_buffer)
+
 #~ import json
 sp2 = plt.subplot(3,1,2, sharex=sp1)
 sp3 = plt.subplot(3,1,3, sharex=sp1)
 sp2.plot(thin_slice_set.z_centers, thin_slice_set.charge_per_slice)
-for ibb, bb in enumerate(list_sliced_bunches):
-    for iss, ss in enumerate(bb):
-        #~ print(json.dumps(ss.slice_info, sort_keys=True))
+
+for ibuf, buf in enumerate(list_buffers_rec):
+        ss = ch.buffer_2_beam(buf)
         sp2.axvline(x=ss.slice_info['z_bin_center'], color='k', alpha=0.5, linestyle='--')
         sp2.axvspan(xmin=ss.slice_info['z_bin_left'], xmax=ss.slice_info['z_bin_right'],
-            color={0:'r', 1:'b'}[iss%2], alpha = 0.3)
+            color={0:'r', 1:'b'}[ibuf%2], alpha = 0.3)
         sp3.stem([ss.slice_info['z_bin_center']], [ss.slice_info['interact_with_EC']])
 sp2.grid('on')
 
