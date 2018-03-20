@@ -15,6 +15,9 @@ class RingOfCPUs_multiturn(object):
                     N_buffer_float_size = 1000000, N_buffer_int_size = 100,
                     verbose = False):
         
+        if N_pieces_per_transfer>1:
+            raise ValueError("Not implemented!")
+
         self.sim_content = sim_content
         self.N_turns = sim_content.N_turns
         
@@ -104,17 +107,36 @@ class RingOfCPUs_multiturn(object):
         
         self.comm.Barrier() # only for stdoutp
         
+        self.left = int(np.mod(self.myid-1, self.N_nodes))
+        self.right = int(np.mod(self.myid+1, self.N_nodes))
+
         if self.I_am_at_start_ring:
             from collections import deque
             self.bunches_to_be_treated = deque([])
+
+            self.slices_to_be_treated = []
+
+        if self.I_am_at_end_ring:
+            self.slices_treated = []
         
         if self.I_am_the_master:
             list_bunches = sim_content.init_master()
             self.bunches_to_be_treated.extend(list_bunches)
             
-            while True:
-                try:
-                    bb = self.bunches_to_be_treated.pop()
-                    print bb.slice_info['i_bunch'], np.mean(bb.z)
-                except IndexError:
-                    break
+        self.comm.Barrier()
+
+    def run(self):
+        
+        # if self.I_am_at_start_ring:
+
+
+        #sendbuf = ch.combine_float_buffers(list_of_buffers_to_send)
+        sendbuf = np.array([float(self.myid)])
+        if len(sendbuf) > self.N_buffer_float_size:
+            raise ValueError('Float buffer is too small!')
+        self.comm.Sendrecv(sendbuf, dest=self.right, sendtag=self.right, 
+                    recvbuf=self.buf_float, source=self.left, recvtag=self.myid)
+        
+        print('I am %d and I received from %d'%(self.myid, int(self.buf_float[0])))
+        #list_received_pieces = map(self.sim_content.buffer_to_piece, ch.split_float_buffers(self.buf_float))
+

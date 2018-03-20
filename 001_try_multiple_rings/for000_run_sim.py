@@ -8,4 +8,4 @@ import Simulation
 
 simulation_content = Simulation.Simulation()
 myCPUring = RingOfCPUs_multiturn(simulation_content, verbose=True)
-#~ myCPUring.run()
+myCPUring.run()

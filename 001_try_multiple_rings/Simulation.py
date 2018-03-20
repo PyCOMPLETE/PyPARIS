@@ -56,28 +56,8 @@ class Simulation(object):
 
         return list_bunches
 
-    def init_worker(self):
+    def slice_bunch_at_start_ring(self, bunch):
         pass
-
-    def treat_piece(self, piece):
-        for ele in self.mypart: 
-                ele.track(piece)
-
-    def finalize_turn_on_master(self, pieces_treated):
-    
-
-        return orders_to_pass, new_pieces_to_be_treated
-
-
-    def execute_orders_from_master(self, orders_from_master):
-        pass
-
-
-
-        
-    def finalize_simulation(self):
-        pass
-        
 
     def piece_to_buffer(self, piece):
         buf = ch.beam_2_buffer(piece)
@@ -86,6 +66,7 @@ class Simulation(object):
     def buffer_to_piece(self, buf):
         piece = ch.buffer_2_beam(buf)
         return piece
+
 
 
 
