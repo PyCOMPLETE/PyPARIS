@@ -80,9 +80,7 @@ class RingOfCPUs_multiturn(object):
                         {True:'end_ring', False:''}[self.I_am_at_end_ring]))
 
         # allocate buffers for communication
-
         self.buf_float = np.zeros(self.N_buffer_float_size, dtype=np.float64)
-
         self.buf_int = np.array(self.N_buffer_int_size*[0])
 
         self.sim_content.init_all()
@@ -111,6 +109,8 @@ class RingOfCPUs_multiturn(object):
             self.bunches_to_be_treated = deque([])
         
         if self.I_am_the_master:
-            temp_list = sim_content.init_master()
-
+            list_bunches = sim_content.init_master()
+            self.bunches_to_be_treated.extend(list_bunches)
+            
+        
 
