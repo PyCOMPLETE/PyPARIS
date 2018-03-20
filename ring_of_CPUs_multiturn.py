@@ -112,5 +112,9 @@ class RingOfCPUs_multiturn(object):
             list_bunches = sim_content.init_master()
             self.bunches_to_be_treated.extend(list_bunches)
             
-        
-
+            while True:
+                try:
+                    bb = self.bunches_to_be_treated.pop()
+                    print bb.slice_info['i_bunch'], np.mean(bb.z)
+                except IndexError:
+                    break
