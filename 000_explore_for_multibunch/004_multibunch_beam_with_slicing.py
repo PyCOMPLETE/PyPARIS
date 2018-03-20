@@ -70,10 +70,15 @@ list_bunches = beam.extract_slices(buncher, include_non_sliced='never')
 # The head is at the end of the list
 
 # Add further information to bunches
-for bb in list_bunches:
+for i_bb, bb in enumerate(list_bunches):
     slice4EC = bb.intensity>min_inten_slice4EC
     bb.slice_info['slice_4_EC'] = slice4EC
     bb.slice_info['interact_with_EC'] = slice4EC
+    bb.slice_info['N_bunches_tot_beam'] = len(list_bunches)
+    bb.slice_info['i_bunch'] = i_bb
+
+# Done with creation of bunches
+# Now we slice them
 
 import slicing_tool as st
 
