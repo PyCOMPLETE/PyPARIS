@@ -55,10 +55,15 @@ import PyPARIS.communication_helpers as ch
 
 # Turn slices into buffer
 list_buffers = []
+list_bunch_buffers = []
 for bb in list_bunches:
     these_slices = st.slice_a_bunch(bb, z_cut=z_cut, n_slices=n_slices)
+    list_bunch_buffers.append([])
     for ss in these_slices:
-        list_buffers.append(ch.beam_2_buffer(ss,verbose=True, mode='pickle'))
+        thisbuffer = ch.beam_2_buffer(ss,verbose=True, mode='pickle')
+        list_buffers.append(thisbuffer)
+        list_bunch_buffers[-1].append(thisbuffer)
+
 big_buffer = ch.combine_float_buffers(list_buffers)
 
 # Build profile of the full beam
@@ -87,7 +92,22 @@ for ibuf, buf in enumerate(list_buffers_rec):
         sp2.stem([ss.slice_info['z_bin_center']], [ss.slice_info['interact_with_EC']])
 sp2.grid('on')
 
-
+# check bunch merge
+list_bunches_rec = []
+for ibun, lbun in enumerate(list_bunch_buffers):
+    list_sl_buffers = map(ch.buffer_2_beam, lbun)
+    list_bunches_rec.append(st.merge_slices_into_bunch(list_sl_buffers))
+    
+plt.figure(2)
+spb1 = plt.subplot(2,1,1, sharex=sp1)
+spb1.plot(thin_slice_set.z_centers, thin_slice_set.charge_per_slice)
+spb2 = plt.subplot(2,1,2, sharex=sp1)
+for ibun, bun in enumerate(list_bunches_rec):
+        spb1.axvline(x=bun.slice_info['z_bin_center'], color='k', alpha=0.5, linestyle='--')
+        spb1.axvspan(xmin=bun.slice_info['z_bin_left'], xmax=bun.slice_info['z_bin_right'],
+            color={0:'r', 1:'b'}[ibun%2], alpha = 0.3)
+        spb2.stem([bun.slice_info['z_bin_center']], [bun.slice_info['interact_with_EC']])
+sp2.grid('on')
 
 plt.show()
 
