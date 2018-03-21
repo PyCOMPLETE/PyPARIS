@@ -113,7 +113,6 @@ class RingOfCPUs_multiturn(object):
 
         if self.I_am_at_start_ring:
             self.bunches_to_be_treated = deque([])
-
             self.slices_to_be_treated = []
 
         if self.I_am_at_end_ring:
@@ -134,6 +133,12 @@ class RingOfCPUs_multiturn(object):
             
             if self.I_am_at_start_ring:
                 
+                # If a bunch is received put in the queue
+                buffer_received = list_received_buffers[0]
+                bunch_received = self.sim_content.buffer_to_piece(buffer_received)
+                if bunch_received is not None:
+                    self.bunches_to_be_treated.appendleft(bunch_received)
+
                 # Pop a slice
                 if len(self.slices_to_be_treated)==0 and len(self.bunches_to_be_treated)>0:
                     next_bunch = self.bunches_to_be_treated.pop()
