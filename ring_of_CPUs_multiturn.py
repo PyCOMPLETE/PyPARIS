@@ -161,15 +161,15 @@ class RingOfCPUs_multiturn(object):
                     self.sim_content.treat_piece(thisslice)
                 
                 # Put the slice in slices_treated
+                bunch_to_be_sent = None
                 if thisslice is not None:
                    self.slices_treated.appendleft(thisslice) 
-                   
                    if len(self.slices_treated) == self.slices_treated[0].slice_info['N_slices_tot_bunch']:
-                       print 'Time to merge!'
+                       bunch_to_be_sent = self.sim_content.merge_slices_and_perform_bunch_operations_at_end_ring(self.slices_treated)
                    
                 
                 # (TEMPORARY!) For now we send None not to break the circle
-                buf = self.sim_content.piece_to_buffer(None)
+                buf = self.sim_content.piece_to_buffer(bunch_to_be_sent)
             
             else:  #Standard node                 
                 # Buffer to slice
@@ -187,7 +187,7 @@ class RingOfCPUs_multiturn(object):
             list_of_buffers_to_send = [buf]
             sendbuf = ch.combine_float_buffers(list_of_buffers_to_send)
             if len(sendbuf) > self.N_buffer_float_size:
-                raise ValueError('Float buffer is too small!')
+                raise ValueError('Float buffer (%d) is too small!\n %d required.'%(self.N_buffer_float_size, len(sendbuf)))
             self.comm.Sendrecv(sendbuf, dest=self.right, sendtag=self.right, 
                         recvbuf=self.buf_float, source=self.left, recvtag=self.myid)
             list_received_buffers = ch.split_float_buffers(self.buf_float)

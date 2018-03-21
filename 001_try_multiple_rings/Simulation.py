@@ -16,7 +16,7 @@ sigma_z_bunch = 10e-2
 class Simulation(object):
     def __init__(self):
         self.N_turns = 128
-        self.N_buffer_float_size = 500000
+        self.N_buffer_float_size = 1000000
         self.N_buffer_int_size = 450
         self.N_parellel_rings = 3
         
@@ -65,7 +65,7 @@ class Simulation(object):
         return list_slices
         
     def merge_slices_and_perform_bunch_operations_at_end_ring(self, list_slices):
-        bunch = st.merge_slices_into_bunch(list_sl)
+        bunch = sl.merge_slices_into_bunch(list_slices)
         # here perform synchrotron motion
         return bunch
 
