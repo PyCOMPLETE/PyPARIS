@@ -95,8 +95,8 @@ sp2.grid('on')
 # check bunch merge
 list_bunches_rec = []
 for ibun, lbun in enumerate(list_bunch_buffers):
-    list_sl_buffers = map(ch.buffer_2_beam, lbun)
-    list_bunches_rec.append(st.merge_slices_into_bunch(list_sl_buffers))
+    list_sl = map(ch.buffer_2_beam, lbun)
+    list_bunches_rec.append(st.merge_slices_into_bunch(list_sl))
     
 plt.figure(2)
 spb1 = plt.subplot(2,1,1, sharex=sp1)
