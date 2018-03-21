@@ -71,3 +71,12 @@ def slice_a_bunch(this_bunch, z_cut, n_slices):
         ss.slice_info['info_parent_bunch'] = {kk: this_bunch.slice_info[kk] for kk in this_bunch.slice_info.keys()}
         
     return list_slices_this_bunch
+
+
+#~ def merge_slices_into_bunch(list_slices_this_bunch):
+    #~ bunch = sum(list_slices_this_bunch)
+    #~ bunch.slice_info = list_slices_this_bunch[0]['info_parent_bunch']
+    #~ return bunch
+    
+    
+    
