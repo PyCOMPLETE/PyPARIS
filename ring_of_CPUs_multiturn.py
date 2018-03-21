@@ -152,7 +152,8 @@ class RingOfCPUs_multiturn(object):
                 # Treat the slice
                 if thisslice is not None:
                     self.sim_content.treat_piece(thisslice)
-                    
+                self._print_some_info_on_comm(thisslice, iteration)
+                   
                 # Slice to buffer
                 buf = self.sim_content.piece_to_buffer(thisslice)
             
@@ -164,7 +165,8 @@ class RingOfCPUs_multiturn(object):
                 # Treat the slice
                 if thisslice is not None:
                     self.sim_content.treat_piece(thisslice)
-                
+                self._print_some_info_on_comm(thisslice, iteration)
+
                 # Put the slice in slices_treated
                 bunch_to_be_sent = None
                 if thisslice is not None:
@@ -172,7 +174,6 @@ class RingOfCPUs_multiturn(object):
                    if len(self.slices_treated) == self.slices_treated[0].slice_info['N_slices_tot_bunch']:
                        bunch_to_be_sent = self.sim_content.merge_slices_and_perform_bunch_operations_at_end_ring(self.slices_treated)
                    
-                
                 # (TEMPORARY!) For now we send None not to break the circle
                 buf = self.sim_content.piece_to_buffer(bunch_to_be_sent)
             
@@ -184,10 +185,11 @@ class RingOfCPUs_multiturn(object):
                 # Treat the slice
                 if thisslice is not None:
                     self.sim_content.treat_piece(thisslice)
+                self._print_some_info_on_comm(thisslice, iteration)
 
                 # Slice to buffer
                 buf = self.sim_content.piece_to_buffer(thisslice)
-            
+        
                 
             list_of_buffers_to_send = [buf]
             sendbuf = ch.combine_float_buffers(list_of_buffers_to_send)
@@ -197,7 +199,7 @@ class RingOfCPUs_multiturn(object):
                         recvbuf=self.buf_float, source=self.left, recvtag=self.myid)
             list_received_buffers = ch.split_float_buffers(self.buf_float)
             
-            print('Iter%d - I am %d and I received %d'%(iteration, self.myid, int(list_received_buffers[0][0])))
+            # print('Iter%d - I am %d and I received %d'%(iteration, self.myid, int(list_received_buffers[0][0])))
             
             
             iteration+=1
@@ -210,6 +212,11 @@ class RingOfCPUs_multiturn(object):
                 break
             # (TEMPORARY!)
             
-        
-        
+    def _print_some_info_on_comm(self, thisslice, iteration):
+        if thisslice is not None:
+            print('Iter%d - I am %d and I treated slice %d of bunch %d'%(iteration, 
+                                            self.myid, thisslice.slice_info['i_slice'], 
+                                            thisslice.slice_info['info_parent_bunch']['i_bunch']))
+        else:
+            print('Iter%d - I am %d and I treated None'%(iteration, self.myid))      
 

@@ -45,7 +45,8 @@ class Simulation(object):
         sigma_z = sigma_z_bunch
 
         #Filling pattern: here head is left and tail is right
-        filling_pattern = [1., 0., 0., 1., 1., 1., 0.]
+        # filling_pattern = [1., 0., 0., 1., 1., 1., 0.]
+        filling_pattern = 10*[1]
         macroparticlenumber = 100000
         min_inten_slice4EC = 1e7
         
