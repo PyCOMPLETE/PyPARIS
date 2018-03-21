@@ -80,8 +80,9 @@ plt.figure(1)
 list_buffers_rec = ch.split_float_buffers(big_buffer)
 
 #~ import json
-sp1 = plt.subplot(2,1,1)
-sp2 = plt.subplot(2,1,2, sharex=sp1)
+sp1 = plt.subplot(3,1,1)
+sp2 = plt.subplot(3,1,2, sharex=sp1)
+sp3 = plt.subplot(3,1,3, sharex=sp1)
 sp1.plot(thin_slice_set.z_centers, thin_slice_set.charge_per_slice)
 
 for ibuf, buf in enumerate(list_buffers_rec):
@@ -90,6 +91,7 @@ for ibuf, buf in enumerate(list_buffers_rec):
         sp1.axvspan(xmin=ss.slice_info['z_bin_left'], xmax=ss.slice_info['z_bin_right'],
             color={0:'r', 1:'b'}[ibuf%2], alpha = 0.3)
         sp2.stem([ss.slice_info['z_bin_center']], [ss.slice_info['interact_with_EC']])
+        sp3.stem([ss.slice_info['z_bin_center']], [ss.slice_info['i_slice']])
 sp2.grid('on')
 
 # check bunch merge
@@ -99,15 +101,19 @@ for ibun, lbun in enumerate(list_bunch_buffers):
     list_bunches_rec.append(st.merge_slices_into_bunch(list_sl))
     
 plt.figure(2)
-spb1 = plt.subplot(2,1,1, sharex=sp1)
+spb1 = plt.subplot(3,1,1, sharex=sp1)
 spb1.plot(thin_slice_set.z_centers, thin_slice_set.charge_per_slice)
-spb2 = plt.subplot(2,1,2, sharex=sp1)
+spb2 = plt.subplot(3,1,2, sharex=sp1)
+spb3 = plt.subplot(3,1,3, sharex=sp1)
 for ibun, bun in enumerate(list_bunches_rec):
         spb1.axvline(x=bun.slice_info['z_bin_center'], color='k', alpha=0.5, linestyle='--')
         spb1.axvspan(xmin=bun.slice_info['z_bin_left'], xmax=bun.slice_info['z_bin_right'],
             color={0:'r', 1:'b'}[ibun%2], alpha = 0.3)
         spb2.stem([bun.slice_info['z_bin_center']], [bun.slice_info['interact_with_EC']])
-sp2.grid('on')
+        spb3.stem([bun.slice_info['z_bin_center']], [bun.slice_info['i_bunch']])
+spb2.grid('on')
+
+
 
 plt.show()
 

@@ -37,7 +37,7 @@ def gen_matched_multibunch_beam(machine, n_macroparticles_per_bunch, filling_pat
     # The head is at the end of the list
 
     # Add further information to bunches
-    for i_bb, bb in enumerate(list_bunches):
+    for i_bb, bb in enumerate(list_bunches[::-1]): # I want bunch 0 at the head pf the train
         slice4EC = bb.intensity>min_inten_slice4EC
         bb.slice_info['slice_4_EC'] = slice4EC
         bb.slice_info['interact_with_EC'] = slice4EC
