@@ -33,7 +33,7 @@ b_spac_s = 25e-9
 
 #Here head is left and tail is right
 filling_pattern = [1., 0., 0., 1., 1., 1., 0.]
-
+filling_pattern = 6*[1]
 
 macroparticlenumber = 100000
 

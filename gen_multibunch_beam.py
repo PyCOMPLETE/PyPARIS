@@ -3,7 +3,8 @@ import numpy as np
 
 from PyHEADTAIL.particles.slicing import UniformBinSlicer
 
-def gen_matched_multibunch_beam(machine, n_macroparticles_per_bunch, filling_pattern, b_spac_s, bunch_intensity, epsn_x, epsn_y, sigma_z, non_linear_long_matching, min_inten_slice4EC):
+def gen_matched_multibunch_beam(machine, n_macroparticles_per_bunch, filling_pattern, 
+        b_spac_s, bunch_intensity, epsn_x, epsn_y, sigma_z, non_linear_long_matching, min_inten_slice4EC):
 
     bucket_length_m = machine.circumference/(machine.longitudinal_map.harmonics[0])
     b_spac_m =  b_spac_s*machine.beta*clight
@@ -34,14 +35,21 @@ def gen_matched_multibunch_beam(machine, n_macroparticles_per_bunch, filling_pat
                                             bucket.z_sfp+bucket_length_m, bucket_length_m*b_spac_buckets))
     buncher_slice_set = beam.get_slices(buncher, statistics=True)
     list_bunches = beam.extract_slices(buncher, include_non_sliced='never')
-    # The head is at the end of the list
-
+    # The bunch at position 0 is the tail
+    
+    # If last bunch is empty remove it
+    if (list_bunches[0].intensity<min_inten_slice4EC):
+        list_bunches = list_bunches[1:]
+    
     # Add further information to bunches
-    for i_bb, bb in enumerate(list_bunches[::-1]): # I want bunch 0 at the head pf the train
+    for i_bb, bb in enumerate(list_bunches[::-1]): # I want bunch 0 at the head of the train
         slice4EC = bb.intensity>min_inten_slice4EC
         bb.slice_info['slice_4_EC'] = slice4EC
         bb.slice_info['interact_with_EC'] = slice4EC
         bb.slice_info['N_bunches_tot_beam'] = len(list_bunches)
         bb.slice_info['i_bunch'] = i_bb
         
+
+       
+    
     return list_bunches
