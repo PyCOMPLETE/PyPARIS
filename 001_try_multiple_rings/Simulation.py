@@ -20,7 +20,7 @@ class Simulation(object):
         self.N_buffer_int_size = 450
         self.N_parellel_rings = 3
         
-        self.n_slices_per_bunch = 10
+        self.n_slices_per_bunch = 3
         self.z_cut_slicing = sigma_z_bunch
 
     def init_all(self):
@@ -46,7 +46,7 @@ class Simulation(object):
 
         #Filling pattern: here head is left and tail is right
         # filling_pattern = [1., 0., 0., 1., 1., 1., 0.]
-        filling_pattern = 10*[1]
+        filling_pattern = 2*[1]
         macroparticlenumber = 100000
         min_inten_slice4EC = 1e7
         

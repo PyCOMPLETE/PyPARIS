@@ -8,6 +8,8 @@ def print2logandstdo(message, mode='a+'):
     print message
     with open(logfilename, mode) as fid:
         fid.writelines([message+'\n'])
+        
+verbose = True
 
 
 class RingOfCPUs_multiturn(object):
@@ -152,7 +154,7 @@ class RingOfCPUs_multiturn(object):
                 # Treat the slice
                 if thisslice is not None:
                     self.sim_content.treat_piece(thisslice)
-                self._print_some_info_on_comm(thisslice, iteration)
+                self._print_some_info_on_comm(thisslice, iteration, verbose)
                    
                 # Slice to buffer
                 buf = self.sim_content.piece_to_buffer(thisslice)
@@ -165,16 +167,20 @@ class RingOfCPUs_multiturn(object):
                 # Treat the slice
                 if thisslice is not None:
                     self.sim_content.treat_piece(thisslice)
-                self._print_some_info_on_comm(thisslice, iteration)
+                self._print_some_info_on_comm(thisslice, iteration, verbose)
 
                 # Put the slice in slices_treated
                 bunch_to_be_sent = None
                 if thisslice is not None:
                    self.slices_treated.appendleft(thisslice) 
                    if len(self.slices_treated) == self.slices_treated[0].slice_info['N_slices_tot_bunch']:
-                       bunch_to_be_sent = self.sim_content.merge_slices_and_perform_bunch_operations_at_end_ring(self.slices_treated)
+                        bunch_to_be_sent = self.sim_content.merge_slices_and_perform_bunch_operations_at_end_ring(self.slices_treated)
+                        self.slices_treated = deque([])
+                    
+                #~ if self.myring == 0:
+                    #~ print('Iter%03d - I am %d.%d len()'%(iteration, 
+                                                #~ self.myring, self.myid_in_ring)
                    
-                # (TEMPORARY!) For now we send None not to break the circle
                 buf = self.sim_content.piece_to_buffer(bunch_to_be_sent)
             
             else:  #Standard node                 
@@ -185,7 +191,7 @@ class RingOfCPUs_multiturn(object):
                 # Treat the slice
                 if thisslice is not None:
                     self.sim_content.treat_piece(thisslice)
-                self._print_some_info_on_comm(thisslice, iteration)
+                self._print_some_info_on_comm(thisslice, iteration, verbose)
 
                 # Slice to buffer
                 buf = self.sim_content.piece_to_buffer(thisslice)
@@ -203,20 +209,21 @@ class RingOfCPUs_multiturn(object):
             
             
             iteration+=1
-            
-            
-            
+
             # (TEMPORARY!) To stop
             self.comm.Barrier()
             if iteration==60:
                 break
             # (TEMPORARY!)
             
-    def _print_some_info_on_comm(self, thisslice, iteration):
-        if thisslice is not None:
-            print('Iter%d - I am %d and I treated slice %d of bunch %d'%(iteration, 
-                                            self.myid, thisslice.slice_info['i_slice'], 
-                                            thisslice.slice_info['info_parent_bunch']['i_bunch']))
-        else:
-            print('Iter%d - I am %d and I treated None'%(iteration, self.myid))      
+    def _print_some_info_on_comm(self, thisslice, iteration, verbose):
+        if verbose:
+            if thisslice is not None:
+                print('Iter%03d - I am %d.%d and I treated slice %d/%d of bunch %d/%d'%(iteration, 
+                                                self.myring, self.myid_in_ring,
+                                                thisslice.slice_info['i_slice'], thisslice.slice_info['N_slices_tot_bunch'], 
+                                                thisslice.slice_info['info_parent_bunch']['i_bunch'], 
+                                                thisslice.slice_info['info_parent_bunch']['N_bunches_tot_beam']))
+            else:
+                print('Iter%03d - I am %d.%d and I treated None'%(iteration, self.myring, self.myid_in_ring))      
 
