@@ -9,7 +9,7 @@ def print2logandstdo(message, mode='a+'):
     with open(logfilename, mode) as fid:
         fid.writelines([message+'\n'])
         
-verbose = True
+verbose = False
 
 
 class RingOfCPUs_multiturn(object):
@@ -141,11 +141,16 @@ class RingOfCPUs_multiturn(object):
                 if bunch_received is not None:
                     self.bunches_to_be_treated.appendleft(bunch_received)
 
-                # Pop a slice
+                # If slices_to_be_treated is empty pop a bunch
                 if len(self.slices_to_be_treated)==0 and len(self.bunches_to_be_treated)>0:
                     next_bunch = self.bunches_to_be_treated.pop()
                     self.slices_to_be_treated = self.sim_content.slice_bunch_at_start_ring(next_bunch)
                     
+                    if self.myring==0 and self.myid_in_ring == 0:
+                        print'Iter%03d - I am %d.%d startin bunch %d/%d '%(iteration, self.myring, self.myid_in_ring,
+                                        next_bunch.slice_info['i_bunch'], next_bunch.slice_info['N_bunches_tot_beam'])
+                
+                # Pop a slice    
                 if len(self.slices_to_be_treated)>0:
                     thisslice = self.slices_to_be_treated.pop()
                 else:
@@ -176,10 +181,7 @@ class RingOfCPUs_multiturn(object):
                    if len(self.slices_treated) == self.slices_treated[0].slice_info['N_slices_tot_bunch']:
                         bunch_to_be_sent = self.sim_content.merge_slices_and_perform_bunch_operations_at_end_ring(self.slices_treated)
                         self.slices_treated = deque([])
-                    
-                #~ if self.myring == 0:
-                    #~ print('Iter%03d - I am %d.%d len()'%(iteration, 
-                                                #~ self.myring, self.myid_in_ring)
+
                    
                 buf = self.sim_content.piece_to_buffer(bunch_to_be_sent)
             
@@ -212,7 +214,7 @@ class RingOfCPUs_multiturn(object):
 
             # (TEMPORARY!) To stop
             self.comm.Barrier()
-            if iteration==60:
+            if iteration==100:
                 break
             # (TEMPORARY!)
             
