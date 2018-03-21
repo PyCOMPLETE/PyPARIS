@@ -133,6 +133,8 @@ class RingOfCPUs_multiturn(object):
         while True:
             
             if self.I_am_at_start_ring:
+                
+                # Pop a slice
                 if len(self.slices_to_be_treated)==0 and len(self.bunches_to_be_treated)>0:
                     next_bunch = self.bunches_to_be_treated.pop()
                     self.slices_to_be_treated = self.sim_content.slice_bunch_at_start_ring(next_bunch)
@@ -141,31 +143,47 @@ class RingOfCPUs_multiturn(object):
                     thisslice = self.slices_to_be_treated.pop()
                 else:
                     thisslice = None
-            else:
-                buf = list_received_buffers[0]
-                thisslice = self.sim_content.buffer_to_piece(buf)
                     
-            
-            
-            
-            # Treat the slice
-            if thisslice is not None:
-                self.sim_content.treat_piece(thisslice)
+                # Treat the slice
+                if thisslice is not None:
+                    self.sim_content.treat_piece(thisslice)
                     
+                # Slice to buffer
+                buf = self.sim_content.piece_to_buffer(thisslice)
             
-            
-            if self.I_am_at_end_ring:
+            elif self.I_am_at_end_ring:
+                # Buffer to slice
+                recbuf = list_received_buffers[0]
+                thisslice = self.sim_content.buffer_to_piece(recbuf)
+                
+                # Treat the slice
+                if thisslice is not None:
+                    self.sim_content.treat_piece(thisslice)
+                
+                # Put the slice in slices_treated
                 if thisslice is not None:
                    self.slices_treated.appendleft(thisslice) 
+                   
+                   if len(self.slices_treated) == self.slices_treated[0].slice_info['N_slices_tot_bunch']:
+                       print 'Time to merge!'
+                   
                 
                 # (TEMPORARY!) For now we send None not to break the circle
                 buf = self.sim_content.piece_to_buffer(None)
-            else:                   
-                #Buffer the slice
+            
+            else:  #Standard node                 
+                # Buffer to slice
+                recbuf = list_received_buffers[0]
+                thisslice = self.sim_content.buffer_to_piece(recbuf)
+                
+                # Treat the slice
+                if thisslice is not None:
+                    self.sim_content.treat_piece(thisslice)
+
+                # Slice to buffer
                 buf = self.sim_content.piece_to_buffer(thisslice)
             
-
-            
+                
             list_of_buffers_to_send = [buf]
             sendbuf = ch.combine_float_buffers(list_of_buffers_to_send)
             if len(sendbuf) > self.N_buffer_float_size:
@@ -183,7 +201,7 @@ class RingOfCPUs_multiturn(object):
             
             # (TEMPORARY!) To stop
             self.comm.Barrier()
-            if iteration==10:
+            if iteration==60:
                 break
             # (TEMPORARY!)
             
