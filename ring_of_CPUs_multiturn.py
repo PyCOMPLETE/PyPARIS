@@ -215,15 +215,17 @@ class RingOfCPUs_multiturn(object):
 
             # Handle orders (for now only to stop simulations)
             if self.I_am_the_master:
+                print('I am %d master'%self.myid)
                 # send orders
                 buforders = ch.list_of_strings_2_buffer(orders_from_master)
                 if len(buforders) > self.N_buffer_int_size:
                     raise ValueError('Int buffer is too small!')
-                self.comm.Bcast(buforders, self.master_id)
+                #self.comm.Bcast(buforders, self.master_id)
             else:    
                 # receive orders from the master
-                self.comm.Bcast(self.buf_int, self.master_id)
+                #self.comm.Bcast(self.buf_int, self.master_id)
                 orders_from_master = ch.buffer_2_list_of_strings(self.buf_int)
+                print('I am %d worker'%self.myid)
 
             # check if simulation has to be ended
             if 'stop' in orders_from_master:
