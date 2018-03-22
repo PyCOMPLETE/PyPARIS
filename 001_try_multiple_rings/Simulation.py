@@ -15,7 +15,7 @@ sigma_z_bunch = 10e-2
 
 class Simulation(object):
     def __init__(self):
-        self.N_turns = 128
+        self.N_turns = 32
         self.N_buffer_float_size = 1000000
         self.N_buffer_int_size = 100
         self.N_parellel_rings = 3

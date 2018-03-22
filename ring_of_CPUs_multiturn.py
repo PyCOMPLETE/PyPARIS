@@ -149,6 +149,9 @@ class RingOfCPUs_multiturn(object):
                     next_bunch.slice_info['i_turn']+=1
                     self.slices_to_be_treated = self.sim_content.slice_bunch_at_start_ring(next_bunch)
                     
+                    if next_bunch.slice_info['i_turn'] > self.N_turns:
+                        orders_from_master.append('stop')
+                    
                     if self.myring==0 and self.myid_in_ring == 0:
                         print'Iter%03d - I am %d.%d startin bunch %d/%d turn=%d'%(iteration, self.myring, self.myid_in_ring,
                                         next_bunch.slice_info['i_bunch'], next_bunch.slice_info['N_bunches_tot_beam'], next_bunch.slice_info['i_turn'])
@@ -230,7 +233,7 @@ class RingOfCPUs_multiturn(object):
 
             # (TEMPORARY!) To stop
             self.comm.Barrier()
-            if iteration==100:
+            if iteration==10000:
                 break
             # (TEMPORARY!)
             
