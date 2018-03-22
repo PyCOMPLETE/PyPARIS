@@ -71,13 +71,13 @@ class RingOfCPUs_multiturn(object):
         
         # Handle multiturn parallelism
         if np.mod(self.N_nodes, self.N_parellel_rings) !=0:
-            raise ValueError('Number of note must be a multiple of number of rings!')
+            raise ValueError('Number of nodes must be a multiple of number of rings!')
             
         self.N_nodes_per_ring = int(float(self.N_nodes)/float(self.N_parellel_rings))
         self.myring = int(np.floor(float(self.myid)/float(self.N_nodes_per_ring)))
         self.myid_in_ring = int(np.mod(float(self.myid),float(self.N_nodes_per_ring)))
         self.I_am_at_start_ring = self.myid_in_ring == 0
-        self.I_am_at_end_ring = self.myid_in_ring == (self.N_parellel_rings-1)
+        self.I_am_at_end_ring = self.myid_in_ring == (self.N_nodes_per_ring-1)
         
         if verbose:
             print("I am %d, master=%s, myring=%d, myid_in_ring=%d (%s%s)"%(
