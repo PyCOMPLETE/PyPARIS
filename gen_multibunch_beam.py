@@ -48,6 +48,7 @@ def gen_matched_multibunch_beam(machine, n_macroparticles_per_bunch, filling_pat
         bb.slice_info['interact_with_EC'] = slice4EC
         bb.slice_info['N_bunches_tot_beam'] = len(list_bunches)
         bb.slice_info['i_bunch'] = i_bb
+	bb.slice_info['i_turn'] = 0
         
 
        
