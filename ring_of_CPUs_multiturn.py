@@ -132,6 +132,8 @@ class RingOfCPUs_multiturn(object):
         iteration = 0
         list_received_buffers = [self.sim_content.piece_to_buffer(None)]
         while True:
+
+            orders_from_master = []
             
             if self.I_am_at_start_ring:
                 
@@ -144,7 +146,7 @@ class RingOfCPUs_multiturn(object):
                 # If slices_to_be_treated is empty pop a bunch
                 if len(self.slices_to_be_treated)==0 and len(self.bunches_to_be_treated)>0:
                     next_bunch = self.bunches_to_be_treated.pop()
-		    next_bunch.slice_info['i_turn']+=1
+                    next_bunch.slice_info['i_turn']+=1
                     self.slices_to_be_treated = self.sim_content.slice_bunch_at_start_ring(next_bunch)
                     
                     if self.myring==0 and self.myid_in_ring == 0:
@@ -210,6 +212,24 @@ class RingOfCPUs_multiturn(object):
             
             # print('Iter%d - I am %d and I received %d'%(iteration, self.myid, int(list_received_buffers[0][0])))
             
+
+            # Handle orders (for now only to stop simulations)
+            if self.I_am_the_master:
+                # send orders
+                buforders = ch.list_of_strings_2_buffer(orders_from_master)
+                if len(buforders) > self.N_buffer_int_size:
+                    raise ValueError('Int buffer is too small!')
+                self.comm.Bcast(buforders, self.master_id)
+            else:    
+                # receive orders from the master
+                self.comm.Bcast(self.buf_int, self.master_id)
+                orders_from_master = ch.buffer_2_list_of_strings(self.buf_int)
+
+            # check if simulation has to be ended
+            if 'stop' in orders_from_master:
+                break
+
+
             
             iteration+=1
 
