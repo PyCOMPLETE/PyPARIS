@@ -209,30 +209,23 @@ class RingOfCPUs_multiturn(object):
             self.comm.Sendrecv(sendbuf, dest=self.right, sendtag=self.right, 
                         recvbuf=self.buf_float, source=self.left, recvtag=self.myid)
             list_received_buffers = ch.split_float_buffers(self.buf_float)
-            
-            # print('Iter%d - I am %d and I received %d'%(iteration, self.myid, int(list_received_buffers[0][0])))
-            
-
-            # Handle orders (for now only to stop simulations)
+    
+            # Handle orders (for now only to stopping the simulation)
             if self.I_am_the_master:
-                print('I am %d master'%self.myid)
                 # send orders
                 buforders = ch.list_of_strings_2_buffer(orders_from_master)
                 if len(buforders) > self.N_buffer_int_size:
                     raise ValueError('Int buffer is too small!')
-                #self.comm.Bcast(buforders, self.master_id)
+                self.comm.Bcast(buforders, self.master_id)
             else:    
                 # receive orders from the master
-                #self.comm.Bcast(self.buf_int, self.master_id)
+                self.comm.Bcast(self.buf_int, self.master_id)
                 orders_from_master = ch.buffer_2_list_of_strings(self.buf_int)
-                print('I am %d worker'%self.myid)
 
             # check if simulation has to be ended
             if 'stop' in orders_from_master:
                 break
 
-
-            
             iteration+=1
 
             # (TEMPORARY!) To stop

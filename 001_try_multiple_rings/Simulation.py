@@ -17,7 +17,7 @@ class Simulation(object):
     def __init__(self):
         self.N_turns = 128
         self.N_buffer_float_size = 1000000
-        self.N_buffer_int_size = 450
+        self.N_buffer_int_size = 100
         self.N_parellel_rings = 3
         
         self.n_slices_per_bunch = 10
