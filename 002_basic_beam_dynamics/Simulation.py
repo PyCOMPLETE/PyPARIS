@@ -11,6 +11,9 @@ from scipy.constants import c
 import share_segments as shs
 import slicing_tool as sl
 
+import PyPARIS.share_segments as shs
+
+
 sigma_z_bunch = 10e-2
 
 machine_configuration = 'HLLHC-injection'
@@ -60,7 +63,13 @@ class Simulation(object):
             self.machine.one_turn_map.append(damper)
             self.n_non_parallelizable +=1
 
+        # split the machine
+        i_end_parallel = len(self.machine.one_turn_map)-self.n_non_parallelizable
+        sharing = shs.ShareSegments(i_end_parallel, self.ring_of_CPUs.N_nodes_per_ring)
+        i_start_part, i_end_part = sharing.my_part(self.ring_of_CPUs.myid_in_ring)
+        self.mypart = self.machine.one_turn_map[i_start_part:i_end_part]
 
+        print self.mypart
 
         
     def init_master(self):
