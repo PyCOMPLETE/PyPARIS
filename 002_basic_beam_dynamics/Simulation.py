@@ -102,7 +102,8 @@ class Simulation(object):
         return list_bunches
         
     def treat_piece(self, piece):
-        pass
+        for ele in self.mypart: 
+                ele.track(piece)
 
     def slice_bunch_at_start_ring(self, bunch):
         list_slices = sl.slice_a_bunch(bunch, self.z_cut_slicing, self.n_slices_per_bunch)
