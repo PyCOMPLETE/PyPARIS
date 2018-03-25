@@ -20,8 +20,8 @@ machine_configuration = 'HLLHC-injection'
 n_segments = 2
 
 octupole_knob = 0.0
-Qp_x = 5
-Qp_y = 5
+Qp_x = 0.
+Qp_y = 0.
 
 flag_aperture = False # not tested
 
