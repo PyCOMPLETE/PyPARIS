@@ -238,8 +238,8 @@ class RingOfCPUs_multiturn(object):
 
             # (TEMPORARY!) To stop
             self.comm.Barrier()
-            if iteration==10000:
-                break
+            # if iteration==10000:
+            #     break
             # (TEMPORARY!)
             
     def _print_some_info_on_comm(self, thisslice, iteration, verbose):

@@ -4,10 +4,12 @@ sys.path.append(BIN)
 BIN = os.path.expanduser("../../")
 sys.path.append(BIN)
 
+import types
 
-import communication_helpers as ch
 import numpy as np
 from scipy.constants import c
+
+import communication_helpers as ch
 import share_segments as shs
 import slicing_tool as sl
 
@@ -28,6 +30,22 @@ flag_aperture = False # not tested
 enable_transverse_damper = True
 dampingrate_x = 50.
 dampingrate_y = 50.
+
+# Beam properties
+b_spac_s = 25e-9
+non_linear_long_matching = False
+
+bunch_intensity = 1e11
+epsn_x = 2.5e-6
+epsn_y = 3.5e-6
+sigma_z = sigma_z_bunch
+
+#Filling pattern: here head is left and tail is right
+# filling_pattern = [1., 0., 0., 1., 1., 1., 0.]
+filling_pattern = 5*[1.] +[0.]
+macroparticlenumber = 100000
+min_inten_slice4EC = 1e7
+
 
 class Simulation(object):
     def __init__(self):
@@ -79,21 +97,6 @@ class Simulation(object):
         from scipy.constants import c as clight, e as qe
         from PyHEADTAIL.particles.slicing import UniformBinSlicer
         
-        b_spac_s = 25e-9
-        non_linear_long_matching = False
-        
-        bunch_intensity = 1e11
-        epsn_x = 2.5e-6
-        epsn_y = 3.5e-6
-        sigma_z = sigma_z_bunch
-
-        #Filling pattern: here head is left and tail is right
-        # filling_pattern = [1., 0., 0., 1., 1., 1., 0.]
-        filling_pattern = 5*[1]
-        macroparticlenumber = 100000
-        min_inten_slice4EC = 1e7
-        
-        
         import gen_multibunch_beam as gmb
         list_bunches = gmb.gen_matched_multibunch_beam(self.machine, macroparticlenumber, filling_pattern, b_spac_s, 
                 bunch_intensity, epsn_x, epsn_y, sigma_z, non_linear_long_matching, min_inten_slice4EC)
@@ -102,34 +105,28 @@ class Simulation(object):
         return list_bunches
 
     def init_start_ring(self):
-        print 'Init start ring!'
         stats_to_store = [
-         'mean_x',
-         'mean_xp',
-         'mean_y',
-         'mean_yp',
-         'mean_z',
-         'mean_dp',
-         'sigma_x',
-         'sigma_y',
-         'sigma_z',
-         'sigma_dp',
-         'epsn_x',
-         'epsn_y',
-         'epsn_z',
-         'macroparticlenumber',
-         'i_bunch',
-         'i_turn']
+         'mean_x', 'mean_xp', 'mean_y', 'mean_yp', 'mean_z', 'mean_dp',
+         'sigma_x', 'sigma_y', 'sigma_z','sigma_dp', 'epsn_x', 'epsn_y',
+         'epsn_z', 'macroparticlenumber',
+         'i_bunch', 'i_turn']
+
+        n_stored_turns = len(filling_pattern)*(self.ring_of_CPUs.N_turns/self.ring_of_CPUs.N_parellel_rings + self.ring_of_CPUs.N_parellel_rings)
 
         from PyHEADTAIL.monitors.monitors import BunchMonitor
         self.bunch_monitor = BunchMonitor('bunch_monitor_ring%03d'%self.ring_of_CPUs.myring,
-                            self.ring_of_CPUs.N_turns+self.ring_of_CPUs.N_parellel_rings, 
+                            n_stored_turns, 
                             {'Comment':'PyHDTL simulation'}, 
                             write_buffer_every = 1,
                             stats_to_store = stats_to_store)
 
     def perform_bunch_operations_at_start_ring(self, bunch):
-        pass
+        # Attach bound methods to monitor i_bunch and i_turns 
+        # (In the future we might upgrade PyHEADTAIL to pass the lambda to the monitor)
+        if bunch.macroparticlenumber>0:
+            bunch.i_bunch = types.MethodType(lambda self: self.slice_info['i_bunch'], bunch)
+            bunch.i_turn = types.MethodType(lambda self: self.slice_info['i_turn'], bunch)
+            self.bunch_monitor.dump(bunch)        
 
     def slice_bunch_at_start_ring(self, bunch):
         list_slices = sl.slice_a_bunch(bunch, self.z_cut_slicing, self.n_slices_per_bunch)
