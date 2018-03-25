@@ -64,6 +64,9 @@ class Simulation(object):
     def slice_bunch_at_start_ring(self, bunch):
         list_slices = sl.slice_a_bunch(bunch, self.z_cut_slicing, self.n_slices_per_bunch)
         return list_slices
+
+    def perform_bunch_operations_at_start_ring(self, bunch):
+        pass
         
     def merge_slices_at_end_ring(self, list_slices):
         bunch = sl.merge_slices_into_bunch(list_slices)
