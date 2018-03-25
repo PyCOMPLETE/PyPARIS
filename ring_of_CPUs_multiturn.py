@@ -189,8 +189,16 @@ class RingOfCPUs_multiturn(object):
                 bunch_to_be_sent = None
                 if thisslice is not None:
                    self.slices_treated.appendleft(thisslice) 
+                   
                    if len(self.slices_treated) == self.slices_treated[0].slice_info['N_slices_tot_bunch']:
+                        
+                        # Merge slices
                         bunch_to_be_sent = self.sim_content.merge_slices_at_end_ring(self.slices_treated)
+
+                        # Perform opertations at end ring
+                        self.sim_content.perform_bunch_operations_at_end_ring(bunch_to_be_sent)
+
+                        # Empty slices_treated
                         self.slices_treated = deque([])
 
                    

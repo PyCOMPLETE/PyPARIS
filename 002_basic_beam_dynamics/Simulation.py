@@ -26,7 +26,7 @@ Qp_y = 0.
 flag_aperture = False # not tested
 
 enable_transverse_damper = True
-dampingrate_x = 50.
+dampingrate_x = 10000.
 dampingrate_y = 50.
 
 # Beam properties
@@ -88,7 +88,9 @@ class Simulation(object):
         i_start_part, i_end_part = sharing.my_part(self.ring_of_CPUs.myid_in_ring)
         self.mypart = self.machine.one_turn_map[i_start_part:i_end_part]
 
-        print self.mypart
+        if self.ring_of_CPUs.I_am_at_end_ring:
+            self.non_parallel_part = self.machine.one_turn_map[i_end_parallel:]
+
 
         
     def init_master(self):
@@ -144,15 +146,19 @@ class Simulation(object):
         return list_slices
 
     def treat_piece(self, piece):
-        for ele in self.mypart: 
-                ele.track(piece)
+        if piece.macroparticlenumber>0:
+            for ele in self.mypart: 
+                    ele.track(piece)
         
     def merge_slices_at_end_ring(self, list_slices):
         bunch = sl.merge_slices_into_bunch(list_slices)
         return bunch
 
     def perform_bunch_operations_at_end_ring(self, bunch):
-        pass
+        #finalize present turn (with non parallel part, e.g. synchrotron motion)
+        if bunch.macroparticlenumber>0:
+            for ele in self.non_parallel_part:
+                ele.track(bunch)
 
 
     def piece_to_buffer(self, piece):
