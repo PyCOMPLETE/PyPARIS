@@ -13,8 +13,6 @@ import communication_helpers as ch
 import share_segments as shs
 import slicing_tool as sl
 
-import PyPARIS.share_segments as shs
-
 
 sigma_z_bunch = 10e-2
 
