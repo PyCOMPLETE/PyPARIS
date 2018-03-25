@@ -46,6 +46,9 @@ filling_pattern = 5*[1.] +[0.]
 macroparticlenumber = 100000
 min_inten_slice4EC = 1e7
 
+x_kick_in_sigmas = 0.1
+y_kick_in_sigmas = 0.1
+
 
 class Simulation(object):
     def __init__(self):
@@ -100,6 +103,16 @@ class Simulation(object):
         import gen_multibunch_beam as gmb
         list_bunches = gmb.gen_matched_multibunch_beam(self.machine, macroparticlenumber, filling_pattern, b_spac_s, 
                 bunch_intensity, epsn_x, epsn_y, sigma_z, non_linear_long_matching, min_inten_slice4EC)
+
+        # compute and apply initial displacements
+        inj_opt = self.machine.transverse_map.get_injection_optics()
+        sigma_x = np.sqrt(inj_opt['beta_x']*epsn_x/self.machine.betagamma)
+        sigma_y = np.sqrt(inj_opt['beta_y']*epsn_y/self.machine.betagamma)
+        x_kick = x_kick_in_sigmas*sigma_x
+        y_kick = y_kick_in_sigmas*sigma_y
+        for bunch in list_bunches:
+            self.bunch.x += x_kick
+            self.bunch.y += y_kick
 
 
         return list_bunches
