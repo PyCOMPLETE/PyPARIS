@@ -105,14 +105,23 @@ class Simulation(object):
         for ele in self.mypart: 
                 ele.track(piece)
 
+    def monitor_bunch_at_start_ring(self, bunch):
+        pass
+
+    def perform_bunch_operations_at_start_ring(self, bunch):
+        pass
+
     def slice_bunch_at_start_ring(self, bunch):
         list_slices = sl.slice_a_bunch(bunch, self.z_cut_slicing, self.n_slices_per_bunch)
         return list_slices
         
-    def merge_slices_and_perform_bunch_operations_at_end_ring(self, list_slices):
+    def merge_slices_at_end_ring(self, list_slices):
         bunch = sl.merge_slices_into_bunch(list_slices)
-        # here perform synchrotron motion
         return bunch
+
+    def perform_bunch_operations_at_end_ring(self, bunch):
+        pass
+
 
     def piece_to_buffer(self, piece):
         buf = ch.beam_2_buffer(piece)

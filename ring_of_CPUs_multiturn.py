@@ -146,16 +146,18 @@ class RingOfCPUs_multiturn(object):
                 # If slices_to_be_treated is empty pop a bunch
                 if len(self.slices_to_be_treated)==0 and len(self.bunches_to_be_treated)>0:
                     next_bunch = self.bunches_to_be_treated.pop()
+
+                    if self.myring==0 and self.myid_in_ring == 0:
+                        print'Iter%03d - I am %d.%d startin bunch %d/%d turn=%d'%(iteration, self.myring, self.myid_in_ring,
+                                next_bunch.slice_info['i_bunch'], next_bunch.slice_info['N_bunches_tot_beam'], next_bunch.slice_info['i_turn'])
+                
                     next_bunch.slice_info['i_turn']+=1
                     self.slices_to_be_treated = self.sim_content.slice_bunch_at_start_ring(next_bunch)
                     
                     if next_bunch.slice_info['i_turn'] > self.N_turns:
                         orders_from_master.append('stop')
                     
-                    if self.myring==0 and self.myid_in_ring == 0:
-                        print'Iter%03d - I am %d.%d startin bunch %d/%d turn=%d'%(iteration, self.myring, self.myid_in_ring,
-                                        next_bunch.slice_info['i_bunch'], next_bunch.slice_info['N_bunches_tot_beam'], next_bunch.slice_info['i_turn'])
-                
+                    
                 # Pop a slice    
                 if len(self.slices_to_be_treated)>0:
                     thisslice = self.slices_to_be_treated.pop()
@@ -185,7 +187,7 @@ class RingOfCPUs_multiturn(object):
                 if thisslice is not None:
                    self.slices_treated.appendleft(thisslice) 
                    if len(self.slices_treated) == self.slices_treated[0].slice_info['N_slices_tot_bunch']:
-                        bunch_to_be_sent = self.sim_content.merge_slices_and_perform_bunch_operations_at_end_ring(self.slices_treated)
+                        bunch_to_be_sent = self.sim_content.merge_slices_at_end_ring(self.slices_treated)
                         self.slices_treated = deque([])
 
                    

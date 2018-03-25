@@ -65,9 +65,8 @@ class Simulation(object):
         list_slices = sl.slice_a_bunch(bunch, self.z_cut_slicing, self.n_slices_per_bunch)
         return list_slices
         
-    def merge_slices_and_perform_bunch_operations_at_end_ring(self, list_slices):
+    def merge_slices_at_end_ring(self, list_slices):
         bunch = sl.merge_slices_into_bunch(list_slices)
-        # here perform synchrotron motion
         return bunch
 
     def piece_to_buffer(self, piece):
