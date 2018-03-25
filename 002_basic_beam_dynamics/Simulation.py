@@ -52,7 +52,7 @@ y_kick_in_sigmas = 0.1
 
 class Simulation(object):
     def __init__(self):
-        self.N_turns = 10
+        self.N_turns = 128
         self.N_buffer_float_size = 1000000
         self.N_buffer_int_size = 100
         self.N_parellel_rings = 3
@@ -111,8 +111,8 @@ class Simulation(object):
         x_kick = x_kick_in_sigmas*sigma_x
         y_kick = y_kick_in_sigmas*sigma_y
         for bunch in list_bunches:
-            self.bunch.x += x_kick
-            self.bunch.y += y_kick
+            bunch.x += x_kick
+            bunch.y += y_kick
 
 
         return list_bunches
