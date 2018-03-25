@@ -28,6 +28,9 @@ class Simulation(object):
         machine = LHC(machine_configuration='Injection', n_segments=43, D_x=0., 
                         RF_at='end_of_transverse')
         self.machine = machine
+
+    def init_start_ring(self):
+        pass
         
     def init_master(self):
         

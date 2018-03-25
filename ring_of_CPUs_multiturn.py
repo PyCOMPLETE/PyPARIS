@@ -117,6 +117,8 @@ class RingOfCPUs_multiturn(object):
             self.bunches_to_be_treated = deque([])
             self.slices_to_be_treated = []
 
+            self.sim_content.init_start_ring()
+
         if self.I_am_at_end_ring:
             self.slices_treated = deque([])
         

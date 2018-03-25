@@ -101,6 +101,33 @@ class Simulation(object):
 
         return list_bunches
 
+    def init_start_ring(self):
+        print 'Init start ring!'
+        stats_to_store = [
+         'mean_x',
+         'mean_xp',
+         'mean_y',
+         'mean_yp',
+         'mean_z',
+         'mean_dp',
+         'sigma_x',
+         'sigma_y',
+         'sigma_z',
+         'sigma_dp',
+         'epsn_x',
+         'epsn_y',
+         'epsn_z',
+         'macroparticlenumber',
+         'i_bunch',
+         'i_turn']
+
+        from PyHEADTAIL.monitors.monitors import BunchMonitor
+        self.bunch_monitor = BunchMonitor('bunch_monitor_ring%03d'%self.ring_of_CPUs.myring,
+                            self.ring_of_CPUs.N_turns+self.ring_of_CPUs.N_parellel_rings, 
+                            {'Comment':'PyHDTL simulation'}, 
+                            write_buffer_every = 1,
+                            stats_to_store = stats_to_store)
+
     def perform_bunch_operations_at_start_ring(self, bunch):
         pass
 
