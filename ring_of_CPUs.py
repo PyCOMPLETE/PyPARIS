@@ -227,7 +227,7 @@ class SingleCoreComminicator(object):
         pass
 
     def Sendrecv(self, sendbuf, dest, sendtag, recvbuf, source, recvtag):
-        if dest!=0 or sendtag!=0 or source!=-1 or recvtag!=0:
+        if dest!=0 or sendtag!=0 or (source!=-1 and source!=0) or recvtag!=0:
             raise ValueError('Input of Sendrecv not compatible with single core operation!!!')
         recvbuf[:len(sendbuf)]=sendbuf
         

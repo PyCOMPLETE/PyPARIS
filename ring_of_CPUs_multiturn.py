@@ -1,5 +1,7 @@
 import numpy as np
 
+from ring_of_CPUs import SingleCoreComminicator
+
 import communication_helpers as ch
 from collections import deque
 
@@ -137,8 +139,10 @@ class RingOfCPUs_multiturn(object):
 
             orders_from_master = []
             
+            ##########################
+            # Before slice treatment #
+            ##########################
             if self.I_am_at_start_ring:
-                
                 # If a bunch is received put in the queue
                 buffer_received = list_received_buffers[0]
                 bunch_received = self.sim_content.buffer_to_piece(buffer_received)
@@ -159,65 +163,58 @@ class RingOfCPUs_multiturn(object):
                     
                     if next_bunch.slice_info['i_turn'] > self.N_turns:
                         orders_from_master.append('stop')
-                    
-                    
+                        
                 # Pop a slice    
                 if len(self.slices_to_be_treated)>0:
                     thisslice = self.slices_to_be_treated.pop()
                 else:
                     thisslice = None
-                    
-                # Treat the slice
-                if thisslice is not None:
-                    self.sim_content.treat_piece(thisslice)
-                self._print_some_info_on_comm(thisslice, iteration, verbose)
-                   
-                # Slice to buffer
-                buf = self.sim_content.piece_to_buffer(thisslice)
-            
-            elif self.I_am_at_end_ring:
+            else:
                 # Buffer to slice
                 recbuf = list_received_buffers[0]
                 thisslice = self.sim_content.buffer_to_piece(recbuf)
                 
-                # Treat the slice
-                if thisslice is not None:
-                    self.sim_content.treat_piece(thisslice)
-                self._print_some_info_on_comm(thisslice, iteration, verbose)
-
+            
+            
+            ###################
+            # Treat the slice #
+            ###################            
+            if thisslice is not None:
+                self.sim_content.treat_piece(thisslice)
+            self._print_some_info_on_comm(thisslice, iteration, verbose)
+            
+            
+            #########################
+            # After slice treatment #
+            #########################        
+            if self.I_am_at_end_ring:    
+                
                 # Put the slice in slices_treated
                 bunch_to_be_sent = None
                 if thisslice is not None:
-                   self.slices_treated.appendleft(thisslice) 
+                    self.slices_treated.appendleft(thisslice) 
                    
-                   if len(self.slices_treated) == self.slices_treated[0].slice_info['N_slices_tot_bunch']:
+                    if len(self.slices_treated) == self.slices_treated[0].slice_info['N_slices_tot_bunch']:
                         
                         # Merge slices
                         bunch_to_be_sent = self.sim_content.merge_slices_at_end_ring(self.slices_treated)
-
-                        # Perform opertations at end ring
+    
+                        # Perform operations at end ring
                         self.sim_content.perform_bunch_operations_at_end_ring(bunch_to_be_sent)
-
+    
                         # Empty slices_treated
                         self.slices_treated = deque([])
-
+    
                    
                 buf = self.sim_content.piece_to_buffer(bunch_to_be_sent)
-            
-            else:  #Standard node                 
-                # Buffer to slice
-                recbuf = list_received_buffers[0]
-                thisslice = self.sim_content.buffer_to_piece(recbuf)
-                
-                # Treat the slice
-                if thisslice is not None:
-                    self.sim_content.treat_piece(thisslice)
-                self._print_some_info_on_comm(thisslice, iteration, verbose)
-
+            else:
                 # Slice to buffer
                 buf = self.sim_content.piece_to_buffer(thisslice)
-        
-                
+            
+            
+            ########################
+            # Send/receive buffer  #
+            ########################   
             list_of_buffers_to_send = [buf]
             sendbuf = ch.combine_float_buffers(list_of_buffers_to_send)
             if len(sendbuf) > self.N_buffer_float_size:
