@@ -35,7 +35,7 @@ non_linear_long_matching = False
 
 bunch_intensity = 1e11
 epsn_x = 2.5e-6
-epsn_y = 3.5e-6
+epsn_y = 2.5e-6
 sigma_z = sigma_z_bunch
 
 #Filling pattern: here head is left and tail is right
@@ -43,10 +43,14 @@ filling_pattern = 5*[1.]
 macroparticlenumber = 100000
 min_inten_slice4EC = 1e7
 
-x_kick_in_sigmas = 0.1
+x_kick_in_sigmas = 5.
 y_kick_in_sigmas = 0.1
 
-target_size_internal_grid_sigma = 5.
+target_size_internal_grid_sigma = 10.
+
+enable_ecloud = False
+
+L_ecloud = 200e3
 
 
 class Simulation(object):
@@ -88,31 +92,32 @@ class Simulation(object):
             self.machine.one_turn_map.append(damper)
             self.n_non_parallelizable +=1
             
-        print('Build ecloud...')
-        import PyECLOUD.PyEC4PyHT as PyEC4PyHT
-        ecloud = PyEC4PyHT.Ecloud(
-                L_ecloud=1., slicer=None, slice_by_slice_mode=True,
-                Dt_ref=5e-12, pyecl_input_folder='./pyecloud_config',
-                chamb_type = 'polyg' ,
-                filename_chm= 'LHC_chm_ver.mat', 
-                #init_unif_edens_flag=1,
-                #init_unif_edens=1e7,
-                #N_mp_max = 3000000,
-                #nel_mp_ref_0 = 1e7/(0.7*3000000),
-                #B_multip = [0.],
-                #~ PyPICmode = 'ShortleyWeller_WithTelescopicGrids',
-                #~ f_telescope = 0.3,
-                target_grid = {'x_min_target':-target_size_internal_grid_sigma*sigma_x_smooth, 'x_max_target':target_size_internal_grid_sigma*sigma_x_smooth,
-                               'y_min_target':-target_size_internal_grid_sigma*sigma_y_smooth,'y_max_target':target_size_internal_grid_sigma*sigma_y_smooth,
-                               'Dh_target':.2*sigma_x_smooth},
-                #~ N_nodes_discard = 10.,
-                #~ N_min_Dh_main = 10,
-                #x_beam_offset = x_beam_offset,
-                #y_beam_offset = y_beam_offset,
-                #probes_position = probes_position,
-                save_pyecl_outp_as = 'cloud_evol_ring%d'%self.ring_of_CPUs.myring,
-                sparse_solver = 'PyKLU')
-        print('Done.')
+        if enable_ecloud:
+            print('Build ecloud...')
+            import PyECLOUD.PyEC4PyHT as PyEC4PyHT
+            ecloud = PyEC4PyHT.Ecloud(
+                    L_ecloud=L_ecloud, slicer=None, slice_by_slice_mode=True,
+                    Dt_ref=5e-12, pyecl_input_folder='./pyecloud_config',
+                    chamb_type = 'polyg' ,
+                    filename_chm= 'LHC_chm_ver.mat', 
+                    #init_unif_edens_flag=1,
+                    #init_unif_edens=1e7,
+                    #N_mp_max = 3000000,
+                    #nel_mp_ref_0 = 1e7/(0.7*3000000),
+                    #B_multip = [0.],
+                    #~ PyPICmode = 'ShortleyWeller_WithTelescopicGrids',
+                    #~ f_telescope = 0.3,
+                    target_grid = {'x_min_target':-target_size_internal_grid_sigma*sigma_x_smooth, 'x_max_target':target_size_internal_grid_sigma*sigma_x_smooth,
+                                   'y_min_target':-target_size_internal_grid_sigma*sigma_y_smooth,'y_max_target':target_size_internal_grid_sigma*sigma_y_smooth,
+                                   'Dh_target':.2*sigma_x_smooth},
+                    #~ N_nodes_discard = 10.,
+                    #~ N_min_Dh_main = 10,
+                    #x_beam_offset = x_beam_offset,
+                    #y_beam_offset = y_beam_offset,
+                    #probes_position = probes_position,
+                    save_pyecl_outp_as = 'cloud_evol_ring%d'%self.ring_of_CPUs.myring,
+                    sparse_solver = 'PyKLU')
+            print('Done.')
 
 
 
@@ -125,20 +130,21 @@ class Simulation(object):
         if self.ring_of_CPUs.I_am_at_end_ring:
             self.non_parallel_part = self.machine.one_turn_map[i_end_parallel:]
             
-            
-        #install eclouds in my part
-        my_new_part = []
-        self.my_list_eclouds = []
-        for ele in self.mypart:
-            my_new_part.append(ele)
-            if ele in self.machine.transverse_map:
-                ecloud_new = ecloud.generate_twin_ecloud_with_shared_space_charge()
-                my_new_part.append(ecloud_new)
-                self.my_list_eclouds.append(ecloud_new)
 
-        self.mypart = my_new_part
-        
-        print('Hello, I am ring %d, my part looks like: %s'%(self.ring_of_CPUs.myring, self.mypart))
+        #install eclouds in my part
+        if enable_ecloud:
+            my_new_part = []
+            self.my_list_eclouds = []
+            for ele in self.mypart:
+                my_new_part.append(ele)
+                if ele in self.machine.transverse_map:
+                    ecloud_new = ecloud.generate_twin_ecloud_with_shared_space_charge()
+                    my_new_part.append(ecloud_new)
+                    self.my_list_eclouds.append(ecloud_new)
+
+            self.mypart = my_new_part
+            
+            print('Hello, I am ring %d, my part looks like: %s'%(self.ring_of_CPUs.myring, self.mypart))
         
 
 
