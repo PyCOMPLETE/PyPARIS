@@ -23,7 +23,7 @@ octupole_knob = 0.0
 Qp_x = 0.
 Qp_y = 0.
 
-flag_aperture = False # not tested
+flag_aperture = True
 
 enable_transverse_damper = True
 dampingrate_x = 10000.
@@ -47,6 +47,8 @@ min_inten_slice4EC = 1e7
 x_kick_in_sigmas = 0.1
 y_kick_in_sigmas = 0.1
 
+target_size_internal_grid_sigma = 5.
+
 
 class Simulation(object):
     def __init__(self):
@@ -66,12 +68,15 @@ class Simulation(object):
                         octupole_knob=octupole_knob)
         self.n_non_parallelizable = 1 #RF
 
+        inj_optics = self.machine.transverse_map.get_injection_optics()
+        sigma_x_smooth = np.sqrt(inj_optics['beta_x']*epsn_x/self.machine.betagamma)
+        sigma_y_smooth = np.sqrt(inj_optics['beta_y']*epsn_y/self.machine.betagamma)
 
-        if flag_aperture: # never tested, to be introduced together with coulds
+        if flag_aperture:
             # setup transverse losses (to "protect" the ecloud)
             import PyHEADTAIL.aperture.aperture as aperture
-            apt_xy = aperture.EllipticalApertureXY(x_aper=target_size_internal_grid_sigma*sigma_x, 
-                                                   y_aper=target_size_internal_grid_sigma*sigma_y)
+            apt_xy = aperture.EllipticalApertureXY(x_aper=target_size_internal_grid_sigma*sigma_x_smooth, 
+                                                   y_aper=target_size_internal_grid_sigma*sigma_x_smooth)
             self.machine.one_turn_map.append(apt_xy)
             self.n_non_parallelizable +=1 
 
@@ -81,6 +86,34 @@ class Simulation(object):
             damper = TransverseDamper(dampingrate_x=dampingrate_x, dampingrate_y=dampingrate_y)
             self.machine.one_turn_map.append(damper)
             self.n_non_parallelizable +=1
+            
+        print('Build ecloud...')
+        import PyECLOUD.PyEC4PyHT as PyEC4PyHT
+        ecloud = PyEC4PyHT.Ecloud(
+                L_ecloud=1., slicer=None, slice_by_slice_mode=True,
+                Dt_ref=5e-12, pyecl_input_folder='./pyecloud_config',
+                chamb_type = 'polyg' ,
+                filename_chm= 'LHC_chm_ver.mat', 
+                #init_unif_edens_flag=1,
+                #init_unif_edens=1e7,
+                #N_mp_max = 3000000,
+                #nel_mp_ref_0 = 1e7/(0.7*3000000),
+                #B_multip = [0.],
+                #~ PyPICmode = 'ShortleyWeller_WithTelescopicGrids',
+                #~ f_telescope = 0.3,
+                target_grid = {'x_min_target':-target_size_internal_grid_sigma*sigma_x_smooth, 'x_max_target':target_size_internal_grid_sigma*sigma_x_smooth,
+                               'y_min_target':-target_size_internal_grid_sigma*sigma_y_smooth,'y_max_target':target_size_internal_grid_sigma*sigma_y_smooth,
+                               'Dh_target':.2*sigma_x_smooth},
+                #~ N_nodes_discard = 10.,
+                #~ N_min_Dh_main = 10,
+                #x_beam_offset = x_beam_offset,
+                #y_beam_offset = y_beam_offset,
+                #probes_position = probes_position,
+                save_pyecl_outp_as = 'test_saving',
+                sparse_solver = 'PyKLU')
+        print('Done.')
+
+
 
         # split the machine
         i_end_parallel = len(self.machine.one_turn_map)-self.n_non_parallelizable
