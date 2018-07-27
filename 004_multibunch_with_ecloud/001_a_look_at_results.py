@@ -38,11 +38,16 @@ freq_ax = np.fft.rfftfreq(len(dict_bunch['mean_x']))
 plt.figure(1)
 sp1 = plt.subplot(2,2,1)
 sp2 = plt.subplot(2,2,2, sharex=sp1)
+sp3 = plt.subplot(2,2,3, sharex=sp2)
+sp4 = plt.subplot(2,2,4, sharex=sp2)
 for i_bunch_obs in range(n_bunches):
     
     sp1.plot(list_bunches[i_bunch_obs]['mean_x'])
-    
     sp2.plot(list_bunches[i_bunch_obs]['mean_y'])
+    
+    sp3.plot(list_bunches[i_bunch_obs]['macroparticlenumber'])
+    sp4.plot(list_bunches[i_bunch_obs]['epsn_x'])
+    sp4.plot(list_bunches[i_bunch_obs]['epsn_y'])
 
 #~ spf1 = plt.subplot(2,2,3)
 #~ plt.plot(freq_ax, np.abs(spect_x))

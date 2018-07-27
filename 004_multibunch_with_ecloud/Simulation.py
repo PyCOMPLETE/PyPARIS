@@ -43,14 +43,14 @@ filling_pattern = 5*[1.]
 macroparticlenumber = 100000
 min_inten_slice4EC = 1e7
 
-x_kick_in_sigmas = 5.
+x_kick_in_sigmas = 3.
 y_kick_in_sigmas = 0.1
 
 target_size_internal_grid_sigma = 10.
 
-enable_ecloud = False
+enable_ecloud = True
 
-L_ecloud = 200e3
+L_ecloud = 1.
 
 
 class Simulation(object):
@@ -139,6 +139,7 @@ class Simulation(object):
                 my_new_part.append(ele)
                 if ele in self.machine.transverse_map:
                     ecloud_new = ecloud.generate_twin_ecloud_with_shared_space_charge()
+                    ecloud_new = ecloud #TEEEEEEEEEEEEEEEEEEEEEST
                     my_new_part.append(ecloud_new)
                     self.my_list_eclouds.append(ecloud_new)
 
