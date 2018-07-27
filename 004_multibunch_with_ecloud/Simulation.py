@@ -54,7 +54,7 @@ class Simulation(object):
         self.N_turns = 128
         self.N_buffer_float_size = 1000000
         self.N_buffer_int_size = 100
-        self.N_parellel_rings = 1
+        self.N_parellel_rings = 4
         
         self.n_slices_per_bunch = 150
         self.z_cut_slicing = sigma_z_bunch
@@ -137,6 +137,9 @@ class Simulation(object):
                 self.my_list_eclouds.append(ecloud_new)
 
         self.mypart = my_new_part
+        
+        print('Hello, I am ring %d, my part looks like: %s'%(self.ring_of_CPUs.myring, self.mypart))
+        
 
 
         
