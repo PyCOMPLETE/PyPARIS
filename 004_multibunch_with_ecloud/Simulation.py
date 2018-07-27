@@ -17,7 +17,7 @@ import slicing_tool as sl
 sigma_z_bunch = 10e-2
 
 machine_configuration = 'HLLHC-injection'
-n_segments = 2
+n_segments = 1
 
 octupole_knob = 0.0
 Qp_x = 0.
@@ -39,7 +39,6 @@ epsn_y = 3.5e-6
 sigma_z = sigma_z_bunch
 
 #Filling pattern: here head is left and tail is right
-# filling_pattern = [1., 0., 0., 1., 1., 1., 0.]
 filling_pattern = 5*[1.] +[0.]
 macroparticlenumber = 100000
 min_inten_slice4EC = 1e7
@@ -57,7 +56,7 @@ class Simulation(object):
         self.N_buffer_int_size = 100
         self.N_parellel_rings = 1
         
-        self.n_slices_per_bunch = 10
+        self.n_slices_per_bunch = 150
         self.z_cut_slicing = sigma_z_bunch
 
     def init_all(self):
@@ -123,6 +122,19 @@ class Simulation(object):
 
         if self.ring_of_CPUs.I_am_at_end_ring:
             self.non_parallel_part = self.machine.one_turn_map[i_end_parallel:]
+            
+            
+        #install eclouds in my part
+        my_new_part = []
+        self.my_list_eclouds = []
+        for ele in self.mypart:
+            my_new_part.append(ele)
+            if ele in self.machine.transverse_map:
+                ecloud_new = ecloud.generate_twin_ecloud_with_shared_space_charge()
+                my_new_part.append(ecloud_new)
+                self.my_list_eclouds.append(ecloud_new)
+
+        self.mypart = my_new_part
 
 
         
