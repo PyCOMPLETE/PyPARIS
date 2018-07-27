@@ -39,7 +39,7 @@ epsn_y = 3.5e-6
 sigma_z = sigma_z_bunch
 
 #Filling pattern: here head is left and tail is right
-filling_pattern = 5*[1.] +[0.]
+filling_pattern = 5*[1.]
 macroparticlenumber = 100000
 min_inten_slice4EC = 1e7
 
@@ -60,6 +60,8 @@ class Simulation(object):
         self.z_cut_slicing = sigma_z_bunch
 
     def init_all(self):
+        
+        print('Exec init...')
 
         from LHC_custom import LHC
         self.machine = LHC(n_segments = n_segments, machine_configuration = machine_configuration,
@@ -108,7 +110,7 @@ class Simulation(object):
                 #x_beam_offset = x_beam_offset,
                 #y_beam_offset = y_beam_offset,
                 #probes_position = probes_position,
-                save_pyecl_outp_as = 'test_saving',
+                save_pyecl_outp_as = 'cloud_evol_ring%d'%self.ring_of_CPUs.myring,
                 sparse_solver = 'PyKLU')
         print('Done.')
 
