@@ -17,7 +17,7 @@ import slicing_tool as sl
 sigma_z_bunch = 10e-2
 
 machine_configuration = 'HLLHC-injection'
-n_segments = 1
+n_segments = 2
 
 octupole_knob = 0.0
 Qp_x = 0.
@@ -50,7 +50,7 @@ target_size_internal_grid_sigma = 10.
 
 enable_ecloud = True
 
-L_ecloud = 20e3/16
+L_ecloud_tot = 20e3
 
 
 class Simulation(object):
@@ -96,7 +96,7 @@ class Simulation(object):
             print('Build ecloud...')
             import PyECLOUD.PyEC4PyHT as PyEC4PyHT
             ecloud = PyEC4PyHT.Ecloud(
-                    L_ecloud=L_ecloud, slicer=None, slice_by_slice_mode=True,
+                    L_ecloud=L_ecloud_tot/n_segments, slicer=None, slice_by_slice_mode=True,
                     Dt_ref=5e-12, pyecl_input_folder='./pyecloud_config',
                     chamb_type = 'polyg' ,
                     filename_chm= 'LHC_chm_ver.mat', 
@@ -139,14 +139,18 @@ class Simulation(object):
                 my_new_part.append(ele)
                 if ele in self.machine.transverse_map:
                     ecloud_new = ecloud.generate_twin_ecloud_with_shared_space_charge()
-                    # ecloud_new = ecloud #TEEEEEEEEEEEEEEEEEEEEEST
+                    
+                    # we save buildup info only for the first cloud in each ring
+                    if self.ring_of_CPUs.myid_in_ring>0 or len(self.my_list_eclouds)>0:
+                        ecloud_new.remove_savers()
+                    
                     my_new_part.append(ecloud_new)
                     self.my_list_eclouds.append(ecloud_new)
 
             self.mypart = my_new_part
             
-            print('Hello, I am ring %d, my part looks like: %s'%(self.ring_of_CPUs.myring, self.mypart))
-        
+            print('Hello, I am %d.%d, my part looks like: %s. Saver status: %s'%(self.ring_of_CPUs.myring, self.ring_of_CPUs.myid_in_ring, self.mypart, [(ec.cloudsim.cloud_list[0].pyeclsaver is not None) for ec in self.my_list_eclouds]))
+            
 
 
         
