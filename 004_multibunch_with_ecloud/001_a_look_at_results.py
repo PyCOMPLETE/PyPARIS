@@ -45,10 +45,13 @@ for i_bunch_obs in range(n_bunches):
     sp1.plot(list_bunches[i_bunch_obs]['mean_x'])
     sp2.plot(list_bunches[i_bunch_obs]['mean_y'])
     
-    sp3.plot(list_bunches[i_bunch_obs]['macroparticlenumber'])
-    sp4.plot(list_bunches[i_bunch_obs]['epsn_x'])
-    sp4.plot(list_bunches[i_bunch_obs]['epsn_y'])
+    #~ sp3.plot(list_bunches[i_bunch_obs]['macroparticlenumber'])
+    sp3.plot(list_bunches[i_bunch_obs]['epsn_x']*1e6, label='%d'%i_bunch_obs)
+    sp4.plot(list_bunches[i_bunch_obs]['epsn_y']*1e6, label='%d'%i_bunch_obs)
+    #sp4.plot(list_bunches[i_bunch_obs]['epsn_y']*1e6, '--')
 
+sp4.legend()
+sp3.legend()
 #~ spf1 = plt.subplot(2,2,3)
 #~ plt.plot(freq_ax, np.abs(spect_x))
 

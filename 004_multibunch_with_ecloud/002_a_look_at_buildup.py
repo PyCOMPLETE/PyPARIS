@@ -65,14 +65,22 @@ dict_bunch = list_bunches[i_bunch_obs]
 
 list_clouave = []
 plt.figure(100)
-for i_iter in xrange(4):
+ax1 = plt.subplot(2,1,1)
+ax2 = plt.subplot(2,1,2)
+icol = 0
+ibun_hist = 4
+for i_iter in xrange(2):
     for i_ring in [0,1,2,3]:
-        color = colorlist[i_ring]
+        color = colorlist[icol]
         ob = mlm.myloadmat_to_obj('./cloud_evol_ring%d__iter%d.mat'%(i_ring, i_iter))   # load dictionary of the current simulation
-        plt.plot(ob.xg_hist, ob.nel_hist[4,:], label='%d'%i_ring, color=color)
+        ax2.plot(ob.xg_hist, ob.nel_hist[ibun_hist,:], label='%d'%(i_ring+i_iter*4), color=color)
+        ax1.plot(ob.t/25e-9, ob.Nel_timep, label='%d'%(i_ring+i_iter*4), color=color)
+        ax1.plot(ob.t_hist/25e-9, np.sum(ob.nel_hist, axis=1), '.', color=color)
+        icol+=1
         
-        list_clouave.append(np.sum(ob.xg_hist*ob.nel_hist[4,:])/np.sum(ob.nel_hist[4,:]))
-plt.legend()
+        list_clouave.append(np.sum(ob.xg_hist*ob.nel_hist[ibun_hist,:])/np.sum(ob.nel_hist[4,:]))
+ax1.legend()
+ax2.legend()
 
 plt.figure(101)
 plt.plot(list_clouave, label='cloud centroid')

@@ -50,13 +50,13 @@ target_size_internal_grid_sigma = 10.
 
 enable_ecloud = True
 
-L_ecloud = 20e3
+L_ecloud = 20e3/16
 
 
 class Simulation(object):
     def __init__(self):
         self.N_turns = 128
-        self.N_buffer_float_size = 1000000
+        self.N_buffer_float_size = 10000000
         self.N_buffer_int_size = 100
         self.N_parellel_rings = 4
         
