@@ -40,17 +40,17 @@ sigma_z = sigma_z_bunch
 
 #Filling pattern: here head is left and tail is right
 filling_pattern = 5*[1.]
-macroparticlenumber = 100000
+macroparticlenumber = 1000000
 min_inten_slice4EC = 1e7
 
-x_kick_in_sigmas = 3.
+x_kick_in_sigmas = 0.1
 y_kick_in_sigmas = 0.1
 
 target_size_internal_grid_sigma = 10.
 
 enable_ecloud = True
 
-L_ecloud = 1
+L_ecloud = 20e3
 
 
 class Simulation(object):
