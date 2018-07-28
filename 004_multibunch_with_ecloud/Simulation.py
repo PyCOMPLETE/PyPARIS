@@ -50,7 +50,7 @@ target_size_internal_grid_sigma = 10.
 
 enable_ecloud = True
 
-L_ecloud = 1.
+L_ecloud = 1
 
 
 class Simulation(object):
@@ -139,7 +139,7 @@ class Simulation(object):
                 my_new_part.append(ele)
                 if ele in self.machine.transverse_map:
                     ecloud_new = ecloud.generate_twin_ecloud_with_shared_space_charge()
-                    ecloud_new = ecloud #TEEEEEEEEEEEEEEEEEEEEEST
+                    # ecloud_new = ecloud #TEEEEEEEEEEEEEEEEEEEEEST
                     my_new_part.append(ecloud_new)
                     self.my_list_eclouds.append(ecloud_new)
 

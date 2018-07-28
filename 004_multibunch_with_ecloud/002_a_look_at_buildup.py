@@ -45,8 +45,11 @@ ob = mlm.myloadmat_to_obj('./cloud_evol_ring0__iter0.mat')   # load dictionary o
 plt.figure(1)
 plt.plot(ob.t/25e-9, ob.Nel_timep)
 
-plt.figure(1)
+plt.figure(10)
 plt.plot(ob.t/25e-9, ob.lam_t_array)
+
+plt.figure(11)
+plt.plot(ob.t/25e-9, ob.cen_density)
 
 
 plt.figure(2)
