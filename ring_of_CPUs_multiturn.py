@@ -1,4 +1,5 @@
 import numpy as np
+import time
 
 from ring_of_CPUs import SingleCoreComminicator
 
@@ -152,9 +153,14 @@ class RingOfCPUs_multiturn(object):
                 # If slices_to_be_treated is empty pop a bunch
                 if len(self.slices_to_be_treated)==0 and len(self.bunches_to_be_treated)>0:
                     next_bunch = self.bunches_to_be_treated.pop()
+                    
+                    # Log some info
                     if self.myring==0 and self.myid_in_ring == 0:
-                        print'Iter%03d - I am %d.%d startin bunch %d/%d turn=%d'%(iteration, self.myring, self.myid_in_ring,
-                                next_bunch.slice_info['i_bunch'], next_bunch.slice_info['N_bunches_tot_beam'], next_bunch.slice_info['i_turn'])
+                        t_now = time.mktime(time.localtime())
+                        print2logandstdo('%s, iter%03d - cpu %d.%d startin bunch %d/%d turn=%d'%(time.strftime("%d/%m/%Y %H:%M:%S", time.localtime(t_now)), 
+                                iteration, self.myring, self.myid_in_ring,
+                                next_bunch.slice_info['i_bunch'], next_bunch.slice_info['N_bunches_tot_beam'], next_bunch.slice_info['i_turn']))
+
                 
                     self.sim_content.perform_bunch_operations_at_start_ring(next_bunch)
 
