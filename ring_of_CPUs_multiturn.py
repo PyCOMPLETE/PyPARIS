@@ -184,10 +184,12 @@ class RingOfCPUs_multiturn(object):
             
             ###################
             # Treat the slice #
-            ###################            
+            ###################    
+            t_start = time.mktime(time.localtime())        
             if thisslice is not None:
                 self.sim_content.treat_piece(thisslice)
-            self._print_some_info_on_comm(thisslice, iteration)
+            t_end = time.mktime(time.localtime()) 
+            self._print_some_info_on_comm(thisslice, iteration, t_start, t_end)
             
             
             #########################
@@ -253,14 +255,16 @@ class RingOfCPUs_multiturn(object):
             #     break
             # (TEMPORARY!)
             
-    def _print_some_info_on_comm(self, thisslice, iteration):
+    def _print_some_info_on_comm(self, thisslice, iteration, t_start, t_end):
         if self.verbose:
             if thisslice is not None:
-                print2logandstdo('Iter%03d - I am %d.%d and I treated slice %d/%d of bunch %d/%d'%(iteration, 
+                print2logandstdo('Iter start on %s, iter%05d - I am %02d.%02d and I treated slice %d/%d of bunch %d/%d, lasts %ds'%(time.strftime("%d/%m/%Y %H:%M:%S", time.localtime(t_start)), iteration, 
                                                 self.myring, self.myid_in_ring,
                                                 thisslice.slice_info['i_slice'], thisslice.slice_info['N_slices_tot_bunch'], 
                                                 thisslice.slice_info['info_parent_bunch']['i_bunch'], 
-                                                thisslice.slice_info['info_parent_bunch']['N_bunches_tot_beam']))
+                                                thisslice.slice_info['info_parent_bunch']['N_bunches_tot_beam'], 
+                                                t_end-t_start))
             else:
-                print2logandstdo('Iter%03d - I am %d.%d and I treated None'%(iteration, self.myring, self.myid_in_ring))      
-
+                print2logandstdo('Iter start on %s, iter%05d - I am %02d.%02d and I treated None, lasts %ds'%(time.strftime("%d/%m/%Y %H:%M:%S", time.localtime(t_start)), iteration, 
+                                                self.myring, self.myid_in_ring,
+                                                t_end-t_start))

@@ -32,8 +32,11 @@ non_linear_long_matching = False
 b_spac_s = 25e-9
 
 #Here head is left and tail is right
-filling_pattern = [1., 0., 0., 1., 1., 1., 0.]
-filling_pattern = 6*[1]
+#~ filling_pattern = [1., 0., 0., 1., 1., 1., 0.]
+#~ filling_pattern = 6*[1]
+
+b_spac_s = 5e-9
+filling_pattern = 5*([1.]+4*[0.])
 
 macroparticlenumber = 100000
 
