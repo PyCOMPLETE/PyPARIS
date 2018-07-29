@@ -41,7 +41,7 @@ sigma_z = sigma_z_bunch
 #Filling pattern: here head is left and tail is right
 b_spac_s = 25e-9
 filling_pattern = 5*[1.]
-filling_pattern = [1, 0, 1]
+filling_pattern = [1, 0, 1, 1, 1]
 
 #~ b_spac_s = 5e-9
 #~ filling_pattern = 5*([1.]+4*[0.])
@@ -223,9 +223,8 @@ class Simulation(object):
         return list_slices
 
     def treat_piece(self, piece):
-        if piece.macroparticlenumber>0:
-            for ele in self.mypart: 
-                    ele.track(piece)
+        for ele in self.mypart: 
+                ele.track(piece)
         
     def merge_slices_at_end_ring(self, list_slices):
         bunch = sl.merge_slices_into_bunch(list_slices)
