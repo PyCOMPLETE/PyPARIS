@@ -7,7 +7,7 @@ class LHC(BasicSynchrotron):
     def __init__(self, n_segments, machine_configuration, **kwargs):
         
         
-        circumference     = 26658.8832
+        circumference     = 35640*2.5e-9*c
         longitudinal_mode = 'non-linear'
         p_increment       = 0.
         charge            = e

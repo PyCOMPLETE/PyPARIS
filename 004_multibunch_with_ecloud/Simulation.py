@@ -13,7 +13,7 @@ import communication_helpers as ch
 import share_segments as shs
 import slicing_tool as sl
 
-verbose = True
+verbose = False
 
 sigma_z_bunch = 10e-2
 
@@ -39,11 +39,12 @@ epsn_y = 2.5e-6
 sigma_z = sigma_z_bunch
 
 #Filling pattern: here head is left and tail is right
-#~ b_spac_s = 25e-9
-#~ filling_pattern = 5*[1.]
+b_spac_s = 25e-9
+filling_pattern = 5*[1.]
+filling_pattern = [1, 0, 1]
 
-b_spac_s = 5e-9
-filling_pattern = 5*([1.]+4*[0.])
+#~ b_spac_s = 5e-9
+#~ filling_pattern = 5*([1.]+4*[0.])
 
 macroparticlenumber = 1000000
 min_inten_slice4EC = 1e7
@@ -57,13 +58,15 @@ enable_ecloud = True
 
 L_ecloud_tot = 20e3
 
+pickle_beam = True
+
 
 class Simulation(object):
     def __init__(self):
         self.N_turns = 128
         self.N_buffer_float_size = 10000000
         self.N_buffer_int_size = 100
-        self.N_parellel_rings = 2
+        self.N_parellel_rings = 1
         
         self.n_slices_per_bunch = 200
         self.z_cut_slicing = 3*sigma_z_bunch
@@ -172,6 +175,11 @@ class Simulation(object):
         import gen_multibunch_beam as gmb
         list_bunches = gmb.gen_matched_multibunch_beam(self.machine, macroparticlenumber, filling_pattern, b_spac_s, 
                 bunch_intensity, epsn_x, epsn_y, sigma_z, non_linear_long_matching, min_inten_slice4EC)
+                
+        if pickle_beam:
+            import pickle
+            with open('init_beam.pkl', 'w') as fid:
+                pickle.dump({'list_bunches': list_bunches}, fid)
 
         # compute and apply initial displacements
         inj_opt = self.machine.transverse_map.get_injection_optics()
