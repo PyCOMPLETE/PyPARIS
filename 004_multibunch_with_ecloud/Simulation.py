@@ -58,7 +58,7 @@ class Simulation(object):
         self.N_turns = 128
         self.N_buffer_float_size = 10000000
         self.N_buffer_int_size = 100
-        self.N_parellel_rings = 4
+        self.N_parellel_rings = 2
         
         self.n_slices_per_bunch = 150
         self.z_cut_slicing = sigma_z_bunch

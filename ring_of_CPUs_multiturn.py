@@ -11,8 +11,6 @@ def print2logandstdo(message, mode='a+'):
     print message
     with open(logfilename, mode) as fid:
         fid.writelines([message+'\n'])
-        
-verbose = False
 
 
 class RingOfCPUs_multiturn(object):
@@ -31,6 +29,8 @@ class RingOfCPUs_multiturn(object):
         self.N_buffer_float_size = N_buffer_float_size
         self.N_buffer_int_size = N_buffer_int_size
         self.N_parellel_rings = N_parellel_rings
+        
+        self.verbose = verbose
         
         if hasattr(sim_content, 'N_pieces_per_transfer'):
             self.N_pieces_per_transfer = sim_content.N_pieces_per_transfer
@@ -82,8 +82,8 @@ class RingOfCPUs_multiturn(object):
         self.I_am_at_start_ring = self.myid_in_ring == 0
         self.I_am_at_end_ring = self.myid_in_ring == (self.N_nodes_per_ring-1)
         
-        if verbose:
-            print("I am %d, master=%s, myring=%d, myid_in_ring=%d (%s%s)"%(
+        if self.verbose:
+            print2logandstdo("I am %d, master=%s, myring=%d, myid_in_ring=%d (%s%s)"%(
                         self.myid, repr(self.I_am_the_master), self.myring, self.myid_in_ring,
                         {True:'start_ring', False:''}[self.I_am_at_start_ring], 
                         {True:'end_ring', False:''}[self.I_am_at_end_ring]))
@@ -187,7 +187,7 @@ class RingOfCPUs_multiturn(object):
             ###################            
             if thisslice is not None:
                 self.sim_content.treat_piece(thisslice)
-            self._print_some_info_on_comm(thisslice, iteration, verbose)
+            self._print_some_info_on_comm(thisslice, iteration)
             
             
             #########################
@@ -253,14 +253,14 @@ class RingOfCPUs_multiturn(object):
             #     break
             # (TEMPORARY!)
             
-    def _print_some_info_on_comm(self, thisslice, iteration, verbose):
-        if verbose:
+    def _print_some_info_on_comm(self, thisslice, iteration):
+        if self.verbose:
             if thisslice is not None:
-                print('Iter%03d - I am %d.%d and I treated slice %d/%d of bunch %d/%d'%(iteration, 
+                print2logandstdo('Iter%03d - I am %d.%d and I treated slice %d/%d of bunch %d/%d'%(iteration, 
                                                 self.myring, self.myid_in_ring,
                                                 thisslice.slice_info['i_slice'], thisslice.slice_info['N_slices_tot_bunch'], 
                                                 thisslice.slice_info['info_parent_bunch']['i_bunch'], 
                                                 thisslice.slice_info['info_parent_bunch']['N_bunches_tot_beam']))
             else:
-                print('Iter%03d - I am %d.%d and I treated None'%(iteration, self.myring, self.myid_in_ring))      
+                print2logandstdo('Iter%03d - I am %d.%d and I treated None'%(iteration, self.myring, self.myid_in_ring))      
 
