@@ -39,12 +39,14 @@ epsn_y = 2.5e-6
 sigma_z = sigma_z_bunch
 
 #Filling pattern: here head is left and tail is right
-b_spac_s = 25e-9
-filling_pattern = 5*[1.]
-filling_pattern = [1, 0, 1, 1, 1]
+#~ b_spac_s = 25e-9
+#~ filling_pattern = 5*[1.]
 
 #~ b_spac_s = 5e-9
 #~ filling_pattern = 5*([1.]+4*[0.])
+
+b_spac_s = 2.5e-9
+filling_pattern = 5*([1.]+9*[0.])
 
 macroparticlenumber = 1000000
 min_inten_slice4EC = 1e7
@@ -58,7 +60,7 @@ enable_ecloud = True
 
 L_ecloud_tot = 20e3
 
-pickle_beam = True
+pickle_beam = False
 
 
 class Simulation(object):
@@ -66,7 +68,7 @@ class Simulation(object):
         self.N_turns = 128
         self.N_buffer_float_size = 10000000
         self.N_buffer_int_size = 100
-        self.N_parellel_rings = 1
+        self.N_parellel_rings = 2
         
         self.n_slices_per_bunch = 200
         self.z_cut_slicing = 3*sigma_z_bunch

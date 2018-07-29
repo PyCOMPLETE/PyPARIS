@@ -69,8 +69,8 @@ ax1 = plt.subplot(2,1,1)
 ax2 = plt.subplot(2,1,2)
 icol = 0
 ibun_hist = 4
-for i_iter in xrange(1):
-    for i_ring in [0]:
+for i_iter in xrange(2):
+    for i_ring in [0, 1]:
         color = colorlist[icol]
         ob = mlm.myloadmat_to_obj('./cloud_evol_ring%d__iter%d.mat'%(i_ring, i_iter))   # load dictionary of the current simulation
         ax2.plot(ob.xg_hist, ob.nel_hist[ibun_hist,:], label='%d'%(i_ring+i_iter*4), color=color)
