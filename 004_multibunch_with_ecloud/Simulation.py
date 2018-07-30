@@ -72,7 +72,7 @@ class Simulation(object):
         
         self.n_slices_per_bunch = 200
         self.z_cut_slicing = 3*sigma_z_bunch
-        self.N_pieces_per_transfer = 5
+        self.N_pieces_per_transfer = 100
         
 
     def init_all(self):

@@ -62,8 +62,8 @@ class RingOfCPUs_multiturn(object):
             #in case it is forced by user it will be rebound but there is no harm in that
             self.comm = SingleCoreComminicator()
             
-        if self.N_pieces_per_transfer>1:
-            raise ValueError("Not implemented!")
+        #~ if self.N_pieces_per_transfer>1:
+            #~ raise ValueError("Not implemented!")
             
         # get info on the grid
         self.N_nodes = self.comm.Get_size()
@@ -170,25 +170,26 @@ class RingOfCPUs_multiturn(object):
                     
                     if next_bunch.slice_info['i_turn'] > self.N_turns:
                         orders_from_master.append('stop')
-                        
-                # Pop a slice    
-                if len(self.slices_to_be_treated)>0:
-                    thisslice = self.slices_to_be_treated.pop()
-                else:
-                    thisslice = None
+                
+                # Pop slices
+                slice_group = []
+                while len(slice_group)<self.N_pieces_per_transfer and len(self.slices_to_be_treated)>0:      
+                    slice_group.append(self.slices_to_be_treated.pop())
+                if len(slice_group)<1:
+                    slice_group.append(None)
             else:
                 # Buffer to slice
-                recbuf = list_received_buffers[0]
-                thisslice = self.sim_content.buffer_to_piece(recbuf)
+                slice_group = map(self.sim_content.buffer_to_piece, list_received_buffers)
                 
             
             
-            ###################
-            # Treat the slice #
-            ###################    
-            t_start = time.mktime(time.localtime())        
-            if thisslice is not None:
-                self.sim_content.treat_piece(thisslice)
+            ####################
+            # Treat the slices #
+            ####################    
+            t_start = time.mktime(time.localtime())              
+            for thisslice in slice_group:
+                if thisslice is not None:
+                    self.sim_content.treat_piece(thisslice)
             t_end = time.mktime(time.localtime()) 
             self._print_some_info_on_comm(thisslice, iteration, t_start, t_end)
             
@@ -200,31 +201,33 @@ class RingOfCPUs_multiturn(object):
                 
                 # Put the slice in slices_treated
                 bunch_to_be_sent = None
-                if thisslice is not None:
-                    self.slices_treated.appendleft(thisslice) 
+                for thisslice in slice_group:
+                    if thisslice is not None:
+                        self.slices_treated.appendleft(thisslice) 
+                       
+                        if len(self.slices_treated) == self.slices_treated[0].slice_info['N_slices_tot_bunch']:
+                            
+                            assert(bunch_to_be_sent is None)
+                            
+                            # Merge slices
+                            bunch_to_be_sent = self.sim_content.merge_slices_at_end_ring(self.slices_treated)
+        
+                            # Perform operations at end ring
+                            self.sim_content.perform_bunch_operations_at_end_ring(bunch_to_be_sent)
+        
+                            # Empty slices_treated
+                            self.slices_treated = deque([])
+    
                    
-                    if len(self.slices_treated) == self.slices_treated[0].slice_info['N_slices_tot_bunch']:
-                        
-                        # Merge slices
-                        bunch_to_be_sent = self.sim_content.merge_slices_at_end_ring(self.slices_treated)
-    
-                        # Perform operations at end ring
-                        self.sim_content.perform_bunch_operations_at_end_ring(bunch_to_be_sent)
-    
-                        # Empty slices_treated
-                        self.slices_treated = deque([])
-    
-                   
-                buf = self.sim_content.piece_to_buffer(bunch_to_be_sent)
+                list_of_buffers_to_send = [self.sim_content.piece_to_buffer(bunch_to_be_sent)]
             else:
                 # Slice to buffer
-                buf = self.sim_content.piece_to_buffer(thisslice)
+                list_of_buffers_to_send = map(self.sim_content.piece_to_buffer, slice_group)
             
             
             ########################
             # Send/receive buffer  #
             ########################   
-            list_of_buffers_to_send = [buf]
             sendbuf = ch.combine_float_buffers(list_of_buffers_to_send)
             if len(sendbuf) > self.N_buffer_float_size:
                 raise ValueError('Float buffer (%d) is too small!\n %d required.'%(self.N_buffer_float_size, len(sendbuf)))
