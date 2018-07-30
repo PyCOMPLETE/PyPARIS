@@ -39,14 +39,14 @@ epsn_y = 2.5e-6
 sigma_z = sigma_z_bunch
 
 #Filling pattern: here head is left and tail is right
-#~ b_spac_s = 25e-9
-#~ filling_pattern = 5*[1.]
+#b_spac_s = 25e-9
+#filling_pattern = 10*[1.]
 
 #~ b_spac_s = 5e-9
 #~ filling_pattern = 5*([1.]+4*[0.])
 
 b_spac_s = 2.5e-9
-filling_pattern = 5*([1.]+9*[0.])
+filling_pattern = 10*([1.]+9*[0.])
 
 macroparticlenumber = 1000000
 min_inten_slice4EC = 1e7
@@ -70,7 +70,7 @@ class Simulation(object):
         self.N_buffer_int_size = 100
         self.N_parellel_rings = 2
         
-        self.n_slices_per_bunch = 200
+        self.n_slices_per_bunch = 2
         self.z_cut_slicing = 3*sigma_z_bunch
         
 
