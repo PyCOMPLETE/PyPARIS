@@ -19,8 +19,6 @@ class RingOfCPUs_multiturn(object):
                     N_buffer_float_size = 1000000, N_buffer_int_size = 100,
                     verbose = False):
         
-        if N_pieces_per_transfer>1:
-            raise ValueError("Not implemented!")
 
         self.sim_content = sim_content
         self.N_turns = sim_content.N_turns
@@ -63,6 +61,9 @@ class RingOfCPUs_multiturn(object):
         if self.comm.Get_size()==1:
             #in case it is forced by user it will be rebound but there is no harm in that
             self.comm = SingleCoreComminicator()
+            
+        if self.N_pieces_per_transfer>1:
+            raise ValueError("Not implemented!")
             
         # get info on the grid
         self.N_nodes = self.comm.Get_size()
