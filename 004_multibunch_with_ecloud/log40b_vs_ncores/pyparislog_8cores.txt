@@ -1,0 +1,52 @@
+yPARIS simulation -- multiturn parallelization
+Multiprocessing using communicator provided as argument.
+N_cores = 8
+N_pieces_per_transfer = 300
+N_buffer_float_size = 10000000
+N_buffer_int_size = 100
+Multi-ring info:
+N_parellel_rings = 4
+N_nodes_per_ring = 2
+Running on hpc-201-11-17-a.cr.cnaf.infn.it
+Interpreter at /home/HPC/giadarol/sim_workspace/virtualenvs/py2.7/bin/python
+30/07/2018 18:29:33, iter000 - cpu 0.0 startin bunch 0/40 turn=0
+30/07/2018 18:29:53, iter001 - cpu 0.0 startin bunch 1/40 turn=0
+30/07/2018 18:30:16, iter002 - cpu 0.0 startin bunch 2/40 turn=0
+30/07/2018 18:30:41, iter003 - cpu 0.0 startin bunch 3/40 turn=0
+30/07/2018 18:31:07, iter004 - cpu 0.0 startin bunch 4/40 turn=0
+30/07/2018 18:31:32, iter005 - cpu 0.0 startin bunch 5/40 turn=0
+30/07/2018 18:31:58, iter006 - cpu 0.0 startin bunch 6/40 turn=0
+30/07/2018 18:32:24, iter007 - cpu 0.0 startin bunch 7/40 turn=0
+30/07/2018 18:32:51, iter008 - cpu 0.0 startin bunch 8/40 turn=0
+30/07/2018 18:33:17, iter009 - cpu 0.0 startin bunch 9/40 turn=0
+30/07/2018 18:33:44, iter010 - cpu 0.0 startin bunch 10/40 turn=0
+30/07/2018 18:34:09, iter011 - cpu 0.0 startin bunch 11/40 turn=0
+30/07/2018 18:34:36, iter012 - cpu 0.0 startin bunch 12/40 turn=0
+30/07/2018 18:35:02, iter013 - cpu 0.0 startin bunch 13/40 turn=0
+30/07/2018 18:35:28, iter014 - cpu 0.0 startin bunch 14/40 turn=0
+30/07/2018 18:35:54, iter015 - cpu 0.0 startin bunch 15/40 turn=0
+30/07/2018 18:36:19, iter016 - cpu 0.0 startin bunch 16/40 turn=0
+30/07/2018 18:36:45, iter017 - cpu 0.0 startin bunch 17/40 turn=0
+30/07/2018 18:37:09, iter018 - cpu 0.0 startin bunch 18/40 turn=0
+30/07/2018 18:37:35, iter019 - cpu 0.0 startin bunch 19/40 turn=0
+30/07/2018 18:38:01, iter020 - cpu 0.0 startin bunch 20/40 turn=0
+30/07/2018 18:38:27, iter021 - cpu 0.0 startin bunch 21/40 turn=0
+30/07/2018 18:38:52, iter022 - cpu 0.0 startin bunch 22/40 turn=0
+30/07/2018 18:39:19, iter023 - cpu 0.0 startin bunch 23/40 turn=0
+30/07/2018 18:39:44, iter024 - cpu 0.0 startin bunch 24/40 turn=0
+30/07/2018 18:40:10, iter025 - cpu 0.0 startin bunch 25/40 turn=0
+30/07/2018 18:40:36, iter026 - cpu 0.0 startin bunch 26/40 turn=0
+30/07/2018 18:41:02, iter027 - cpu 0.0 startin bunch 27/40 turn=0
+30/07/2018 18:41:26, iter028 - cpu 0.0 startin bunch 28/40 turn=0
+30/07/2018 18:41:52, iter029 - cpu 0.0 startin bunch 29/40 turn=0
+30/07/2018 18:42:18, iter030 - cpu 0.0 startin bunch 30/40 turn=0
+30/07/2018 18:42:45, iter031 - cpu 0.0 startin bunch 31/40 turn=0
+30/07/2018 18:43:11, iter032 - cpu 0.0 startin bunch 32/40 turn=0
+30/07/2018 18:43:38, iter033 - cpu 0.0 startin bunch 33/40 turn=0
+30/07/2018 18:44:04, iter034 - cpu 0.0 startin bunch 34/40 turn=0
+30/07/2018 18:44:30, iter035 - cpu 0.0 startin bunch 35/40 turn=0
+30/07/2018 18:44:56, iter036 - cpu 0.0 startin bunch 36/40 turn=0
+30/07/2018 18:45:23, iter037 - cpu 0.0 startin bunch 37/40 turn=0
+30/07/2018 18:45:48, iter038 - cpu 0.0 startin bunch 38/40 turn=0
+30/07/2018 18:46:13, iter039 - cpu 0.0 startin bunch 39/40 turn=0
+30/07/2018 18:46:39, iter040 - cpu 0.0 startin bunch 0/40 turn=4

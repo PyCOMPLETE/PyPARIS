@@ -1,0 +1,24 @@
+PyPARIS simulation -- multiturn parallelization
+Multiprocessing using communicator provided as argument.
+N_cores = 8
+N_pieces_per_transfer = 1
+N_buffer_float_size = 10000000
+N_buffer_int_size = 100
+Multi-ring info:
+N_parellel_rings = 4
+N_nodes_per_ring = 2
+Running on hpc-201-11-04-b.cr.cnaf.infn.it
+Interpreter at /home/HPC/giadarol/sim_workspace/virtualenvs/py2.7/bin/python
+29/07/2018 23:26:10, iter000 - cpu 0.0 startin bunch 0/10 turn=0
+29/07/2018 23:26:34, iter202 - cpu 0.0 startin bunch 1/10 turn=0
+29/07/2018 23:27:12, iter404 - cpu 0.0 startin bunch 2/10 turn=0
+29/07/2018 23:28:00, iter606 - cpu 0.0 startin bunch 3/10 turn=0
+29/07/2018 23:28:57, iter808 - cpu 0.0 startin bunch 4/10 turn=0
+29/07/2018 23:29:59, iter1010 - cpu 0.0 startin bunch 5/10 turn=0
+29/07/2018 23:30:58, iter1212 - cpu 0.0 startin bunch 6/10 turn=0
+29/07/2018 23:31:57, iter1414 - cpu 0.0 startin bunch 7/10 turn=0
+29/07/2018 23:32:56, iter1616 - cpu 0.0 startin bunch 8/10 turn=0
+29/07/2018 23:33:57, iter1818 - cpu 0.0 startin bunch 9/10 turn=0
+29/07/2018 23:34:57, iter2020 - cpu 0.0 startin bunch 0/10 turn=4
+29/07/2018 23:35:55, iter2222 - cpu 0.0 startin bunch 1/10 turn=4
+29/07/2018 23:36:55, iter2424 - cpu 0.0 startin bunch 2/10 turn=4
