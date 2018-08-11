@@ -18,7 +18,7 @@ verbose = False
 sigma_z_bunch = 10e-2
 
 machine_configuration = 'HLLHC-injection'
-n_segments = 2
+n_segments = 4
 
 octupole_knob = 0.0
 Qp_x = 0.
@@ -26,7 +26,7 @@ Qp_y = 0.
 
 flag_aperture = True
 
-enable_transverse_damper = True
+enable_transverse_damper = False
 dampingrate_x = 10000.
 dampingrate_y = 50.
 
@@ -51,8 +51,8 @@ filling_pattern = 40*[1.]
 macroparticlenumber = 1000000
 min_inten_slice4EC = 1e7
 
-x_kick_in_sigmas = 0.1
-y_kick_in_sigmas = 0.1
+x_kick_in_sigmas = 0.25
+y_kick_in_sigmas = 0.25
 
 target_size_internal_grid_sigma = 10.
 
@@ -65,10 +65,10 @@ pickle_beam = False
 
 class Simulation(object):
     def __init__(self):
-        self.N_turns = 128
+        self.N_turns = 5000
         self.N_buffer_float_size = 10000000
         self.N_buffer_int_size = 100
-        self.N_parellel_rings = 2 
+        self.N_parellel_rings = 10
         
         self.n_slices_per_bunch = 200
         self.z_cut_slicing = 3*sigma_z_bunch
