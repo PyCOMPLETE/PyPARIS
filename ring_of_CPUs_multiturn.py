@@ -17,7 +17,8 @@ class RingOfCPUs_multiturn(object):
     def __init__(self, sim_content, N_pieces_per_transfer=1, force_serial = False, comm=None,
                     N_parellel_rings = 1,
                     N_buffer_float_size = 1000000, N_buffer_int_size = 100,
-                    verbose = False):
+                    verbose = False
+                    enable_orders_from_master = True):
         
 
         self.sim_content = sim_content
@@ -29,6 +30,8 @@ class RingOfCPUs_multiturn(object):
         self.N_parellel_rings = N_parellel_rings
         
         self.verbose = verbose
+        
+        self.enable_orders_from_master = enable_orders_from_master
         
         if hasattr(sim_content, 'N_pieces_per_transfer'):
             self.N_pieces_per_transfer = sim_content.N_pieces_per_transfer
@@ -236,20 +239,21 @@ class RingOfCPUs_multiturn(object):
             list_received_buffers = ch.split_float_buffers(self.buf_float)
     
             # Handle orders (for now only to stopping the simulation)
-            if self.I_am_the_master:
-                # send orders
-                buforders = ch.list_of_strings_2_buffer(orders_from_master)
-                if len(buforders) > self.N_buffer_int_size:
-                    raise ValueError('Int buffer is too small!')
-                self.comm.Bcast(buforders, self.master_id)
-            else:    
-                # receive orders from the master
-                self.comm.Bcast(self.buf_int, self.master_id)
-                orders_from_master = ch.buffer_2_list_of_strings(self.buf_int)
+            if self.enable_orders_from_master:
+                if self.I_am_the_master:
+                    # send orders
+                    buforders = ch.list_of_strings_2_buffer(orders_from_master)
+                    if len(buforders) > self.N_buffer_int_size:
+                        raise ValueError('Int buffer is too small!')
+                    self.comm.Bcast(buforders, self.master_id)
+                else:    
+                    # receive orders from the master
+                    self.comm.Bcast(self.buf_int, self.master_id)
+                    orders_from_master = ch.buffer_2_list_of_strings(self.buf_int)
 
-            # check if simulation has to be ended
-            if 'stop' in orders_from_master:
-                break
+                # check if simulation has to be ended
+                if 'stop' in orders_from_master:
+                    break
 
             iteration+=1
 
