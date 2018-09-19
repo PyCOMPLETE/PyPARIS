@@ -17,7 +17,7 @@ class RingOfCPUs_multiturn(object):
     def __init__(self, sim_content, N_pieces_per_transfer=1, force_serial = False, comm=None,
                     N_parellel_rings = 1,
                     N_buffer_float_size = 1000000, N_buffer_int_size = 100,
-                    verbose = False
+                    verbose = False,
                     enable_orders_from_master = True):
         
 
