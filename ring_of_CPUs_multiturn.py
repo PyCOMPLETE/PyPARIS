@@ -245,7 +245,9 @@ class RingOfCPUs_multiturn(object):
                     buforders = ch.list_of_strings_2_buffer(orders_from_master)
                     if len(buforders) > self.N_buffer_int_size:
                         raise ValueError('Int buffer is too small!')
-                    self.comm.Bcast(buforders, self.master_id)
+                    self.buf_int = 0*self.buf_int
+                    self.buf_int[:len(buforders)]=buforders
+                    self.comm.Bcast(self.buf_int, self.master_id)
                 else:    
                     # receive orders from the master
                     self.comm.Bcast(self.buf_int, self.master_id)
