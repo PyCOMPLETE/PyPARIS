@@ -10,6 +10,9 @@ def gen_matched_multibunch_beam(machine, n_macroparticles_per_bunch, filling_pat
     b_spac_m =  b_spac_s*machine.beta*clight
     b_spac_buckets = np.round(b_spac_m/bucket_length_m)
 
+    if np.abs(b_spac_buckets*bucket_length_m-b_spac_m)/b_spac_m > 0.03:
+        raise ValueError('Bunch spacing is not a multiple of the bucket length!')
+
     if non_linear_long_matching:
         generate_bunch = machine.generate_6D_Gaussian_bunch_matched
     else:
