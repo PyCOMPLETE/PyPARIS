@@ -1,6 +1,0 @@
-#!/bin/bash
-
-rm *.txt
-rm *.err
-rm *.out
-rm *.cmd
