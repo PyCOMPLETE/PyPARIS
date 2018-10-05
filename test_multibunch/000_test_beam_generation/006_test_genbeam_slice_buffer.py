@@ -1,15 +1,12 @@
 import sys
-sys.path.append('../../')
-sys.path.append('../')
-import numpy as np
+sys.path.append('../../../')
 
+import numpy as np
 from scipy.constants import c as clight, e as qe
 
 from PyHEADTAIL.particles.slicing import UniformBinSlicer
-
-
-
-import gen_multibunch_beam as gmb
+import PyPARIS.gen_multibunch_beam as gmb
+import PyECLOUD.mystyle as ms
 
 from machines_for_testing import SPS
 
@@ -24,16 +21,13 @@ z_cut = 2*sigma_z
 
 min_inten_slice4EC = 1e3
 
-
 non_linear_long_matching = False
 
 
-
-b_spac_s = 25e-9
-
 #Here head is left and tail is right
-#~ filling_pattern = [1., 0., 0., 1., 1., 1., 0.]
-#~ filling_pattern = 6*[1]
+# ~ b_spac_s = 25e-9
+# ~ filling_pattern = [1., 0., 0., 1., 1., 1., 0.]
+# ~ filling_pattern = 6*[1]
 
 b_spac_s = 5e-9
 filling_pattern = 5*([1.]+4*[0.])
@@ -53,7 +47,7 @@ list_bunches = gmb.gen_matched_multibunch_beam(machine, macroparticlenumber, fil
 
 beam = sum(list_bunches)
 
-import slicing_tool as st
+import PyPARIS.slicing_tool as st
 import PyPARIS.communication_helpers as ch
 
 # Turn slices into buffer
@@ -76,6 +70,7 @@ thin_slice_set = beam.get_slices(thin_slicer, statistics=True)
 import matplotlib.pyplot as plt
 
 plt.close('all')
+ms.mystyle_arial(fontsz=14, dist_tick_lab=5)
 plt.figure(1)
 
 

@@ -1,0 +1,8 @@
+#!/usr/bin/bash
+#SBATCH -p batch-long
+#SBATCH -n 360
+#SBATCH -t 10-00:00:00
+# --hint=nomultithread
+
+source /hpcscratch/user/giadarol/sim_workspace_PyPARIS/python27/virtualenvs/py2.7/bin/activate
+srun python for000_run_sim.py
