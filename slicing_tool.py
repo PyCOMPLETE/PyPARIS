@@ -71,7 +71,8 @@ def slice_a_bunch(this_bunch, z_cut, n_slices):
                     charge=this_bunch.charge,
                     mass=this_bunch.mass, circumference=this_bunch.circumference, 
                     gamma=this_bunch.gamma, 
-                    coords_n_momenta_dict=this_bunch)
+                    coords_n_momenta_dict=this_bunch.get_coords_n_momenta_dict())
+        copy_this_bunch.slice_info = {kk:this_bunch.slice_info[kk] for kk in this_bunch.slice_info.keys()}
         
         list_slices_this_bunch = [copy_this_bunch]
         
