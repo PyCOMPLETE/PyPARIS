@@ -116,7 +116,17 @@ for ibun, bun in enumerate(list_bunches_rec):
         
 for sp in [sp1, sp2, sp3, spb1, spb2, spb3]:
     sp.grid('on')
-    
+
+for sp in [sp1, spb1]:
+    sp.set_ylabel('Beam profile [C/m]')
+for sp in [sp2, spb2]:
+    sp.set_ylabel('Interact with E.C.')
+
+spb3.set_ylabel('Bunch number')
+sp3.set_ylabel('Slice number')   
+
+for sp in [sp3, spb3]:
+    sp.set_xlabel('z [m]')
 
 import pprint
 # bunch to display
