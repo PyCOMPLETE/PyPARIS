@@ -65,7 +65,15 @@ def slice_a_bunch(this_bunch, z_cut, n_slices):
         list_slices_this_bunch = [slice_tail] + sliced + [slice_head]
         
     else:
-        list_slices_this_bunch = [this_bunch]
+        # Build a copy of the bunch
+        copy_this_bunch = Particles(macroparticlenumber=this_bunch.macroparticlenumber,
+                    particlenumber_per_mp=this_bunch.particlenumber_per_mp, 
+                    charge=this_bunch.charge,
+                    mass=this_bunch.mass, circumference=this_bunch.circumference, 
+                    gamma=this_bunch.gamma, 
+                    coords_n_momenta_dict=this_bunch)
+        
+        list_slices_this_bunch = [copy_this_bunch]
         
     for i_sl, ss in enumerate(list_slices_this_bunch[::-1]): # I want slice 0 to be at the head
         ss.slice_info['info_parent_bunch'] = {kk: this_bunch.slice_info[kk] for kk in this_bunch.slice_info.keys()}
