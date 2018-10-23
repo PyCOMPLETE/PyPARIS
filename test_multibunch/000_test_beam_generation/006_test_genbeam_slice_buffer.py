@@ -26,7 +26,7 @@ non_linear_long_matching = False
 
 # ~ #Here head is left and tail is right
 b_spac_s = 25e-9
-filling_pattern = [1., 0., 0., 1., 1., 1., 0.]
+filling_pattern = [1., 1., 0., 1., 1.]
 
 # ~ b_spac_s = 5e-9
 # ~ filling_pattern = 5*([1.]+4*[0.])
@@ -69,8 +69,8 @@ thin_slicer = UniformBinSlicer(n_slices=10000, z_cuts=(-len(filling_pattern)*buc
 thin_slice_set = beam.get_slices(thin_slicer, statistics=True)
 
 import matplotlib.pyplot as plt
-
 plt.close('all')
+
 ms.mystyle_arial(fontsz=14, dist_tick_lab=5)
 
 
@@ -84,16 +84,16 @@ fig1.set_facecolor('w')
 sp1 = plt.subplot(3,1,1)
 sp2 = plt.subplot(3,1,2, sharex=sp1)
 sp3 = plt.subplot(3,1,3, sharex=sp1)
-sp1.plot(thin_slice_set.z_centers, thin_slice_set.lambda_z(smoothen=False),'-')
+
 
 for ibuf, buf in enumerate(list_buffers_rec):
         ss = ch.buffer_2_beam(buf)
-        sp1.axvline(x=ss.slice_info['z_bin_center'], color='k', alpha=0.3, linestyle='--')
+        #sp1.axvline(x=ss.slice_info['z_bin_center'], color='k', alpha=0.3, linestyle='--')
         sp1.axvspan(xmin=ss.slice_info['z_bin_left'], xmax=ss.slice_info['z_bin_right'],
             color={0:'green', 1:'orange'}[ibuf%2], alpha = 0.3)
         sp2.stem([ss.slice_info['z_bin_center']], [ss.slice_info['interact_with_EC']])
         sp3.stem([ss.slice_info['z_bin_center']], [ss.slice_info['i_slice']])
-
+sp1.plot(thin_slice_set.z_centers, thin_slice_set.lambda_z(smoothen=False),'-', linewidth=2, color='k')
 
 # check bunch merge
 list_bunches_rec = []
@@ -104,15 +104,16 @@ for ibun, lbun in enumerate(list_bunch_buffers):
 fig2 = plt.figure(2, figsize=(8, 6*1.3))
 fig2.set_facecolor('w')
 spb1 = plt.subplot(3,1,1, sharex=sp1)
-spb1.plot(thin_slice_set.z_centers, thin_slice_set.lambda_z(smoothen=False))
+
 spb2 = plt.subplot(3,1,2, sharex=sp1)
 spb3 = plt.subplot(3,1,3, sharex=sp1)
 for ibun, bun in enumerate(list_bunches_rec):
-        spb1.axvline(x=bun.slice_info['z_bin_center'], color='k', alpha=0.3, linestyle='--')
+        #spb1.axvline(x=bun.slice_info['z_bin_center'], color='k', alpha=0.3, linestyle='--')
         spb1.axvspan(xmin=bun.slice_info['z_bin_left'], xmax=bun.slice_info['z_bin_right'],
             color={0:'r', 1:'b'}[ibun%2], alpha = 0.3)
         spb2.stem([bun.slice_info['z_bin_center']], [bun.slice_info['interact_with_EC']])
         spb3.stem([bun.slice_info['z_bin_center']], [bun.slice_info['i_bunch']])
+spb1.plot(thin_slice_set.z_centers, thin_slice_set.lambda_z(smoothen=False), linewidth=2, color='k')
         
 for sp in [sp1, sp2, sp3, spb1, spb2, spb3]:
     sp.grid('on')
