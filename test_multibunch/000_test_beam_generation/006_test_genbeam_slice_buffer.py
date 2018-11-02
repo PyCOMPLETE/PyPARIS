@@ -17,7 +17,7 @@ epsn_y = 3.5e-6
 sigma_z = 10e-2
 
 n_slices = 20
-z_cut = 2*sigma_z
+z_cut = 3*sigma_z
 
 min_inten_slice4EC = 1e3
 
@@ -131,7 +131,7 @@ for sp in [sp3, spb3]:
 
 import pprint
 # bunch to display
-i_obs = 3
+i_obs = 1 
 
 
 bobs = list_bunches[-i_obs-1]
