@@ -81,7 +81,7 @@ class Simulation(object):
 
 		# setup transverse losses (to "protect" the ecloud)
 		import PyHEADTAIL.aperture.aperture as aperture
-		apt_xy = aperture.EllipticalApertureXY(x_aper=ecloud.impact_man.chamb.x_aper, y_aper=ecloud.impact_man.chamb.y_aper)
+		apt_xy = aperture.EllipticalApertureXY(x_aper=x_aper, y_aper=y_aper)
 		self.machine.one_turn_map.append(apt_xy)
 		
 		n_non_parallelizable = 2 #rf and aperture
