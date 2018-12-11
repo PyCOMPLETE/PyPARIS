@@ -18,7 +18,7 @@ verbose = False
 sigma_z_bunch = 10e-2
 
 machine_configuration = 'HLLHC-injection'
-n_segments = 8
+n_segments = 4 
 
 octupole_knob = 0.0
 Qp_x = 0.
@@ -26,9 +26,9 @@ Qp_y = 0.
 
 flag_aperture = True
 
-enable_transverse_damper = False
-dampingrate_x = 10000.
-dampingrate_y = 50.
+enable_transverse_damper = True 
+dampingrate_x = 200.
+dampingrate_y = 100.
 
 # Beam properties
 non_linear_long_matching = False
@@ -61,7 +61,7 @@ class Simulation(object):
         self.N_turns = 10000
         self.N_buffer_float_size = 10000000
         self.N_buffer_int_size = 20
-        self.N_parellel_rings = 2
+        self.N_parellel_rings = 4
         
         self.n_slices_per_bunch = 200
         self.z_cut_slicing = 3*sigma_z_bunch
