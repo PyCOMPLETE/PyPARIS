@@ -15,7 +15,7 @@ import slicing_tool as sl
 
 verbose = False
 
-sigma_z_bunch = 10e-2
+sigma_z_bunch = 1e-2
 
 machine_configuration = 'HLLHC-injection'
 n_segments = 4 
@@ -47,7 +47,8 @@ min_inten_slice4EC = 1e7
 
 x_kick_in_sigmas = 0.25
 y_kick_in_sigmas = 0.25
-z_kick_in_m = 0.01
+z_kick_in_m = 0.005
+
 
 target_size_internal_grid_sigma = 10.
 
@@ -59,7 +60,7 @@ pickle_beam = False
 
 class Simulation(object):
     def __init__(self):
-        self.N_turns = 10000
+        self.N_turns = 2000 
         self.N_buffer_float_size = 10000000
         self.N_buffer_int_size = 20
         self.N_parellel_rings = 4
@@ -79,6 +80,7 @@ class Simulation(object):
         self.machine = LHC(n_segments = n_segments, machine_configuration = machine_configuration,
                         Qp_x=Qp_x, Qp_y=Qp_y,
                         octupole_knob=octupole_knob)
+        print('Expected Qs = %.3e'%self.machine.Q_s)
         self.n_non_parallelizable = 1 #RF
 
         inj_optics = self.machine.transverse_map.get_injection_optics()

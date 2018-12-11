@@ -14,6 +14,9 @@ flag_check_damp_time = True
 tau_damp_x = 200.
 tau_damp_y = 100.
 
+flag_check_Qs = True
+Q_s = 5.664e-03
+
 ob = mfm.myloadmat_to_obj(tag+'_matrices.mat')
 
 plt.close('all')
@@ -54,6 +57,8 @@ spectz = np.abs(np.fft.rfft(ob.mean_z[:-10, i_bunch]))
 spectz[0] = 0. # I am non interested in the average
 freqz = np.fft.rfftfreq(len(ob.mean_x[:-10, i_bunch]))
 axfz.plot(freqz, spectz)
+axfz.axvline(x=Q_s)
+
 
 if flag_check_damp_time:
     turn_num = np.arange(0, len(ob.mean_x[:, i_bunch]), dtype=np.float)
