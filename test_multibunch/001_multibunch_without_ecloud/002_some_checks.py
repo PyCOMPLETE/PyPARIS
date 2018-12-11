@@ -43,18 +43,30 @@ freq = np.fft.rfftfreq(len(ob.mean_x[:, i_bunch]))
 axfx.plot(freq, spectx)
 axfy.plot(freq, specty)
 
+# Check longitudinal plane
+fig3 = plt.figure(3)
+fig3.set_facecolor('w')
+axz = fig3.add_subplot(2,1,1, sharex=axx)
+axfz = fig3.add_subplot(2,1,2)
+
+axz.plot(ob.mean_z[:-10, i_bunch])
+spectz = np.abs(np.fft.rfft(ob.mean_z[:-10, i_bunch]))
+spectz[0] = 0. # I am non interested in the average
+freqz = np.fft.rfftfreq(len(ob.mean_x[:-10, i_bunch]))
+axfz.plot(freqz, spectz)
+
 if flag_check_damp_time:
     turn_num = np.arange(0, len(ob.mean_x[:, i_bunch]), dtype=np.float)
     axx.plot(ob.mean_x[0, i_bunch]*np.exp(-turn_num/tau_damp_x))
     axy.plot(ob.mean_y[0, i_bunch]*np.exp(-turn_num/tau_damp_y))
 
-for ax in [axx, axy, axfx, axfy]:
+for ax in [axx, axy, axfx, axfy, axz, axfz]:
     ax.ticklabel_format(style='sci', scilimits=(0,0),axis='y')
 
-for ax in [axx, axy, axfx, axfy]:
+for ax in [axx, axy, axfx, axfy, axz, axfz]:
     ax.yaxis.set_major_locator(MaxNLocator(5))
 
-for ax in [axx, axy, axfx, axfy]:
+for ax in [axx, axy, axfx, axfy, axz, axfz]:
     ax.grid(True)
 
 plt.show()

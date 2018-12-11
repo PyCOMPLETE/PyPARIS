@@ -47,6 +47,7 @@ min_inten_slice4EC = 1e7
 
 x_kick_in_sigmas = 0.25
 y_kick_in_sigmas = 0.25
+z_kick_in_m = 0.01
 
 target_size_internal_grid_sigma = 10.
 
@@ -137,6 +138,7 @@ class Simulation(object):
         for bunch in list_bunches:
             bunch.x += x_kick
             bunch.y += y_kick
+            bunch.z += z_kick_in_m
 
 
         return list_bunches
