@@ -21,6 +21,7 @@ def gen_matched_multibunch_beam(machine, n_macroparticles_per_bunch, filling_pat
     list_genbunches = []
     for i_slot, inten_slot in enumerate(filling_pattern):
         if inten_slot>0:
+	    print('Generating bunch at slot %d/%d'%(i_slot, len(filling_pattern)))
             bunch = generate_bunch(n_macroparticles_per_bunch, inten_slot*bunch_intensity, epsn_x, epsn_y, sigma_z=sigma_z)
             bunch.z -= b_spac_buckets*bucket_length_m*i_slot
             list_genbunches.append(bunch)
