@@ -114,7 +114,7 @@ class Simulation(object):
 		
 		# save results
 		import PyPARIS.myfilemanager as mfm
-		mfm.dict_to_h5('beam_coord.h5',{\
+		mfm.dict_to_h5({\
 			'beam_x':self.beam_x,
 			'beam_y':self.beam_y,
 			'beam_z':self.beam_z,
@@ -123,7 +123,8 @@ class Simulation(object):
 			'sz':self.sz,
 			'epsx':self.epsx,
 			'epsy':self.epsy,
-			'epsz':self.epsz})
+			'epsz':self.epsz},
+                        'beam_coord.h5')
 		
 		# output plots
 		if False:
