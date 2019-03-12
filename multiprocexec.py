@@ -78,12 +78,12 @@ def todo(sim_module_string, pid, N_proc, queue_list,
     SimClass = getattr(SimModule, class_name)
     
     if multiturn:
-        from ring_of_CPUs_multiturn import RingOfCPUs_multiturn
+        from PyPARIS.ring_of_CPUs_multiturn import RingOfCPUs_multiturn
         simulation_content = SimClass()
         myCPUring = RingOfCPUs_multiturn(simulation_content, comm=comm)
         myCPUring.run()
     else:
-        from ring_of_CPUs import RingOfCPUs
+        from PyPARIS.ring_of_CPUs import RingOfCPUs
         simulation_content = SimClass()
         myCPUring = RingOfCPUs(simulation_content, comm=comm)
         myCPUring.run()

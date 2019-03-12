@@ -1,14 +1,12 @@
-import sys, os
-BIN = os.path.expanduser("../../../")
-sys.path.append(BIN)
+import os, sys
 BIN = os.path.expanduser("../../")
 sys.path.append(BIN)
 
+import PyPARIS.share_segments as shs
+import PyPARIS.communication_helpers as ch
 
-import communication_helpers as ch
 import numpy as np
 from scipy.constants import c
-import share_segments as shs
 
 
 class Simulation(object):
