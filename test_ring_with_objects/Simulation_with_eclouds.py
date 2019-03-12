@@ -1,5 +1,5 @@
 import sys, os
-IN = os.path.expanduser("../../")
+BIN = os.path.expanduser("../../")
 sys.path.append(BIN)
 
 import numpy as np
