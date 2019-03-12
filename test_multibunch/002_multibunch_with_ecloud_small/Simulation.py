@@ -1,7 +1,5 @@
 import sys, os
-BIN = os.path.expanduser("../../")
-sys.path.append(BIN)
-BIN = os.path.expanduser("../../PyPARIS")
+BIN = os.path.expanduser("../../../")
 sys.path.append(BIN)
 
 import types
@@ -9,9 +7,9 @@ import types
 import numpy as np
 from scipy.constants import c
 
-import communication_helpers as ch
-import share_segments as shs
-import slicing_tool as sl
+import PyPARIS.communication_helpers as ch
+import PyPARIS.share_segments as shs
+import PyPARIS.slicing_tool as sl
 
 verbose = False
 
@@ -20,7 +18,6 @@ sigma_z_bunch = 10e-2
 machine_configuration = 'HLLHC-injection'
 n_segments = 8
 
-octupole_knob = 0.0
 Qp_x = 0.
 Qp_y = 0.
 
@@ -80,8 +77,7 @@ class Simulation(object):
 
         from LHC_custom import LHC
         self.machine = LHC(n_segments = n_segments, machine_configuration = machine_configuration,
-                        Qp_x=Qp_x, Qp_y=Qp_y,
-                        octupole_knob=octupole_knob)
+                        Qp_x=Qp_x, Qp_y=Qp_y)
         self.n_non_parallelizable = 1 #RF
 
         inj_optics = self.machine.transverse_map.get_injection_optics()
@@ -172,7 +168,7 @@ class Simulation(object):
         from scipy.constants import c as clight, e as qe
         from PyHEADTAIL.particles.slicing import UniformBinSlicer
         
-        import gen_multibunch_beam as gmb
+        import PyPARIS.gen_multibunch_beam as gmb
         list_bunches = gmb.gen_matched_multibunch_beam(self.machine, macroparticlenumber, filling_pattern, b_spac_s, 
                 bunch_intensity, epsn_x, epsn_y, sigma_z, non_linear_long_matching, min_inten_slice4EC)
                 
