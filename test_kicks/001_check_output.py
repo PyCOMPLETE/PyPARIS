@@ -1,6 +1,10 @@
+import sys
+sys.path.append('../../')
+
 import numpy as np
 import pylab as pl
-import myfilemanager as mfm
+
+import PyPARIS.myfilemanager as mfm
 import mystyle as ms
 
 import time
