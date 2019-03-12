@@ -155,7 +155,7 @@ class Simulation(object):
 		
 		# save results
 		import PyPARIS.myfilemanager as mfm
-		mfm.save_dict_to_h5({\
+		mfm.dict_to_h5({\
 			'beam_x':self.beam_x,
 			'beam_y':self.beam_y,
 			'beam_z':self.beam_z,
