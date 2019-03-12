@@ -44,7 +44,7 @@ class Simulation(object):
 		chamb_type = 'polyg'
 		x_aper = 2.300000e-02
 		y_aper = 1.800000e-02
-		filename_chm = '../pyecloud_config/LHC_chm_ver.mat'
+		filename_chm = 'pyecloud_config/LHC_chm_ver.mat'
 		B_multip_per_eV = [1.190000e-12]
 		B_multip_per_eV = np.array(B_multip_per_eV)
 		fraction_device = 0.65
@@ -60,7 +60,7 @@ class Simulation(object):
 		
 		import PyECLOUD.PyEC4PyHT as PyEC4PyHT
 		ecloud = PyEC4PyHT.Ecloud(L_ecloud=self.machine.circumference/n_segments, slicer=None, 
-					Dt_ref=10e-12, pyecl_input_folder='../pyecloud_config',
+					Dt_ref=10e-12, pyecl_input_folder='pyecloud_config',
 					chamb_type = chamb_type,
 					x_aper=x_aper, y_aper=y_aper,
 					filename_chm=filename_chm, Dh_sc=Dh_sc,
