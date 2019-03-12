@@ -1,6 +1,7 @@
 import pylab as pl
-import myfilemanager as mfm
 import numpy as np
+
+import PyPARIS.myfilemanager as mfm
 
 ob = mfm.object_with_arrays_and_scalar_from_h5('beam_coord.h5') 
 
