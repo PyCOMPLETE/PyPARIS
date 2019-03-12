@@ -14,6 +14,7 @@ class LHC(BasicSynchrotron):
 
         pp.machine_configuration = machine_configuration
         pp.optics_mode = optics_mode
+        pp.use_cython = use_cython
 
         pp.longitudinal_mode = 'non-linear' 
         pp.alpha       = 3.225e-04
