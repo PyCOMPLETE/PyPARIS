@@ -1,3 +1,6 @@
+import sys
+sys.path.append('../../')
+
 import pylab as pl
 import numpy as np
 
