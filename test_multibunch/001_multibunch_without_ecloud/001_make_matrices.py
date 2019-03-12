@@ -1,4 +1,6 @@
 import sys, os
+sys.path.append('../../../')
+
 import numpy as np
 
 
@@ -26,8 +28,8 @@ to_be_saved = [
 
 list_files = [sim_folder+'/bunch_monitor_ring%03d.h5'%ii for ii in range(n_rings)]
 
-import myfilemanager as mfm
-dict_data = mfm.bunchh5list_to_dict(list_files, permissive=True)
+import PyPARIS.myfilemanager as mfm
+dict_data = mfm.monitorh5list_to_dict(list_files, permissive=True)
 
 print 'Data loaded!'
 

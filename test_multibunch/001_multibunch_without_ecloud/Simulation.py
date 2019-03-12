@@ -1,17 +1,14 @@
 import sys, os
 BIN = os.path.expanduser("../../../")
 sys.path.append(BIN)
-BIN = os.path.expanduser("../../../PyPARIS")
-sys.path.append(BIN)
-
 import types
 
 import numpy as np
 from scipy.constants import c
 
-import communication_helpers as ch
-import share_segments as shs
-import slicing_tool as sl
+import PyPARIS.communication_helpers as ch
+import PyPARIS.share_segments as shs
+import PyPARIS.slicing_tool as sl
 
 verbose = False
 
@@ -20,7 +17,6 @@ sigma_z_bunch = 1e-2
 machine_configuration = 'HLLHC-injection'
 n_segments = 4 
 
-octupole_knob = 0.0
 Qp_x = 0.
 Qp_y = 0.
 
@@ -78,8 +74,7 @@ class Simulation(object):
 
         from LHC_custom import LHC
         self.machine = LHC(n_segments = n_segments, machine_configuration = machine_configuration,
-                        Qp_x=Qp_x, Qp_y=Qp_y,
-                        octupole_knob=octupole_knob)
+                        Qp_x=Qp_x, Qp_y=Qp_y)
         print('Expected Qs = %.3e'%self.machine.Q_s)
         self.n_non_parallelizable = 1 #RF
 

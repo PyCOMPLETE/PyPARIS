@@ -1,9 +1,12 @@
 import sys, os
+sys.path.append('../../../')
+
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
-import myfilemanager as mfm
+import PyPARIS.myfilemanager as mfm
 
 import mystyle as ms
 
