@@ -1,13 +1,12 @@
 import sys, os
-BIN = os.path.expanduser("../../../")
-sys.path.append(BIN)
 BIN = os.path.expanduser("../../")
 sys.path.append(BIN)
 
-import communication_helpers as ch
 import numpy as np
 from scipy.constants import c, e
-import share_segments as shs
+
+import PyPARIS.share_segments as shs
+import PyPARIS.communication_helpers as ch
 
 # compute sigma x and y
 epsn_x = 2.5e-6
@@ -177,15 +176,16 @@ class Simulation(object):
 		z_after = np.take(z_after, indsort)
 
 		# save results
-		import myfilemanager as mfm
-		mfm.save_dict_to_h5('particles_at_turn_%d.h5'%self.ring_of_CPUs.i_turn,{\
-		'id_after': id_after,
-		'xp_after': xp_after,
-		'yp_after': yp_after,
-		'z_after': z_after,
-		'id_before':self.id_before,
-		'xp_before':self.xp_before,
-		'yp_before':self.yp_before})
+		import PyPARIS.myfilemanager as mfm
+		mfm.dict_to_h5({\
+		    'id_after': id_after,
+		    'xp_after': xp_after,
+		    'yp_after': yp_after,
+		    'z_after': z_after,
+		    'id_before':self.id_before,
+		    'xp_before':self.xp_before,
+		    'yp_before':self.yp_before},
+                    'particles_at_turn_%d.h5'%self.ring_of_CPUs.i_turn)
 
 
 		# prepare next turn (re-slice)

@@ -1,13 +1,9 @@
 #!/usr/bin/env python
-
 import multiprocessing as mp
 import numpy as np
 import os, sys
 
-BIN = os.path.expanduser("./")
-sys.path.append(BIN)
-
-import sys
+sys.path.append('./')
 	
 if len(sys.argv)!=2:
     raise ValueError('\n\nSyntax must be:\n\t serialexec.py sim_class=module.class\n\n')
@@ -26,7 +22,7 @@ class_name = sim_module_strings[1]
 SimModule = __import__(module_name)
 SimClass = getattr(SimModule, class_name)
 
-from ring_of_CPUs import RingOfCPUs
+from PyPARIS.ring_of_CPUs import RingOfCPUs
 simulation_content = SimClass()
 myCPUring = RingOfCPUs(simulation_content)
 myCPUring.run()
