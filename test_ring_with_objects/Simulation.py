@@ -1,14 +1,12 @@
-import sys, os
-BIN = os.path.expanduser("../../../")
-sys.path.append(BIN)
+import os, sys
 BIN = os.path.expanduser("../../")
 sys.path.append(BIN)
 
+import PyPARIS.share_segments as shs
+import PyPARIS.communication_helpers as ch
 
-import communication_helpers as ch
 import numpy as np
 from scipy.constants import c
-import share_segments as shs
 
 
 class Simulation(object):
@@ -115,8 +113,8 @@ class Simulation(object):
 	def finalize_simulation(self):
 		
 		# save results
-		import myfilemanager as mfm
-		mfm.save_dict_to_h5('beam_coord.h5',{\
+		import PyPARIS.myfilemanager as mfm
+		mfm.dict_to_h5({\
 			'beam_x':self.beam_x,
 			'beam_y':self.beam_y,
 			'beam_z':self.beam_z,
@@ -125,7 +123,8 @@ class Simulation(object):
 			'sz':self.sz,
 			'epsx':self.epsx,
 			'epsy':self.epsy,
-			'epsz':self.epsz})
+			'epsz':self.epsz},
+                        'beam_coord.h5')
 		
 		# output plots
 		if False:

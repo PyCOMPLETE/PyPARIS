@@ -1,13 +1,15 @@
+import sys
+sys.path.append('../../../')
+
 import numpy as np 
-#~ import bunchh5_to_obj as bh5o
-import myfilemanager as mfm
 import mystyle as ms
 import pylab as pl
 from scipy.constants import c as ccc
 
+import PyPARIS.myfilemanager as mfm
 
 pl.close('all')
-ob = mfm.bunchh5_to_obj('bunch_evolution.h5')
+ob = mfm.monitorh5_to_obj('bunch_evolution.h5')
 
 pl.figure(1)
 pl.subplot(2,3,1)

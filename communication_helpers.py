@@ -37,7 +37,7 @@ def list_of_strings_2_buffer(strlist):
 	
 def buffer_2_list_of_strings(buf):
 	str_received = ''.join(map(unichr, list(buf)))
-	strlist = map(str, str_received.split('\n')[0].split(';'))[:-1]
+	strlist = list(map(str, str_received.split('\n')[0].split(';')))[:-1]
 	return strlist
 
 

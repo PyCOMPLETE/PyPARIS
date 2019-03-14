@@ -1,34 +1,30 @@
 import sys, os
-BIN = os.path.expanduser("../../")
+BIN = os.path.expanduser("../../../")
 sys.path.append(BIN)
-BIN = os.path.expanduser("../../PyPARIS")
-sys.path.append(BIN)
-
 import types
 
 import numpy as np
 from scipy.constants import c
 
-import communication_helpers as ch
-import share_segments as shs
-import slicing_tool as sl
+import PyPARIS.communication_helpers as ch
+import PyPARIS.share_segments as shs
+import PyPARIS.slicing_tool as sl
 
 verbose = False
 
-sigma_z_bunch = 10e-2
+sigma_z_bunch = 1e-2
 
 machine_configuration = 'HLLHC-injection'
-n_segments = 8
+n_segments = 4 
 
-octupole_knob = 0.0
 Qp_x = 0.
 Qp_y = 0.
 
 flag_aperture = True
 
-enable_transverse_damper = False
-dampingrate_x = 10000.
-dampingrate_y = 50.
+enable_transverse_damper = True 
+dampingrate_x = 200.
+dampingrate_y = 100.
 
 # Beam properties
 non_linear_long_matching = False
@@ -39,33 +35,31 @@ epsn_y = 2.5e-6
 sigma_z = sigma_z_bunch
 
 #Filling pattern: here head is left and tail is right
-b_spac_s = 25e-9/5
-filling_pattern = 4*([1.]+4*[0.])
+b_spac_s = 25e-9
+filling_pattern = 4*([1.])
 
-macroparticlenumber = 1000000
+macroparticlenumber = 10000
 min_inten_slice4EC = 1e7
 
 x_kick_in_sigmas = 0.25
 y_kick_in_sigmas = 0.25
+z_kick_in_m = 0.005
+
 
 target_size_internal_grid_sigma = 10.
 
-enable_ecloud = True
-
 enable_kick_x = True
 enable_kick_y = False
-
-L_ecloud_tot = 20e3
 
 pickle_beam = False
 
 
 class Simulation(object):
     def __init__(self):
-        self.N_turns = 10000
+        self.N_turns = 2000 
         self.N_buffer_float_size = 10000000
         self.N_buffer_int_size = 20
-        self.N_parellel_rings = 2
+        self.N_parellel_rings = 4
         
         self.n_slices_per_bunch = 200
         self.z_cut_slicing = 3*sigma_z_bunch
@@ -80,8 +74,8 @@ class Simulation(object):
 
         from LHC_custom import LHC
         self.machine = LHC(n_segments = n_segments, machine_configuration = machine_configuration,
-                        Qp_x=Qp_x, Qp_y=Qp_y,
-                        octupole_knob=octupole_knob)
+                        Qp_x=Qp_x, Qp_y=Qp_y)
+        print('Expected Qs = %.3e'%self.machine.Q_s)
         self.n_non_parallelizable = 1 #RF
 
         inj_optics = self.machine.transverse_map.get_injection_optics()
@@ -103,35 +97,6 @@ class Simulation(object):
             self.machine.one_turn_map.append(damper)
             self.n_non_parallelizable +=1
             
-        if enable_ecloud:
-            print('Build ecloud...')
-            import PyECLOUD.PyEC4PyHT as PyEC4PyHT
-            ecloud = PyEC4PyHT.Ecloud(
-                    L_ecloud=L_ecloud_tot/n_segments, slicer=None, slice_by_slice_mode=True,
-                    Dt_ref=5e-12, pyecl_input_folder='./pyecloud_config',
-                    chamb_type = 'polyg' ,
-                    filename_chm= 'LHC_chm_ver.mat', 
-                    #init_unif_edens_flag=1,
-                    #init_unif_edens=1e7,
-                    #N_mp_max = 3000000,
-                    #nel_mp_ref_0 = 1e7/(0.7*3000000),
-                    #B_multip = [0.],
-                    #~ PyPICmode = 'ShortleyWeller_WithTelescopicGrids',
-                    #~ f_telescope = 0.3,
-                    target_grid = {'x_min_target':-target_size_internal_grid_sigma*sigma_x_smooth, 'x_max_target':target_size_internal_grid_sigma*sigma_x_smooth,
-                                   'y_min_target':-target_size_internal_grid_sigma*sigma_y_smooth,'y_max_target':target_size_internal_grid_sigma*sigma_y_smooth,
-                                   'Dh_target':.2*sigma_x_smooth},
-                    #~ N_nodes_discard = 10.,
-                    #~ N_min_Dh_main = 10,
-                    #x_beam_offset = x_beam_offset,
-                    #y_beam_offset = y_beam_offset,
-                    #probes_position = probes_position,
-                    save_pyecl_outp_as = 'cloud_evol_ring%d'%self.ring_of_CPUs.myring,
-                    sparse_solver = 'PyKLU', enable_kick_x=enable_kick_x, enable_kick_y=enable_kick_y)
-            print('Done.')
-
-
-
         # split the machine
         i_end_parallel = len(self.machine.one_turn_map)-self.n_non_parallelizable
         sharing = shs.ShareSegments(i_end_parallel, self.ring_of_CPUs.N_nodes_per_ring)
@@ -140,27 +105,7 @@ class Simulation(object):
 
         if self.ring_of_CPUs.I_am_at_end_ring:
             self.non_parallel_part = self.machine.one_turn_map[i_end_parallel:]
-            
-
-        #install eclouds in my part
-        if enable_ecloud:
-            my_new_part = []
-            self.my_list_eclouds = []
-            for ele in self.mypart:
-                if ele in self.machine.transverse_map:
-                    ecloud_new = ecloud.generate_twin_ecloud_with_shared_space_charge()
-                    
-                    # we save buildup info only for the first cloud in each ring
-                    if self.ring_of_CPUs.myid_in_ring>0 or len(self.my_list_eclouds)>0:
-                        ecloud_new.remove_savers()
-                    
-                    my_new_part.append(ecloud_new)
-                    self.my_list_eclouds.append(ecloud_new)
-                my_new_part.append(ele)
-
-            self.mypart = my_new_part
-            
-            print('Hello, I am %d.%d, my part looks like: %s. Saver status: %s'%(self.ring_of_CPUs.myring, self.ring_of_CPUs.myid_in_ring, self.mypart, [(ec.cloudsim.cloud_list[0].pyeclsaver is not None) for ec in self.my_list_eclouds]))
+            print('Hello, I am %d.%d, my part looks like: %s.'%(self.ring_of_CPUs.myring, self.ring_of_CPUs.myid_in_ring, self.mypart))
             
 
 
@@ -190,6 +135,7 @@ class Simulation(object):
         for bunch in list_bunches:
             bunch.x += x_kick
             bunch.y += y_kick
+            bunch.z += z_kick_in_m
 
 
         return list_bunches

@@ -1,8 +1,6 @@
 import sys, os
 BIN = os.path.expanduser("../../../")
 sys.path.append(BIN)
-BIN = os.path.expanduser("../../")
-sys.path.append(BIN)
 
 import multiprocessing as mp
 import numpy as np
@@ -67,7 +65,7 @@ def todo(pid, N_proc, queue_list,
 	comm = mpComm(pid, N_proc, queue_list,
 					mutex, barriex, turnstile, turnstile2, cnt)
 
-	from ring_of_CPUs import RingOfCPUs
+	from PyPARIS.ring_of_CPUs import RingOfCPUs
 	from Simulation_with_eclouds import Simulation
 	simulation_content = Simulation()
 
