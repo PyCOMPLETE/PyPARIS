@@ -98,8 +98,6 @@ class RingOfCPUs_multiturn(object):
 
         self.sim_content.init_all()
         
-        self.comm.Barrier() # only for stdoutp
-        
         if self.I_am_the_master:
             print2logandstdo('PyPARIS simulation -- multiturn parallelization')#, mode='w+')
             print2logandstdo(comm_info)
@@ -114,8 +112,6 @@ class RingOfCPUs_multiturn(object):
             import sys
             print2logandstdo('Running on %s'%socket.gethostname())
             print2logandstdo('Interpreter at %s'%sys.executable)			
-        
-        self.comm.Barrier() # only for stdoutp
         
         self.left = int(np.mod(self.myid-1, self.N_nodes))
         self.right = int(np.mod(self.myid+1, self.N_nodes))
@@ -133,8 +129,6 @@ class RingOfCPUs_multiturn(object):
             list_bunches = sim_content.init_master()
             self.bunches_to_be_treated.extend(list_bunches)
             
-        self.comm.Barrier()
-
     def run(self):
         
         
@@ -260,7 +254,6 @@ class RingOfCPUs_multiturn(object):
             iteration+=1
 
             # (TEMPORARY!) To stop
-            self.comm.Barrier()
             # if iteration==10000:
             #     break
             # (TEMPORARY!)
