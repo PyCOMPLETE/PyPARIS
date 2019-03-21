@@ -83,7 +83,7 @@ class RingOfCPUs(object):
             self.comm.Barrier() # wait that all are done with the init
    
    
-   def init_sim_objects(self):
+    def init_sim_objects(self):
 
         self.sim_content.init_all()
         if self.I_am_the_master:
