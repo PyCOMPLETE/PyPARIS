@@ -11,7 +11,8 @@ def print2logandstdo(message, mode='a+'):
 
 class RingOfCPUs(object):
     def __init__(self, sim_content, N_pieces_per_transfer=1, force_serial = False, comm=None,
-                    N_buffer_float_size = 1000000, N_buffer_int_size = 100):
+                    N_buffer_float_size = 1000000, N_buffer_int_size = 100, 
+                    init_sim_objects_auto=True):
         
         self.sim_content = sim_content
         self.N_turns = sim_content.N_turns
@@ -62,8 +63,6 @@ class RingOfCPUs(object):
 
         self.buf_int = np.array(self.N_buffer_int_size*[0])
 
-        self.sim_content.init_all()
-        
         if self.I_am_the_master:
             print2logandstdo('PyPARIS simulation')#, mode='w+')
             print2logandstdo(comm_info)
@@ -77,7 +76,16 @@ class RingOfCPUs(object):
             print2logandstdo('Interpreter at %s'%sys.executable)			
         
         self.comm.Barrier() # only for stdoutp
+        
+        # Initialize simulation objects
+        if init_sim_objects_auto:
+            self.init_sim_objects()
+            self.comm.Barrier() # wait that all are done with the init
+   
+   
+    def init_sim_objects(self):
 
+        self.sim_content.init_all()
         if self.I_am_the_master:
             self.pieces_to_be_treated = self.sim_content.init_master()
             self.N_pieces = len(self.pieces_to_be_treated)
@@ -93,7 +101,6 @@ class RingOfCPUs(object):
                 self.left = self.myid-1
             self.right = self.myid+1
             
-        self.comm.Barrier() # wait that all are done with the init
 
     def run(self):
         if self.I_am_the_master:
