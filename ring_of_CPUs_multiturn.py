@@ -1,5 +1,7 @@
 import numpy as np
 import time
+import sys
+import socket
 
 from ring_of_CPUs import SingleCoreComminicator
 
@@ -67,6 +69,11 @@ class RingOfCPUs_multiturn(object):
             from mpi4py import MPI
             self.comm = MPI.COMM_WORLD
             
+            if self.mpi_verbose:                
+                print('Interpreter at %s (cpu %d)'%(sys.executable, self.comm.Get_rank()))			
+                print('mpi4py version: %s (cpu %d)'%(mpi4py.__version__, self.comm.Get_rank()))			
+                print('Running on %s (cpu %d)'%(socket.gethostname(), self.comm.Get_rank()))			
+
         #check if there is only one node
         if self.comm.Get_size()==1:
             #in case it is forced by user it will be rebound but there is no harm in that
@@ -115,8 +122,6 @@ class RingOfCPUs_multiturn(object):
             print2logandstdo('Multi-ring info:')
             print2logandstdo('N_parellel_rings = %d'%self.N_parellel_rings)
             print2logandstdo('N_nodes_per_ring = %d'%self.N_nodes_per_ring)
-            import socket
-            import sys
             print2logandstdo('Running on %s'%socket.gethostname())
             print2logandstdo('Interpreter at %s'%sys.executable)			
         
