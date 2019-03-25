@@ -69,7 +69,8 @@ class RingOfCPUs_multiturn(object):
             from mpi4py import MPI
             self.comm = MPI.COMM_WORLD
             
-            if self.mpi_verbose:                
+            if self.mpi_verbose:
+                import mpi4py
                 print('Interpreter at %s (cpu %d)'%(sys.executable, self.comm.Get_rank()))			
                 print('mpi4py version: %s (cpu %d)'%(mpi4py.__version__, self.comm.Get_rank()))			
                 print('Running on %s (cpu %d)'%(socket.gethostname(), self.comm.Get_rank()))			
