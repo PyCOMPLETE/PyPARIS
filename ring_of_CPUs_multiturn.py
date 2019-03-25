@@ -283,15 +283,12 @@ class RingOfCPUs_multiturn(object):
             sendbuf = ch.combine_float_buffers(list_of_buffers_to_send)
             if len(sendbuf) > self.N_buffer_float_size:
                 raise ValueError('Float buffer (%d) is too small!\n %d required.'%(self.N_buffer_float_size, len(sendbuf)))
-            if self.mpi_verbose:
-                self.verbose_mpi_out('At Sendrecv, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
 
+            self.verbose_mpi_out('At Sendrecv, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
             self.comm.Sendrecv(sendbuf, dest=self.right, sendtag=self.right, 
                         recvbuf=self.buf_float, source=self.left, recvtag=self.myid)
-
-            if self.mpi_verbose:
-                self.verbose_mpi_out('After Sendrecv, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
-
+            self.verbose_mpi_out('After Sendrecv, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
+                
             list_received_buffers = ch.split_float_buffers(self.buf_float)
     
             # Handle orders (for now only to stopping the simulation)
@@ -304,23 +301,15 @@ class RingOfCPUs_multiturn(object):
                     self.buf_int = 0*self.buf_int
                     self.buf_int[:len(buforders)]=buforders
 
-                    if self.mpi_verbose:
-                        self.verbose_mpi_out('At Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
-
+                    self.verbose_mpi_out('At Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
                     self.comm.Bcast(self.buf_int, self.master_id)
-
-                    if self.mpi_verbose:
-                        self.verbose_mpi_out('After Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
+                    self.verbose_mpi_out('After Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
 
                 else:    
                     # receive orders from the master
-                    if self.mpi_verbose:
-                        self.verbose_mpi_out('At Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
-
+                    self.verbose_mpi_out('At Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
                     self.comm.Bcast(self.buf_int, self.master_id)
-
-                    if self.mpi_verbose:
-                        self.verbose_mpi_out('After Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
+                    self.verbose_mpi_out('After Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
 
                     orders_from_master = ch.buffer_2_list_of_strings(self.buf_int)
 
