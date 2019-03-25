@@ -15,7 +15,7 @@ def print2logandstdo(message, mode='a+'):
         fid.writelines([message+'\n'])
 
 
-def verbose_mpi_out(message, myid, mode='a+'):
+def verbose_mpi_out(message, myid, mpi_verbose, mode='a+'):
     t_now = time.mktime(time.localtime())
     time_string = time.strftime("%d/%m/%Y %H:%M:%S", time.localtime(t_now))
 
@@ -27,7 +27,7 @@ class RingOfCPUs_multiturn(object):
     def __init__(self, sim_content, N_pieces_per_transfer=1, force_serial = False, comm=None,
                     N_parellel_rings = 1,
                     N_buffer_float_size = 1000000, N_buffer_int_size = 100,
-                    verbose = False, mpi_verbose = False,
+                    verbose = False, mpi_verbose = False, enable_barriers = False,
                     enable_orders_from_master = True):
         
 
@@ -41,6 +41,7 @@ class RingOfCPUs_multiturn(object):
         
         self.verbose = verbose
         self.mpi_verbose = mpi_verbose
+        self.enable_barriers = enable_barriers
         
         self.enable_orders_from_master = enable_orders_from_master
         
@@ -62,6 +63,9 @@ class RingOfCPUs_multiturn(object):
         if hasattr(sim_content, 'mpi_verbose'):
             self.mpi_verbose = sim_content.mpi_verbose
         
+        if hasattr(sim_content, 'enable_barriers'):
+            self.enable_barriers = sim_content.enable_barriers
+        
         
         self.sim_content.ring_of_CPUs = self
         
@@ -79,12 +83,18 @@ class RingOfCPUs_multiturn(object):
             
             if self.mpi_verbose:
                 import mpi4py
-                self.verbose_mpi_out = lambda message: verbose_mpi_out(message, self.comm.Get_rank())
-                
-                verbose_mpi_out('Debug file (cpu %d)'%(self.comm.Get_rank(), self.comm.Get_rank()), mode = 'w')
-                self.verbose_mpi_out('Interpreter at %s (cpu %d)'%(sys.executable, self.comm.Get_rank()))
-                self.verbose_mpi_out('mpi4py version: %s (cpu %d)'%(mpi4py.__version__, self.comm.Get_rank()))
-                self.verbose_mpi_out('Running on %s (cpu %d)'%(socket.gethostname(), self.comm.Get_rank()))			
+                self.verbose_mpi_out = lambda message: verbose_mpi_out(message, self.comm.Get_rank(), 
+                                                                       self.mpi_verbose)
+                verbose_mpi_out('Debug file (cpu %d)'%(self.comm.Get_rank()), self.comm.Get_rank(), 
+                                self.mpi_verbose, mode = 'w')
+
+            self.verbose_mpi_out('Interpreter at %s (cpu %d)'%(sys.executable, self.comm.Get_rank()))
+            self.verbose_mpi_out('mpi4py version: %s (cpu %d)'%(mpi4py.__version__, self.comm.Get_rank()))
+            self.verbose_mpi_out('Running on %s (cpu %d)'%(socket.gethostname(), self.comm.Get_rank()))			
+            if self.enable_barriers:
+                self.verbose_mpi_out('At barrier 1 (cpu %d)'%self.comm.Get_rank())
+                self.comm.Barrier()
+                self.verbose_mpi_out('After barrier 1 (cpu %d)'%self.comm.Get_rank())
 
         #check if there is only one node
         if self.comm.Get_size()==1:
@@ -122,8 +132,18 @@ class RingOfCPUs_multiturn(object):
         self.buf_float = np.zeros(self.N_buffer_float_size, dtype=np.float64)
         self.buf_int = np.array(self.N_buffer_int_size*[0])
 
+        if self.enable_barriers:
+            self.verbose_mpi_out('At barrier 2 (cpu %d)'%self.comm.Get_rank())
+            self.comm.Barrier()
+            self.verbose_mpi_out('After barrier 2 (cpu %d)'%self.comm.Get_rank())
+
         self.sim_content.init_all()
         
+        if self.enable_barriers:
+            self.verbose_mpi_out('At barrier 3 (cpu %d)'%self.comm.Get_rank())
+            self.comm.Barrier()
+            self.verbose_mpi_out('After barrier 3 (cpu %d)'%self.comm.Get_rank())
+
         if self.I_am_the_master:
             print2logandstdo('PyPARIS simulation -- multiturn parallelization')#, mode='w+')
             print2logandstdo(comm_info)
@@ -140,6 +160,11 @@ class RingOfCPUs_multiturn(object):
         self.left = int(np.mod(self.myid-1, self.N_nodes))
         self.right = int(np.mod(self.myid+1, self.N_nodes))
 
+        if self.enable_barriers:
+            self.verbose_mpi_out('At barrier 4 (cpu %d)'%self.comm.Get_rank())
+            self.comm.Barrier()
+            self.verbose_mpi_out('After barrier 4 (cpu %d)'%self.comm.Get_rank())
+
         if self.I_am_at_start_ring:
             self.bunches_to_be_treated = deque([])
             self.slices_to_be_treated = []
@@ -152,6 +177,12 @@ class RingOfCPUs_multiturn(object):
         if self.I_am_the_master:
             list_bunches = sim_content.init_master()
             self.bunches_to_be_treated.extend(list_bunches)
+
+        if self.enable_barriers:
+            self.verbose_mpi_out('At barrier 5 (cpu %d)'%self.comm.Get_rank())
+            self.comm.Barrier()
+            self.verbose_mpi_out('After barrier 5 (cpu %d)'%self.comm.Get_rank())
+
             
     def run(self):
         
