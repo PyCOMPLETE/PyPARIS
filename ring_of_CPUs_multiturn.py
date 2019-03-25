@@ -15,6 +15,14 @@ def print2logandstdo(message, mode='a+'):
         fid.writelines([message+'\n'])
 
 
+def verbose_mpi_out(message, myid, mode='a+'):
+    t_now = time.mktime(time.localtime())
+    time_string = time.strftime("%d/%m/%Y %H:%M:%S", time.localtime(t_now))
+
+    with open('mpi_logfile_cpu%03d.txt'%myid, mode) as fid:
+        fid.writelines([time_string + ' - ' + message + '\n'])
+
+
 class RingOfCPUs_multiturn(object):
     def __init__(self, sim_content, N_pieces_per_transfer=1, force_serial = False, comm=None,
                     N_parellel_rings = 1,
@@ -71,9 +79,12 @@ class RingOfCPUs_multiturn(object):
             
             if self.mpi_verbose:
                 import mpi4py
-                print('Interpreter at %s (cpu %d)'%(sys.executable, self.comm.Get_rank()))			
-                print('mpi4py version: %s (cpu %d)'%(mpi4py.__version__, self.comm.Get_rank()))			
-                print('Running on %s (cpu %d)'%(socket.gethostname(), self.comm.Get_rank()))			
+                self.verbose_mpi_out = lambda message: verbose_mpi_out(message, self.comm.Get_rank())
+                
+                verbose_mpi_out('Debug file (cpu %d)'%(self.comm.Get_rank(), self.comm.Get_rank()), mode = 'w')
+                self.verbose_mpi_out('Interpreter at %s (cpu %d)'%(sys.executable, self.comm.Get_rank()))
+                self.verbose_mpi_out('mpi4py version: %s (cpu %d)'%(mpi4py.__version__, self.comm.Get_rank()))
+                self.verbose_mpi_out('Running on %s (cpu %d)'%(socket.gethostname(), self.comm.Get_rank()))			
 
         #check if there is only one node
         if self.comm.Get_size()==1:
@@ -242,13 +253,13 @@ class RingOfCPUs_multiturn(object):
             if len(sendbuf) > self.N_buffer_float_size:
                 raise ValueError('Float buffer (%d) is too small!\n %d required.'%(self.N_buffer_float_size, len(sendbuf)))
             if self.mpi_verbose:
-                print('At Sendrecv, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
+                self.verbose_mpi_out('At Sendrecv, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
 
             self.comm.Sendrecv(sendbuf, dest=self.right, sendtag=self.right, 
                         recvbuf=self.buf_float, source=self.left, recvtag=self.myid)
 
             if self.mpi_verbose:
-                print('After Sendrecv, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
+                self.verbose_mpi_out('After Sendrecv, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
 
             list_received_buffers = ch.split_float_buffers(self.buf_float)
     
@@ -263,22 +274,22 @@ class RingOfCPUs_multiturn(object):
                     self.buf_int[:len(buforders)]=buforders
 
                     if self.mpi_verbose:
-                        print('At Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
+                        self.verbose_mpi_out('At Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
 
                     self.comm.Bcast(self.buf_int, self.master_id)
 
                     if self.mpi_verbose:
-                        print('After Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
+                        self.verbose_mpi_out('After Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
 
                 else:    
                     # receive orders from the master
                     if self.mpi_verbose:
-                        print('At Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
+                        self.verbose_mpi_out('At Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
 
                     self.comm.Bcast(self.buf_int, self.master_id)
 
                     if self.mpi_verbose:
-                        print('After Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
+                        self.verbose_mpi_out('After Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
 
                     orders_from_master = ch.buffer_2_list_of_strings(self.buf_int)
 
