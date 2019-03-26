@@ -90,7 +90,7 @@ class RingOfCPUs_multiturn(object):
 
             self.verbose_mpi_out('Interpreter at %s (cpu %d)'%(sys.executable, self.comm.Get_rank()))
             self.verbose_mpi_out('mpi4py version: %s (cpu %d)'%(mpi4py.__version__, self.comm.Get_rank()))
-            self.verbose_mpi_out('Running on %s (cpu %d)'%(socket.gethostname(), self.comm.Get_rank()))			
+            self.verbose_mpi_out('Running on %s (cpu %d)'%(socket.gethostname(), self.comm.Get_rank()))         
             if self.enable_barriers:
                 self.verbose_mpi_out('At barrier 1 (cpu %d)'%self.comm.Get_rank())
                 self.comm.Barrier()
@@ -155,7 +155,7 @@ class RingOfCPUs_multiturn(object):
             print2logandstdo('N_parellel_rings = %d'%self.N_parellel_rings)
             print2logandstdo('N_nodes_per_ring = %d'%self.N_nodes_per_ring)
             print2logandstdo('Running on %s'%socket.gethostname())
-            print2logandstdo('Interpreter at %s'%sys.executable)			
+            print2logandstdo('Interpreter at %s'%sys.executable)            
         
         self.left = int(np.mod(self.myid-1, self.N_nodes))
         self.right = int(np.mod(self.myid+1, self.N_nodes))
