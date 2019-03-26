@@ -1,6 +1,6 @@
 import numpy as np
 import time
-import sys
+import sys, os
 import socket
 
 from ring_of_CPUs import SingleCoreComminicator
@@ -183,6 +183,9 @@ class RingOfCPUs_multiturn(object):
             self.comm.Barrier()
             self.verbose_mpi_out('After barrier 5 (cpu %d)'%self.comm.Get_rank())
 
+        if self.mpi_verbose:
+            filename = 'mpi_logfile_cpu%03d'%self.myid
+            os.system("cp %s.txt end_init_%s.txt"%(filename, filename))
             
     def run(self):
         
@@ -284,14 +287,30 @@ class RingOfCPUs_multiturn(object):
             if len(sendbuf) > self.N_buffer_float_size:
                 raise ValueError('Float buffer (%d) is too small!\n %d required.'%(self.N_buffer_float_size, len(sendbuf)))
 
+            if self.enable_barriers:
+                self.verbose_mpi_out('At barrier L1 (cpu %d)'%self.comm.Get_rank())
+                self.comm.Barrier()
+                self.verbose_mpi_out('After barrier L1 (cpu %d)'%self.comm.Get_rank())
+
             self.verbose_mpi_out('At Sendrecv, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
             self.comm.Sendrecv(sendbuf, dest=self.right, sendtag=self.right, 
                         recvbuf=self.buf_float, source=self.left, recvtag=self.myid)
             self.verbose_mpi_out('After Sendrecv, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
                 
+            if self.enable_barriers:
+                self.verbose_mpi_out('At barrier L2 (cpu %d)'%self.comm.Get_rank())
+                self.comm.Barrier()
+                self.verbose_mpi_out('After barrier L2 (cpu %d)'%self.comm.Get_rank())
+
             list_received_buffers = ch.split_float_buffers(self.buf_float)
     
             # Handle orders (for now only to stopping the simulation)
+            if self.enable_barriers:
+                self.verbose_mpi_out('At barrier L3 (cpu %d)'%self.comm.Get_rank())
+                self.comm.Barrier()
+                self.verbose_mpi_out('After barrier L3 (cpu %d)'%self.comm.Get_rank())
+
+
             if self.enable_orders_from_master:
                 if self.I_am_the_master:
                     # send orders
@@ -316,6 +335,11 @@ class RingOfCPUs_multiturn(object):
                 # check if simulation has to be ended
                 if 'stop' in orders_from_master:
                     break
+
+            if self.enable_barriers:
+                self.verbose_mpi_out('At barrier L4 (cpu %d)'%self.comm.Get_rank())
+                self.comm.Barrier()
+                self.verbose_mpi_out('After barrier L4 (cpu %d)'%self.comm.Get_rank())
 
             iteration+=1
 
