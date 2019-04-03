@@ -16,12 +16,13 @@ def print2logandstdo(message, mode='a+'):
 
 
 def verbose_mpi_out(message, myid, mpi_verbose, mode='a+'):
-    t_now = time.mktime(time.localtime())
-    time_string = time.strftime("%d/%m/%Y %H:%M:%S", time.localtime(t_now))
+    if mpi_verbose:
+        t_now = time.mktime(time.localtime())
+        time_string = time.strftime("%d/%m/%Y %H:%M:%S", time.localtime(t_now))
 
-    with open('mpi_logfile_cpu%03d.txt'%myid, mode) as fid:
-        fid.writelines([time_string + ' - ' + message + '\n'])
-
+        with open('mpi_logfile_cpu%03d.txt'%myid, mode) as fid:
+            fid.writelines([time_string + ' - ' + message + '\n'])
+        
 
 class RingOfCPUs_multiturn(object):
     def __init__(self, sim_content, N_pieces_per_transfer=1, force_serial = False, comm=None,
@@ -81,15 +82,16 @@ class RingOfCPUs_multiturn(object):
             from mpi4py import MPI
             self.comm = MPI.COMM_WORLD
             
+            self.verbose_mpi_out = lambda message: verbose_mpi_out(message, self.comm.Get_rank(), 
+                                                                   self.mpi_verbose)
             if self.mpi_verbose:
                 import mpi4py
-                self.verbose_mpi_out = lambda message: verbose_mpi_out(message, self.comm.Get_rank(), 
-                                                                       self.mpi_verbose)
                 verbose_mpi_out('Debug file (cpu %d)'%(self.comm.Get_rank()), self.comm.Get_rank(), 
                                 self.mpi_verbose, mode = 'w')
 
-            self.verbose_mpi_out('Interpreter at %s (cpu %d)'%(sys.executable, self.comm.Get_rank()))
-            self.verbose_mpi_out('mpi4py version: %s (cpu %d)'%(mpi4py.__version__, self.comm.Get_rank()))
+                self.verbose_mpi_out('Interpreter at %s (cpu %d)'%(sys.executable, self.comm.Get_rank()))
+                self.verbose_mpi_out('mpi4py version: %s (cpu %d)'%(mpi4py.__version__, self.comm.Get_rank()))
+
             self.verbose_mpi_out('Running on %s (cpu %d)'%(socket.gethostname(), self.comm.Get_rank()))         
             if self.enable_barriers:
                 self.verbose_mpi_out('At barrier 1 (cpu %d)'%self.comm.Get_rank())
