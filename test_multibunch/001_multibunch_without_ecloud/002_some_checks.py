@@ -39,7 +39,7 @@ if flag_check_damp_time:
     turn_num = np.arange(0, len(ob.mean_x[:, i_bunch]), dtype=np.float)
     axx.plot(ob.mean_x[0, i_bunch]*np.exp(-turn_num/tau_damp_x), 
             linewidth=2, color='red', linestyle='--',
-            label=r'Dumping time = %.0f turns'%tau_damp_x)
+            label=r'Damping time = %.0f turns'%tau_damp_x)
     axy.plot(ob.mean_y[0, i_bunch]*np.exp(-turn_num/tau_damp_y), 
             linewidth=2, color='red', linestyle='--',
             label=r'Damping time = %.0f turns'%tau_damp_y)
