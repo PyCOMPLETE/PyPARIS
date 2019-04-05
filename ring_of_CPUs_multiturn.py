@@ -185,10 +185,7 @@ class RingOfCPUs_multiturn(object):
             self.comm.Barrier()
             self.verbose_mpi_out('After barrier 5 (cpu %d)'%self.comm.Get_rank())
 
-        if self.mpi_verbose:
-            filename = 'mpi_logfile_cpu%03d'%self.myid
-            os.system("cp %s.txt end_init_%s.txt"%(filename, filename))
-            
+
     def run(self):
         
         
