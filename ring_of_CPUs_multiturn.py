@@ -103,8 +103,6 @@ class RingOfCPUs_multiturn(object):
             #in case it is forced by user it will be rebound but there is no harm in that
             self.comm = SingleCoreComminicator()
             
-        #~ if self.N_pieces_per_transfer>1:
-            #~ raise ValueError("Not implemented!")
             
         # get info on the grid
         self.N_nodes = self.comm.Get_size()
@@ -302,8 +300,11 @@ class RingOfCPUs_multiturn(object):
                 self.verbose_mpi_out('After barrier L2 (cpu %d)'%self.comm.Get_rank())
 
             list_received_buffers = ch.split_float_buffers(self.buf_float)
-    
-            # Handle orders (for now only to stopping the simulation)
+            
+            
+            #######################################################
+            # Handle orders (for now only to stop the simulation) #
+            #######################################################
             if self.enable_barriers:
                 self.verbose_mpi_out('At barrier L3 (cpu %d)'%self.comm.Get_rank())
                 self.comm.Barrier()
