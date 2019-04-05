@@ -74,29 +74,34 @@ class RingOfCPUs_multiturn(object):
         if force_serial:
             comm_info = 'Single CPU forced by user.'
             self.comm = SingleCoreComminicator()
+            self.comm_type = 'Serial'
         elif comm is not None:
             comm_info = 'Multiprocessing using communicator provided as argument.'
             self.comm = comm
+            self.comm_type = 'Multip'
         else:
             comm_info = 'Multiprocessing via MPI.'
             from mpi4py import MPI
             self.comm = MPI.COMM_WORLD
+            self.comm_type = 'MPI'
             
-            self.verbose_mpi_out = lambda message: verbose_mpi_out(message, self.comm.Get_rank(), 
+        self.verbose_mpi_out = lambda message: verbose_mpi_out(message, self.comm.Get_rank(), 
                                                                    self.mpi_verbose)
-            if self.mpi_verbose:
-                import mpi4py
-                verbose_mpi_out('Debug file (cpu %d)'%(self.comm.Get_rank()), self.comm.Get_rank(), 
-                                self.mpi_verbose, mode = 'w')
 
-                self.verbose_mpi_out('Interpreter at %s (cpu %d)'%(sys.executable, self.comm.Get_rank()))
-                self.verbose_mpi_out('mpi4py version: %s (cpu %d)'%(mpi4py.__version__, self.comm.Get_rank()))
+        verbose_mpi_out('Debug file (cpu %d)'%(self.comm.Get_rank()), self.comm.Get_rank(), 
+                        self.mpi_verbose, mode = 'w')
 
-            self.verbose_mpi_out('Running on %s (cpu %d)'%(socket.gethostname(), self.comm.Get_rank()))         
-            if self.enable_barriers:
-                self.verbose_mpi_out('At barrier 1 (cpu %d)'%self.comm.Get_rank())
-                self.comm.Barrier()
-                self.verbose_mpi_out('After barrier 1 (cpu %d)'%self.comm.Get_rank())
+        self.verbose_mpi_out('Interpreter at %s (cpu %d)'%(sys.executable, self.comm.Get_rank()))
+        if self.mpi_verbose and self.comm_type=='MPI':
+           import mpi4py
+           self.verbose_mpi_out('mpi4py version: %s (cpu %d)'%(mpi4py.__version__, self.comm.Get_rank()))
+
+        self.verbose_mpi_out('Running on %s (cpu %d)'%(socket.gethostname(), self.comm.Get_rank()))         
+        
+        if self.enable_barriers:
+            self.verbose_mpi_out('At barrier 1 (cpu %d)'%self.comm.Get_rank())
+            self.comm.Barrier()
+            self.verbose_mpi_out('After barrier 1 (cpu %d)'%self.comm.Get_rank())
 
         #check if there is only one node
         if self.comm.Get_size()==1:
