@@ -57,6 +57,9 @@ class RingOfCPUs_multiturn(object):
 
         if hasattr(sim_content, 'N_parellel_rings'):
             self.N_parellel_rings = sim_content.N_parellel_rings
+
+        if int(np.mod(self.N_turns, self.N_parellel_rings)) != 0.:
+            raise ValueError('Sorry! N_turns needs to be a multiple of N_parellel_rings!')
         
         if hasattr(sim_content, 'verbose'):
             self.verbose = sim_content.verbose
@@ -222,11 +225,15 @@ class RingOfCPUs_multiturn(object):
                 
                     self.sim_content.perform_bunch_operations_at_start_ring(next_bunch)
 
+                    if next_bunch.slice_info['i_bunch'] == next_bunch.slice_info['N_bunches_tot_beam']-1:
+                        if int(next_bunch.slice_info['i_turn']) >= self.N_turns:
+                            orders_from_master.append('stop')
+                            if self.I_am_a_worker:
+                                raise ValueError('I cannot give orders to anybody :-(')
+
                     next_bunch.slice_info['i_turn']+=1
-                    self.slices_to_be_treated = self.sim_content.slice_bunch_at_start_ring(next_bunch)
-                    
-                    if next_bunch.slice_info['i_turn'] > self.N_turns:
-                        orders_from_master.append('stop')
+                    if next_bunch.slice_info['i_turn'] <= self.N_turns:
+                        self.slices_to_be_treated = self.sim_content.slice_bunch_at_start_ring(next_bunch)
                 
                 # Pop slices
                 slice_group = []
