@@ -55,3 +55,17 @@ def gen_matched_multibunch_beam(machine, n_macroparticles_per_bunch, filling_pat
         bb.slice_info['i_turn'] = 0
     
     return list_bunches
+
+def load_multibunch_beam(dirname):
+    import PyPARIS.myfilemanager as mfm
+    print('Loading the beam from %s'%dirname)
+    bzero = ch.buffer_2_beam(mfm.dict_of_arrays_and_scalar_from_h5(
+            dirname+'/bunch0.h5')['bunchbuffer'])
+    N_bunches_tot_beam = bzero.slice_info['N_bunches_tot_beam']
+    list_bunches = [bzero]
+    for ibun in xrange(1, N_bunches_tot_beam):
+        list_bunches.append(ch.buffer_2_beam(
+            mfm.dict_of_arrays_and_scalar_from_h5(
+            dirname+'/bunch%d.h5'%ibun)['bunchbuffer']))
+    list_bunches = list_bunches[::-1] # We want the last bunch to be in pos 0
+    return list_bunches
