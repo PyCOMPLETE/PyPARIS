@@ -1,3 +1,5 @@
+import os
+
 from scipy.constants import c as clight, e as qe
 import numpy as np
 
@@ -56,9 +58,13 @@ def gen_matched_multibunch_beam(machine, n_macroparticles_per_bunch, filling_pat
     
     return list_bunches
 
-def load_multibunch_beam(dirname):
+
+def load_multibunch_beam(dirname, reset_i_turns=True):
     import PyPARIS.myfilemanager as mfm
+    import PyPARIS.communication_helpers as ch
+    
     print('Loading the beam from %s'%dirname)
+    
     bzero = ch.buffer_2_beam(mfm.dict_of_arrays_and_scalar_from_h5(
             dirname+'/bunch0.h5')['bunchbuffer'])
     N_bunches_tot_beam = bzero.slice_info['N_bunches_tot_beam']
@@ -67,5 +73,24 @@ def load_multibunch_beam(dirname):
         list_bunches.append(ch.buffer_2_beam(
             mfm.dict_of_arrays_and_scalar_from_h5(
             dirname+'/bunch%d.h5'%ibun)['bunchbuffer']))
+    
     list_bunches = list_bunches[::-1] # We want the last bunch to be in pos 0
+    if reset_i_turns:
+        for bb in list_bunches:
+            bb.slice_info['i_turn'] = 0
+    
     return list_bunches
+
+
+def save_bunch_to_folder(bunch, dirname):
+    import PyPARIS.myfilemanager as mfm
+    import PyPARIS.communication_helpers as ch
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    buf = ch.beam_2_buffer(bunch)
+    bpath = dirname+'/bunch%d.h5'%bunch.slice_info['i_bunch']
+    print('Saving: ' + bpath)
+    mfm.dict_to_h5(dict_save={'bunchbuffer':buf}, 
+                   filename=bpath)
+
+
