@@ -30,8 +30,9 @@ class RingOfCPUs_multiturn(object):
                     N_buffer_float_size = 1000000, N_buffer_int_size = 100,
                     verbose = False, mpi_verbose = False, enable_barriers = False,
                     enable_orders_from_master = True):
-        
 
+
+        self.iteration = -1
         self.sim_content = sim_content
         self.N_turns = sim_content.N_turns
         
@@ -145,7 +146,15 @@ class RingOfCPUs_multiturn(object):
             self.comm.Barrier()
             self.verbose_mpi_out('After barrier 2 (cpu %d)'%self.comm.Get_rank())
 
-        self.sim_content.init_all()
+        if hasattr(self.sim_content, 'pre_init_master'):
+            if self.I_am_the_master:
+                from_master = self.sim_content.pre_init_master()
+            else:
+                from_master = None 
+            from_master = self._broadcast_from_master(from_master)
+            self.sim_content.init_all(from_master)
+        else:
+            self.sim_content.init_all()
         
         if self.enable_barriers:
             self.verbose_mpi_out('At barrier 3 (cpu %d)'%self.comm.Get_rank())
@@ -195,7 +204,7 @@ class RingOfCPUs_multiturn(object):
     def run(self):
         
         
-        iteration = 0
+        self.iteration = 0
         list_received_buffers = [self.sim_content.piece_to_buffer(None)]
         while True:
 
@@ -219,7 +228,7 @@ class RingOfCPUs_multiturn(object):
                     if self.myring==0 and self.myid_in_ring == 0:
                         t_now = time.mktime(time.localtime())
                         print2logandstdo('%s, iter%03d - cpu %d.%d startin bunch %d/%d turn=%d'%(time.strftime("%d/%m/%Y %H:%M:%S", time.localtime(t_now)), 
-                                iteration, self.myring, self.myid_in_ring,
+                                self.iteration, self.myring, self.myid_in_ring,
                                 next_bunch.slice_info['i_bunch'], next_bunch.slice_info['N_bunches_tot_beam'], next_bunch.slice_info['i_turn']))
 
                 
@@ -255,7 +264,7 @@ class RingOfCPUs_multiturn(object):
                 if thisslice is not None:
                     self.sim_content.treat_piece(thisslice)
             t_end = time.mktime(time.localtime()) 
-            self._print_some_info_on_comm(thisslice, iteration, t_start, t_end)
+            self._print_some_info_on_comm(thisslice, t_start, t_end)
             
             
             #########################
@@ -301,10 +310,10 @@ class RingOfCPUs_multiturn(object):
                 self.comm.Barrier()
                 self.verbose_mpi_out('After barrier L1 (cpu %d)'%self.comm.Get_rank())
 
-            self.verbose_mpi_out('At Sendrecv, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
+            self.verbose_mpi_out('At Sendrecv, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, self.iteration))
             self.comm.Sendrecv(sendbuf, dest=self.right, sendtag=self.right, 
                         recvbuf=self.buf_float, source=self.left, recvtag=self.myid)
-            self.verbose_mpi_out('After Sendrecv, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
+            self.verbose_mpi_out('After Sendrecv, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, self.iteration))
                 
             if self.enable_barriers:
                 self.verbose_mpi_out('At barrier L2 (cpu %d)'%self.comm.Get_rank())
@@ -324,26 +333,7 @@ class RingOfCPUs_multiturn(object):
 
 
             if self.enable_orders_from_master:
-                if self.I_am_the_master:
-                    # send orders
-                    buforders = ch.list_of_strings_2_buffer(orders_from_master)
-                    if len(buforders) > self.N_buffer_int_size:
-                        raise ValueError('Int buffer is too small!')
-                    self.buf_int = 0*self.buf_int
-                    self.buf_int[:len(buforders)]=buforders
-
-                    self.verbose_mpi_out('At Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
-                    self.comm.Bcast(self.buf_int, self.master_id)
-                    self.verbose_mpi_out('After Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
-
-                else:    
-                    # receive orders from the master
-                    self.verbose_mpi_out('At Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
-                    self.comm.Bcast(self.buf_int, self.master_id)
-                    self.verbose_mpi_out('After Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
-
-                    orders_from_master = ch.buffer_2_list_of_strings(self.buf_int)
-
+                self._broadcast_from_master(orders_from_master)
                 # check if simulation has to be ended
                 if 'stop' in orders_from_master:
                     break
@@ -353,23 +343,47 @@ class RingOfCPUs_multiturn(object):
                 self.comm.Barrier()
                 self.verbose_mpi_out('After barrier L4 (cpu %d)'%self.comm.Get_rank())
 
-            iteration+=1
+            self.iteration+=1
 
             # (TEMPORARY!) To stop
-            # if iteration==10000:
+            # if self.iteration==10000:
             #     break
             # (TEMPORARY!)
             
-    def _print_some_info_on_comm(self, thisslice, iteration, t_start, t_end):
+    def _print_some_info_on_comm(self, thisslice, t_start, t_end):
         if self.verbose:
             if thisslice is not None:
-                print2logandstdo('Iter start on %s, iter%05d - I am %02d.%02d and I treated slice %d/%d of bunch %d/%d, lasts %ds'%(time.strftime("%d/%m/%Y %H:%M:%S", time.localtime(t_start)), iteration, 
+                print2logandstdo('Iter start on %s, iter%05d - I am %02d.%02d and I treated slice %d/%d of bunch %d/%d, lasts %ds'%(time.strftime("%d/%m/%Y %H:%M:%S", time.localtime(t_start)), self.iteration, 
                                                 self.myring, self.myid_in_ring,
                                                 thisslice.slice_info['i_slice'], thisslice.slice_info['N_slices_tot_bunch'], 
                                                 thisslice.slice_info['info_parent_bunch']['i_bunch'], 
                                                 thisslice.slice_info['info_parent_bunch']['N_bunches_tot_beam'], 
                                                 t_end-t_start))
             else:
-                print2logandstdo('Iter start on %s, iter%05d - I am %02d.%02d and I treated None, lasts %ds'%(time.strftime("%d/%m/%Y %H:%M:%S", time.localtime(t_start)), iteration, 
+                print2logandstdo('Iter start on %s, iter%05d - I am %02d.%02d and I treated None, lasts %ds'%(time.strftime("%d/%m/%Y %H:%M:%S", time.localtime(t_start)), self.iteration, 
                                                 self.myring, self.myid_in_ring,
                                                 t_end-t_start))
+
+
+    def _broadcast_from_master(self, list_of_strings):
+        if self.I_am_the_master:
+            # send orders
+            buforders = ch.list_of_strings_2_buffer(list_of_strings)
+            if len(buforders) > self.N_buffer_int_size:
+                raise ValueError('Int buffer is too small!')
+            self.buf_int = 0*self.buf_int
+            self.buf_int[:len(buforders)] = buforders
+
+            self.verbose_mpi_out('At Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, self.iteration))
+            self.comm.Bcast(self.buf_int, self.master_id)
+            self.verbose_mpi_out('After Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, self.iteration))
+
+        else:    
+            # receive orders from the master
+            self.verbose_mpi_out('At Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, self.iteration))
+            self.comm.Bcast(self.buf_int, self.master_id)
+            self.verbose_mpi_out('After Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, self.iteration))
+
+        list_of_strings = ch.buffer_2_list_of_strings(self.buf_int)
+
+        return list_of_strings

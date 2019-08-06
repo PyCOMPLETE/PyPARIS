@@ -31,13 +31,13 @@ def split_float_buffers(megabuffer):
 
 
 def list_of_strings_2_buffer(strlist):
-	data = ''.join(map(lambda s:s+';', strlist))+'\n'
+	data = ''.join(map(lambda s:s+';', strlist))+'\nendbuf\n'
 	buf_to_send = np.atleast_1d(np.int_(np.array(map(ord, list(data)))))
 	return buf_to_send
 	
 def buffer_2_list_of_strings(buf):
 	str_received = ''.join(map(unichr, list(buf)))
-	strlist = list(map(str, str_received.split('\n')[0].split(';')))[:-1]
+	strlist = list(map(str, str_received.split('\nendbuf\n')[0].split(';')))[:-1]
 	return strlist
 
 
