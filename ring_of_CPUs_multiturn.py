@@ -333,7 +333,7 @@ class RingOfCPUs_multiturn(object):
 
 
             if self.enable_orders_from_master:
-                self._broadcast_from_master(orders_from_master)
+                orders_from_master = self._broadcast_from_master(orders_from_master)
                 # check if simulation has to be ended
                 if 'stop' in orders_from_master:
                     break
