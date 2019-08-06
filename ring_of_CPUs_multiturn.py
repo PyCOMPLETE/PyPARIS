@@ -145,7 +145,15 @@ class RingOfCPUs_multiturn(object):
             self.comm.Barrier()
             self.verbose_mpi_out('After barrier 2 (cpu %d)'%self.comm.Get_rank())
 
-        self.sim_content.init_all()
+        if hasattr(self.sim_content, 'pre_init_master'):
+            if self.I_am_the_master:
+                from_master = self.sim_content.pre_init_master()
+            else:
+                from_master = None 
+            from_master = self._broadcast_from_master(from_master)
+            self.sim_content.init_all(from_master)
+        else:
+            self.sim_content.init_all()
         
         if self.enable_barriers:
             self.verbose_mpi_out('At barrier 3 (cpu %d)'%self.comm.Get_rank())
@@ -324,26 +332,7 @@ class RingOfCPUs_multiturn(object):
 
 
             if self.enable_orders_from_master:
-                if self.I_am_the_master:
-                    # send orders
-                    buforders = ch.list_of_strings_2_buffer(orders_from_master)
-                    if len(buforders) > self.N_buffer_int_size:
-                        raise ValueError('Int buffer is too small!')
-                    self.buf_int = 0*self.buf_int
-                    self.buf_int[:len(buforders)]=buforders
-
-                    self.verbose_mpi_out('At Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
-                    self.comm.Bcast(self.buf_int, self.master_id)
-                    self.verbose_mpi_out('After Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
-
-                else:    
-                    # receive orders from the master
-                    self.verbose_mpi_out('At Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
-                    self.comm.Bcast(self.buf_int, self.master_id)
-                    self.verbose_mpi_out('After Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
-
-                    orders_from_master = ch.buffer_2_list_of_strings(self.buf_int)
-
+                self._broadcast_from_master(orders_from_master)
                 # check if simulation has to be ended
                 if 'stop' in orders_from_master:
                     break
@@ -373,3 +362,27 @@ class RingOfCPUs_multiturn(object):
                 print2logandstdo('Iter start on %s, iter%05d - I am %02d.%02d and I treated None, lasts %ds'%(time.strftime("%d/%m/%Y %H:%M:%S", time.localtime(t_start)), iteration, 
                                                 self.myring, self.myid_in_ring,
                                                 t_end-t_start))
+
+
+    def _broadcast_from_master(self, list_of_strings):
+        if self.I_am_the_master:
+            # send orders
+            buforders = ch.list_of_strings_2_buffer(list_of_strings)
+            if len(buforders) > self.N_buffer_int_size:
+                raise ValueError('Int buffer is too small!')
+            self.buf_int = 0*self.buf_int
+            self.buf_int[:len(buforders)] = buforders
+
+            self.verbose_mpi_out('At Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
+            self.comm.Bcast(self.buf_int, self.master_id)
+            self.verbose_mpi_out('After Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
+
+        else:    
+            # receive orders from the master
+            self.verbose_mpi_out('At Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
+            self.comm.Bcast(self.buf_int, self.master_id)
+            self.verbose_mpi_out('After Bcast, cpu %d/%d, iter %d'%(self.myid, self.N_nodes, iteration))
+
+        list_of_strings = ch.buffer_2_list_of_strings(self.buf_int)
+
+        return list_of_strings
