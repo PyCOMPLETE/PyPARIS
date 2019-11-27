@@ -3,4 +3,4 @@ rm -rf ../python3/PyPARIS
 cp -r ../PyPARIS ../python3/PyPARIS
 rm ../python3/PyPARIS/*.so
 2to3 --output-dir=../python3/PyPARIS -W -n ../PyPARIS
-rm -rf ../python3/PyPARIS/.git
+# rm -rf ../python3/PyPARIS/.git

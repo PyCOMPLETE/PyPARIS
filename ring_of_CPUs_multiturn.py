@@ -3,14 +3,14 @@ import time
 import sys, os
 import socket
 
-from ring_of_CPUs import SingleCoreComminicator
+from .ring_of_CPUs import SingleCoreComminicator
 
-import communication_helpers as ch
+from . import communication_helpers as ch
 from collections import deque
 
 logfilename = 'pyparislog.txt'
 def print2logandstdo(message, mode='a+'):
-    print message
+    print(message)
     with open(logfilename, mode) as fid:
         fid.writelines([message+'\n'])
 
@@ -252,7 +252,7 @@ class RingOfCPUs_multiturn(object):
                     slice_group.append(None)
             else:
                 # Buffer to slice
-                slice_group = map(self.sim_content.buffer_to_piece, list_received_buffers)
+                slice_group = list(map(self.sim_content.buffer_to_piece, list_received_buffers))
                 
             
             
@@ -295,7 +295,7 @@ class RingOfCPUs_multiturn(object):
                 list_of_buffers_to_send = [self.sim_content.piece_to_buffer(bunch_to_be_sent)]
             else:
                 # Slice to buffer
-                list_of_buffers_to_send = map(self.sim_content.piece_to_buffer, slice_group)
+                list_of_buffers_to_send = list(map(self.sim_content.piece_to_buffer, slice_group))
             
             
             ########################

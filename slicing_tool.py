@@ -72,12 +72,12 @@ def slice_a_bunch(this_bunch, z_cut, n_slices):
                     mass=this_bunch.mass, circumference=this_bunch.circumference, 
                     gamma=this_bunch.gamma, 
                     coords_n_momenta_dict=this_bunch.get_coords_n_momenta_dict())
-        copy_this_bunch.slice_info = {kk:this_bunch.slice_info[kk] for kk in this_bunch.slice_info.keys()}
+        copy_this_bunch.slice_info = {kk:this_bunch.slice_info[kk] for kk in list(this_bunch.slice_info.keys())}
         
         list_slices_this_bunch = [copy_this_bunch]
         
     for i_sl, ss in enumerate(list_slices_this_bunch[::-1]): # I want slice 0 to be at the head
-        ss.slice_info['info_parent_bunch'] = {kk: this_bunch.slice_info[kk] for kk in this_bunch.slice_info.keys()}
+        ss.slice_info['info_parent_bunch'] = {kk: this_bunch.slice_info[kk] for kk in list(this_bunch.slice_info.keys())}
         ss.slice_info['i_slice'] = i_sl
         ss.slice_info['N_slices_tot_bunch'] = len(list_slices_this_bunch)
 

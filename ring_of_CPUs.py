@@ -1,10 +1,10 @@
 import numpy as np
 
-import communication_helpers as ch
+from . import communication_helpers as ch
 
 logfilename = 'pyparislog.txt'
 def print2logandstdo(message, mode='a+'):
-    print message
+    print(message)
     with open(logfilename, mode) as fid:
         fid.writelines([message+'\n'])
 
@@ -111,7 +111,7 @@ class RingOfCPUs(object):
                 orders_from_master = []
                 list_of_buffers_to_send = []
                 
-                for _ in xrange(self.N_pieces_per_transfer):
+                for _ in range(self.N_pieces_per_transfer):
                     # pop a piece
                     try:
                         piece_to_send = self.pieces_to_be_treated.pop() 	# pop starts for the last slices 
@@ -128,7 +128,7 @@ class RingOfCPUs(object):
                     raise ValueError('Float buffer is too small!')
                 self.comm.Sendrecv(sendbuf, dest=0, sendtag=0, 
                             recvbuf=self.buf_float, source=self.master_id-1, recvtag=self.myid)
-                list_received_pieces = map(self.sim_content.buffer_to_piece, ch.split_float_buffers(self.buf_float))
+                list_received_pieces = list(map(self.sim_content.buffer_to_piece, ch.split_float_buffers(self.buf_float)))
                 
                 # treat received pieces				
                 for piece_received in list_received_pieces:
@@ -187,7 +187,7 @@ class RingOfCPUs(object):
                     raise ValueError('Float buffer is too small!')
                 self.comm.Sendrecv(sendbuf, dest=self.right, sendtag=self.right, 
                             recvbuf=self.buf_float, source=self.left, recvtag=self.myid)
-                list_received_pieces = map(self.sim_content.buffer_to_piece, ch.split_float_buffers(self.buf_float))
+                list_received_pieces = list(map(self.sim_content.buffer_to_piece, ch.split_float_buffers(self.buf_float)))
 
                 # treat received piece
                 for piece_received in list_received_pieces:
@@ -195,7 +195,7 @@ class RingOfCPUs(object):
                         self.sim_content.treat_piece(piece_received) #the elements of the list are being mutated
 
                 # prepare for next iteration
-                list_of_buffers_to_send = map(self.sim_content.piece_to_buffer, list_received_pieces)
+                list_of_buffers_to_send = list(map(self.sim_content.piece_to_buffer, list_received_pieces))
 
                 # receive orders from the master
                 self.comm.Bcast(self.buf_int, self.master_id)
@@ -218,11 +218,11 @@ class RingOfCPUs(object):
 
 class SingleCoreComminicator(object):
     def __init__(self):
-        print '\n\n\n'
-        print '****************************************'	
-        print '*** Using single core MPI simulator! ***'	
-        print '****************************************'
-        print '\n\n\n'
+        print('\n\n\n')
+        print('****************************************')	
+        print('*** Using single core MPI simulator! ***')	
+        print('****************************************')
+        print('\n\n\n')
         
     def Get_size(self):
         return 1

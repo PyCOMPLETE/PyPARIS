@@ -98,7 +98,7 @@ sp1.plot(thin_slice_set.z_centers, thin_slice_set.lambda_z(smoothen=False),'-', 
 # check bunch merge
 list_bunches_rec = []
 for ibun, lbun in enumerate(list_bunch_buffers):
-    list_sl = map(ch.buffer_2_beam, lbun)
+    list_sl = list(map(ch.buffer_2_beam, lbun))
     list_bunches_rec.append(st.merge_slices_into_bunch(list_sl))
     
 fig2 = plt.figure(2, figsize=(8, 6*1.3))

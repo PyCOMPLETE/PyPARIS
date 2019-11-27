@@ -6,7 +6,7 @@ import pickle
 
 def combine_float_buffers(list_of_buffers):
 	N_buffers = len(list_of_buffers)
-	len_buffers = np.array(map(lambda seq: float(len(seq)), list_of_buffers))
+	len_buffers = np.array([float(len(seq)) for seq in list_of_buffers])
 	return np.array(np.concatenate([np.array([float(N_buffers)]), len_buffers]+list_of_buffers),dtype=np.float64)
 
 def split_float_buffers(megabuffer):
@@ -19,7 +19,7 @@ def split_float_buffers(megabuffer):
 	i_mbuf += N_buffers
 	
 	list_of_buffers = []
-	for i_buf in xrange(N_buffers):
+	for i_buf in range(N_buffers):
 		lenbuf = int(len_buffers[i_buf])
 		list_of_buffers.append(megabuffer[i_mbuf:i_mbuf+lenbuf])
 		i_mbuf += lenbuf
@@ -31,12 +31,12 @@ def split_float_buffers(megabuffer):
 
 
 def list_of_strings_2_buffer(strlist):
-	data = ''.join(map(lambda s:s+';', strlist))+'\nendbuf\n'
-	buf_to_send = np.atleast_1d(np.int_(np.array(map(ord, list(data)))))
+	data = ''.join([s+';' for s in strlist])+'\nendbuf\n'
+	buf_to_send = np.atleast_1d(np.int_(np.array(list(map(ord, list(data))))))
 	return buf_to_send
 	
 def buffer_2_list_of_strings(buf):
-	str_received = ''.join(map(unichr, list(buf)))
+	str_received = ''.join(map(chr, list(buf)))
 	strlist = list(map(str, str_received.split('\nendbuf\n')[0].split(';')))[:-1]
 	return strlist
 
@@ -73,7 +73,7 @@ def beam_2_buffer(beam, mode='pickle', verbose=False):
 		# Beam data buffer
 		if mode=='json':
 			sinfo_str = json.dumps(sinfo)
-			sinfo_int = np.array(map(ord, sinfo_str), dtype=np.int)
+			sinfo_int = np.array(list(map(ord, sinfo_str)), dtype=np.int)
 			sinfo_float_buf = sinfo_int.astype(np.float, casting='safe')
 		elif mode=='pickle':
 			pss = pickle.dumps(sinfo, protocol=2)
@@ -100,10 +100,10 @@ def beam_2_buffer(beam, mode='pickle', verbose=False):
 			np.array([float(len(sinfo_float_buf))]),sinfo_float_buf)), dtype=np.float64)
 
 		if verbose:
-			print('mode=%s'%mode)
-			print('beam.macroparticlenumber:%d'%beam.macroparticlenumber)
-			print('len(buf):%d'%len(buf))
-			print('len(sinfo_float_buf):%d'%len(sinfo_float_buf))
+			print(('mode=%s'%mode))
+			print(('beam.macroparticlenumber:%d'%beam.macroparticlenumber))
+			print(('len(buf):%d'%len(buf)))
+			print(('len(sinfo_float_buf):%d'%len(sinfo_float_buf)))
 			
 	return buf
 	
@@ -175,7 +175,7 @@ def buffer_2_beam(buf, mode='pickle'):
 		
 		if mode=='json':
 			si_int = slice_info_buf.astype(np.int)
-			si_str = ''.join(map(unichr, list(si_int)))
+			si_str = ''.join(map(chr, list(si_int)))
 			beam.slice_info = json.loads(si_str)
 		elif mode=='pickle':
 			# Get length in bytes

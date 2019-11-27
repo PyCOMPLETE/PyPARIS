@@ -112,7 +112,7 @@ if __name__=='__main__':
 
     sim_module_string = sys.argv[3].split('=')[-1]
     
-    queue_list = [mp.Queue() for _ in xrange(N_proc)]
+    queue_list = [mp.Queue() for _ in range(N_proc)]
     
     mutex = mp.Semaphore(1)
     barrier = mp.Semaphore(0)
@@ -121,7 +121,7 @@ if __name__=='__main__':
     cnt = mp.Value('i', 0)
 
     proc_list = []
-    for pid in xrange(N_proc):
+    for pid in range(N_proc):
         proc_list.append(mp.Process(target=todo, 
             args=(sim_module_string, pid, N_proc, queue_list,
                     mutex, barrier, turnstile, turnstile2, cnt, multiturn)))

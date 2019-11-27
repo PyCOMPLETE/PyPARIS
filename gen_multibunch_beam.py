@@ -23,7 +23,7 @@ def gen_matched_multibunch_beam(machine, n_macroparticles_per_bunch, filling_pat
     list_genbunches = []
     for i_slot, inten_slot in enumerate(filling_pattern):
         if inten_slot>0:
-            print('Generating bunch at slot %d/%d'%(i_slot, len(filling_pattern)))
+            print(('Generating bunch at slot %d/%d'%(i_slot, len(filling_pattern))))
             bunch = generate_bunch(n_macroparticles_per_bunch, inten_slot*bunch_intensity, epsn_x, epsn_y, sigma_z=sigma_z)
             bunch.z -= b_spac_buckets*bucket_length_m*i_slot
             list_genbunches.append(bunch)
@@ -63,13 +63,13 @@ def load_multibunch_beam(dirname, reset_i_turns=True):
     import PyPARIS.myfilemanager as mfm
     import PyPARIS.communication_helpers as ch
     
-    print('Loading the beam from %s'%dirname)
+    print(('Loading the beam from %s'%dirname))
     
     bzero = ch.buffer_2_beam(mfm.dict_of_arrays_and_scalar_from_h5(
             dirname+'/bunch0.h5')['bunchbuffer'])
     N_bunches_tot_beam = bzero.slice_info['N_bunches_tot_beam']
     list_bunches = [bzero]
-    for ibun in xrange(1, N_bunches_tot_beam):
+    for ibun in range(1, N_bunches_tot_beam):
         list_bunches.append(ch.buffer_2_beam(
             mfm.dict_of_arrays_and_scalar_from_h5(
             dirname+'/bunch%d.h5'%ibun)['bunchbuffer']))
@@ -89,7 +89,7 @@ def save_bunch_to_folder(bunch, dirname):
         os.makedirs(dirname)
     buf = ch.beam_2_buffer(bunch)
     bpath = dirname+'/bunch%d.h5'%bunch.slice_info['i_bunch']
-    print('Saving: ' + bpath)
+    print(('Saving: ' + bpath))
     mfm.dict_to_h5(dict_save={'bunchbuffer':buf}, 
                    filename=bpath)
 
