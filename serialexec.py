@@ -19,7 +19,6 @@ sim_module_string = sys.argv[1].split('=', 1)[1]
 module_name, class_name, dict_kwargs = psc.parse_sim_class_string(
         sim_module_string)
 
-
 SimModule = importlib.import_module(module_name)
 SimClass = getattr(SimModule, class_name)
 simulation_content = SimClass(**dict_kwargs)
