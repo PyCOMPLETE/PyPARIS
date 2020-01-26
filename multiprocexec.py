@@ -73,29 +73,38 @@ def todo(sim_module_string, pid, N_proc, queue_list,
     # if len(sim_module_strings)!=2:
     #     raise(ValueError('\n\nsim_class must be given in the form: module.class.\nNested referencing not implemented.\n\n'))
     module_name = '.'.join(sim_module_strings[:-1])
-    class_name = sim_module_strings[-1]
-        
+    class_name_full = sim_module_strings[-1]
+    dict_kwargs = {}
+    if '(' in class_name_full:
+        assert(')' in class_name_full)
+        class_name = class_name_full.split('(')[0]
+        class_args_string = '('.join(class_name_full.split('(')[1:])
+        for astr in class_args_string.split(','):
+            assert('=' in astr)
+            nn = astr.split('=')[0].replace(' ', '')
+            vv = eval(astr.split('=')[1])
+            dict_kwargs[nn] = vv
+
+    else:
+        class_name = class_name_full
+
     SimModule = importlib.import_module(module_name)
     SimClass = getattr(SimModule, class_name)
-    
+
+    simulation_content = SimClass(**dict_kwargs)
     if multiturn:
         from PyPARIS.ring_of_CPUs_multiturn import RingOfCPUs_multiturn
-        simulation_content = SimClass()
         myCPUring = RingOfCPUs_multiturn(simulation_content, comm=comm)
         myCPUring.run()
     else:
         from PyPARIS.ring_of_CPUs import RingOfCPUs
-        simulation_content = SimClass()
         myCPUring = RingOfCPUs(simulation_content, comm=comm)
         myCPUring.run()
-                    
-    
-
 
 
 if __name__=='__main__':
     import sys
-    
+
     if len(sys.argv)<4:
         raise ValueError('\n\nSyntax must be:\n\t multiprocexec.py -n N_proc sim_class=module.class\n\n')
     if '-n' not in sys.argv[1] or 'sim_class' not in sys.argv[3]:

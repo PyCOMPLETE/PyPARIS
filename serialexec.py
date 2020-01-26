@@ -20,9 +20,9 @@ sim_module_strings = sim_module_string.split('.')
 #     raise(ValueError('\n\nsim_class must be given in the form: module.class.\nNested referencing not implemented.\n\n'))
 module_name = '.'.join(sim_module_strings[:-1])
 class_name = sim_module_strings[-1]
-    
+
 SimModule = importlib.import_module(module_name)
-SimClass = getattr(SimModule, class_name)    
+SimClass = getattr(SimModule, class_name)
 
 from PyPARIS.ring_of_CPUs import RingOfCPUs
 simulation_content = SimClass()
