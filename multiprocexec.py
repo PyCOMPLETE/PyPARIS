@@ -4,7 +4,7 @@ import multiprocessing as mp
 import numpy as np
 import os, sys
 import importlib
-
+from . import parse_sim_class_string as psc
 
 class mpComm(object):
     def __init__(self, pid, N_proc, queue_list,
@@ -71,25 +71,9 @@ def todo(sim_module_string, pid, N_proc, queue_list,
 
     # if len(sim_module_strings)!=2:
     #     raise(ValueError('\n\nsim_class must be given in the form: module.class.\nNested referencing not implemented.\n\n'))
-    dict_kwargs = {}
-    if '(' in sim_module_string:
-        assert(')' in  sim_module_string)
 
-        class_args_string = ')'.join(sim_module_string.split('(', 1)[1].split(')')[:-1])
-        module_class_strings = sim_module_string.split('(', 1)[0].split('.')
-
-        module_name = '.'.join(module_class_strings[:-1])
-        class_name = module_class_strings[-1]
-        for astr in class_args_string.split(','):
-            assert('=' in astr)
-            nn = astr.split('=')[0].replace(' ', '')
-            vv = eval(astr.split('=')[1])
-            dict_kwargs[nn] = vv
-
-    else:
-        sim_module_strings = sim_module_string.split('.')
-        module_name = '.'.join(sim_module_strings[:-1])
-        class_name = sim_module_strings[-1]
+    module_name, class_name, dict_kwargs = psc.parse_sim_class_string(
+            sim_module_string)
 
     SimModule = importlib.import_module(module_name)
     SimClass = getattr(SimModule, class_name)
