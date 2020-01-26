@@ -13,25 +13,25 @@ class RingOfCPUs(object):
     def __init__(self, sim_content, N_pieces_per_transfer=1, force_serial = False, comm=None,
                     N_buffer_float_size = 1000000, N_buffer_int_size = 100, 
                     init_sim_objects_auto=True):
-        
+
         self.sim_content = sim_content
         self.N_turns = sim_content.N_turns
         self.N_pieces_per_transfer = N_pieces_per_transfer
         self.N_buffer_float_size = N_buffer_float_size
         self.N_buffer_int_size = N_buffer_int_size
-        
+
         if hasattr(sim_content, 'N_pieces_per_transfer'):
             self.N_pieces_per_transfer = sim_content.N_pieces_per_transfer
-            
+
         if hasattr(sim_content, 'N_buffer_float_size'):
             self.N_buffer_float_size = sim_content.N_buffer_float_size
-            
+
         if hasattr(sim_content, 'N_buffer_int_size'):
             self.N_buffer_int_size = sim_content.N_buffer_int_size
-        
-        
+
+
         self.sim_content.ring_of_CPUs = self
-        
+
         # choice of the communicator
         if force_serial:
             comm_info = 'Single CPU forced by user.'
@@ -43,12 +43,12 @@ class RingOfCPUs(object):
             comm_info = 'Multiprocessing via MPI.'
             from mpi4py import MPI
             self.comm = MPI.COMM_WORLD
-            
+
         #check if there is only one node
         if self.comm.Get_size()==1:
             #in case it is forced by user it will be rebound but there is no harm in that
             self.comm = SingleCoreComminicator()
-            
+
         # get info on the grid
         self.N_nodes = self.comm.Get_size()
         self.N_wkrs = self.N_nodes-1
@@ -73,16 +73,16 @@ class RingOfCPUs(object):
             import socket
             import sys
             print2logandstdo('Running on %s'%socket.gethostname())
-            print2logandstdo('Interpreter at %s'%sys.executable)			
-        
+            print2logandstdo('Interpreter at %s'%sys.executable)
+
         self.comm.Barrier() # only for stdoutp
-        
+
         # Initialize simulation objects
         if init_sim_objects_auto:
             self.init_sim_objects()
             self.comm.Barrier() # wait that all are done with the init
-   
-   
+
+
     def init_sim_objects(self):
 
         self.sim_content.init_all()
@@ -100,7 +100,7 @@ class RingOfCPUs(object):
             else:
                 self.left = self.myid-1
             self.right = self.myid+1
-            
+
 
     def run(self):
         if self.I_am_the_master:
@@ -110,34 +110,34 @@ class RingOfCPUs(object):
             while True: #(it will be stopped with a break)
                 orders_from_master = []
                 list_of_buffers_to_send = []
-                
+
                 for _ in range(self.N_pieces_per_transfer):
                     # pop a piece
                     try:
-                        piece_to_send = self.pieces_to_be_treated.pop() 	# pop starts for the last slices 
+                        piece_to_send = self.pieces_to_be_treated.pop()# pop starts for the last slices 
                                                                     # (it is what we want, for the HEADTAIL 
                                                                     # slice order convention, z = -beta*c*t)
                     except IndexError:
                         piece_to_send = None
-                        
+
                     list_of_buffers_to_send.append(self.sim_content.piece_to_buffer(piece_to_send))
 
                 # send it to the first element of the ring and receive from the last
                 sendbuf = ch.combine_float_buffers(list_of_buffers_to_send)
                 if len(sendbuf)	> self.N_buffer_float_size:
                     raise ValueError('Float buffer is too small!')
-                self.comm.Sendrecv(sendbuf, dest=0, sendtag=0, 
+                self.comm.Sendrecv(sendbuf, dest=0, sendtag=0,
                             recvbuf=self.buf_float, source=self.master_id-1, recvtag=self.myid)
                 list_received_pieces = list(map(self.sim_content.buffer_to_piece, ch.split_float_buffers(self.buf_float)))
-                
+
                 # treat received pieces				
                 for piece_received in list_received_pieces:
                     if piece_received is not None:
                         self.sim_content.treat_piece(piece_received)
-                        self.pieces_treated.append(piece_received)	
+                        self.pieces_treated.append(piece_received
 
                 # end of turn
-                if len(self.pieces_treated)==self.N_pieces:	
+                if len(self.pieces_treated)==self.N_pieces:
 
                     self.pieces_treated = self.pieces_treated[::-1] #restore the original order
 
@@ -145,21 +145,21 @@ class RingOfCPUs(object):
                     orders_to_pass, new_pieces_to_be_treated = \
                         self.sim_content.finalize_turn_on_master(self.pieces_treated)
                     orders_from_master += orders_to_pass
-                    
+
                     t_now = time.mktime(time.localtime())
-                    print2logandstdo('Turn %d, %d s, %s'%(self.i_turn,t_now-t_last_turn, 
+                    print2logandstdo('Turn %d, %d s, %s'%(self.i_turn,t_now-t_last_turn,
                                 time.strftime("%d/%m/%Y %H:%M:%S", time.localtime(t_now))))
                     t_last_turn = t_now
 
                     # prepare next turn
                     self.pieces_to_be_treated = new_pieces_to_be_treated
                     self.N_pieces = len(self.pieces_to_be_treated)
-                    self.pieces_treated = []			
+                    self.pieces_treated = []
                     self.i_turn+=1
 
                     # check if stop is needed
-                    if self.i_turn == self.N_turns: orders_from_master.append('stop')		
-                                
+                    if self.i_turn == self.N_turns: orders_from_master.append('stop')
+
                 # send orders
                 buforders = ch.list_of_strings_2_buffer(orders_from_master)
                 if len(buforders) > self.N_buffer_int_size:
@@ -174,18 +174,18 @@ class RingOfCPUs(object):
                     break
 
             # finalize simulation (savings etc.)	
-            self.sim_content.finalize_simulation()				
+            self.sim_content.finalize_simulation()
 
         elif self.I_am_a_worker:
             # initialization 
             list_of_buffers_to_send = [self.sim_content.piece_to_buffer(None)]
-            
+
             while True:
 
                 sendbuf = ch.combine_float_buffers(list_of_buffers_to_send)
                 if len(sendbuf)	> self.N_buffer_float_size:
                     raise ValueError('Float buffer is too small!')
-                self.comm.Sendrecv(sendbuf, dest=self.right, sendtag=self.right, 
+                self.comm.Sendrecv(sendbuf, dest=self.right, sendtag=self.right,
                             recvbuf=self.buf_float, source=self.left, recvtag=self.myid)
                 list_received_pieces = list(map(self.sim_content.buffer_to_piece, ch.split_float_buffers(self.buf_float)))
 
@@ -219,11 +219,11 @@ class RingOfCPUs(object):
 class SingleCoreComminicator(object):
     def __init__(self):
         print('\n\n\n')
-        print('****************************************')	
-        print('*** Using single core MPI simulator! ***')	
+        print('****************************************')
+        print('*** Using single core MPI simulator! ***')
         print('****************************************')
         print('\n\n\n')
-        
+
     def Get_size(self):
         return 1
 
@@ -237,7 +237,7 @@ class SingleCoreComminicator(object):
         if dest!=0 or sendtag!=0 or (source!=-1 and source!=0) or recvtag!=0:
             raise ValueError('Input of Sendrecv not compatible with single core operation!!!')
         recvbuf[:len(sendbuf)]=sendbuf
-        
+
     def Bcast(self, buf, root=0):
         if root!=0:
             raise ValueError('Input of Bcast not compatible with single core operation!!!')
