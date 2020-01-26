@@ -69,16 +69,17 @@ def todo(sim_module_string, pid, N_proc, queue_list,
     BIN = os.path.expanduser("./")
     sys.path.append(BIN)
 
-    sim_module_strings = sim_module_string.split('.')
     # if len(sim_module_strings)!=2:
     #     raise(ValueError('\n\nsim_class must be given in the form: module.class.\nNested referencing not implemented.\n\n'))
-    module_name = '.'.join(sim_module_strings[:-1])
-    class_name_full = sim_module_strings[-1]
     dict_kwargs = {}
-    if '(' in class_name_full:
-        assert(')' in class_name_full)
-        class_name = class_name_full.split('(')[0]
-        class_args_string = '('.join(class_name_full.split('(')[1:])
+    if '(' in sim_module_string:
+        assert(')' in  sim_module_string)
+
+        class_args_string = ')'.join(sim_module_string.split('(', 1)[1].split(')')[:-1])
+        module_class_strings = sim_module_string.split('(', 1)[0].split('.')
+
+        module_name = '.'.join(module_class_strings[:-1])
+        class_name = module_class_strings[-1]
         for astr in class_args_string.split(','):
             assert('=' in astr)
             nn = astr.split('=')[0].replace(' ', '')
@@ -86,7 +87,9 @@ def todo(sim_module_string, pid, N_proc, queue_list,
             dict_kwargs[nn] = vv
 
     else:
-        class_name = class_name_full
+        sim_module_strings = sim_module_string.split('.')
+        module_name = '.'.join(sim_module_strings[:-1])
+        class_name = sim_module_strings[-1]
 
     SimModule = importlib.import_module(module_name)
     SimClass = getattr(SimModule, class_name)
@@ -119,7 +122,7 @@ if __name__=='__main__':
     
     N_proc = int(sys.argv[2])
 
-    sim_module_string = sys.argv[3].split('=')[-1]
+    sim_module_string = sys.argv[3].split('=', 1)[1]
     
     queue_list = [mp.Queue() for _ in range(N_proc)]
     
