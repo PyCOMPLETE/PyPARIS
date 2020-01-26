@@ -11,7 +11,7 @@ def print2logandstdo(message, mode='a+'):
 
 class RingOfCPUs(object):
     def __init__(self, sim_content, N_pieces_per_transfer=1, force_serial = False, comm=None,
-                    N_buffer_float_size = 1000000, N_buffer_int_size = 100, 
+                    N_buffer_float_size = 1000000, N_buffer_int_size = 100,
                     init_sim_objects_auto=True):
 
         self.sim_content = sim_content
@@ -134,7 +134,7 @@ class RingOfCPUs(object):
                 for piece_received in list_received_pieces:
                     if piece_received is not None:
                         self.sim_content.treat_piece(piece_received)
-                        self.pieces_treated.append(piece_received
+                        self.pieces_treated.append(piece_received)
 
                 # end of turn
                 if len(self.pieces_treated)==self.N_pieces:
