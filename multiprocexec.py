@@ -16,13 +16,13 @@ class mpComm(object):
         self.turnstile = turnstile
         self.turnstile2 = turnstile2
         self.cnt = cnt
-        
+
     def Get_size(self):
         return self._N_proc
 
     def Get_rank(self):
         return self._pid
-        
+
     def Barrier(self):
         self.mutex.acquire()
         self.cnt.value += 1
@@ -41,8 +41,6 @@ class mpComm(object):
         self.mutex.release()
         self.turnstile2.acquire()
         self.turnstile2.release()
-        
-
 
     def Sendrecv(self, sendbuf, dest, sendtag, recvbuf, source, recvtag):
         self._queue_list[dest].put(sendbuf)
@@ -96,20 +94,18 @@ if __name__=='__main__':
         raise ValueError('\n\nSyntax must be:\n\t multiprocexec.py -n N_proc sim_class=module.class\n\n')
     if '-n' not in sys.argv[1] or 'sim_class' not in sys.argv[3]:
         raise ValueError('\n\nSyntax must be:\n\t multiprocexec.py -n N_proc sim_class=module.class\n\n')
-        
+
     if '--multiturn' in sys.argv:
         multiturn=True
     else:
         multiturn=False
-        
-    
-    
+
     N_proc = int(sys.argv[2])
 
     sim_module_string = sys.argv[3].split('=', 1)[1]
-    
+
     queue_list = [mp.Queue() for _ in range(N_proc)]
-    
+
     mutex = mp.Semaphore(1)
     barrier = mp.Semaphore(0)
     turnstile = mp.Semaphore(0)
@@ -118,11 +114,11 @@ if __name__=='__main__':
 
     proc_list = []
     for pid in range(N_proc):
-        proc_list.append(mp.Process(target=todo, 
+        proc_list.append(mp.Process(target=todo,
             args=(sim_module_string, pid, N_proc, queue_list,
                     mutex, barrier, turnstile, turnstile2, cnt, multiturn)))
     for p in proc_list:
         p.start()
     for p in proc_list:
         p.join()
- 
+
