@@ -85,7 +85,7 @@ class RingOfCPUs(object):
     def init_sim_objects(self):
 
         self.sim_content.init_all()
-        self.N_turns = sim_content.N_turns
+        self.N_turns = self.sim_content.N_turns
         if self.I_am_the_master:
             self.pieces_to_be_treated = self.sim_content.init_master()
             self.N_pieces = len(self.pieces_to_be_treated)
