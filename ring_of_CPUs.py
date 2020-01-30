@@ -15,7 +15,6 @@ class RingOfCPUs(object):
                     init_sim_objects_auto=True):
 
         self.sim_content = sim_content
-        self.N_turns = sim_content.N_turns
         self.N_pieces_per_transfer = N_pieces_per_transfer
         self.N_buffer_float_size = N_buffer_float_size
         self.N_buffer_int_size = N_buffer_int_size
@@ -86,6 +85,7 @@ class RingOfCPUs(object):
     def init_sim_objects(self):
 
         self.sim_content.init_all()
+        self.N_turns = sim_content.N_turns
         if self.I_am_the_master:
             self.pieces_to_be_treated = self.sim_content.init_master()
             self.N_pieces = len(self.pieces_to_be_treated)
