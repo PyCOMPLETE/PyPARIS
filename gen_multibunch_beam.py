@@ -37,8 +37,8 @@ def gen_matched_multibunch_beam(machine, n_macroparticles_per_bunch, filling_pat
     bucket.z_sfp
 
     # I want to re-separate the bunches
-    buncher = UniformBinSlicer(n_slices = 0, z_sample_points = np.arange(bucket.z_sfp-len(filling_pattern)*bucket_length_m*b_spac_buckets, 
-                                            bucket.z_sfp+bucket_length_m, bucket_length_m*b_spac_buckets))
+    buncher = UniformBinSlicer(n_slices = 0, z_sample_points = np.arange(bucket.z_sfp.item()-len(filling_pattern)*bucket_length_m*b_spac_buckets, 
+                                            bucket.z_sfp.item()+bucket_length_m, bucket_length_m*b_spac_buckets))
     buncher_slice_set = beam.get_slices(buncher, statistics=True)
     list_bunches = beam.extract_slices(buncher, include_non_sliced='never')
     # The bunch at position 0 is the tail
