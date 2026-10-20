@@ -95,7 +95,7 @@ def beam_2_buffer(beam, mode='pickle', verbose=False):
 			np.array([beam.mass]),
 			np.array([beam.circumference]),
 			np.array([beam.gamma]),
-			np.atleast_1d(np.float_(beam.id)),
+			np.atleast_1d(np.float64(beam.id)),
 			beam.x, beam.xp, beam.y, beam.yp, beam.z, beam.dp,
 			np.array([float(len(sinfo_float_buf))]),sinfo_float_buf)), dtype=np.float64)
 
